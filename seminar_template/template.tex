@@ -1,0 +1,280 @@
+\documentclass[11pt, dvipsnames, DIV=12]{scrreprt}
+\usepackage{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{paralist}
+
+\usepackage{ifthen}
+\newcommand{\CC}[1][]{$\text{C\hspace{-.25ex}}^{_{_{_{++}}}}
+\ifthenelse{\equal{#1}{}}{}{\text{\hspace{-.625ex}#1}}$}
+
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{thmtools}		
+\usepackage{mleftright}
+\usepackage{stmaryrd}
+\usepackage{nicefrac}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+% Fixes some spacing issues with braces.
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{insight}{Insight}
+\newtheorem{observation}{Observation}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\usepackage{thm-restate}
+\usepackage[mathic=true]{mathtools}
+\usepackage{fixmath}
+\usepackage{siunitx}
+
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\usepackage{blindtext}
+
+\usepackage{todonotes}
+
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0.2ex, topsep=0.5\topsep}
+\setlist[description]{itemsep=0.2ex, topsep=0.5\topsep}
+\setlist[itemize]{itemsep=0.2ex, topsep=0.5\topsep}
+
+
+% Let cleveref and thmtools work together
+\makeatletter
+\def\thmt@refnamewithcomma #1#2#3,#4,#5\@nil{%
+\@xa\def\csname\thmt@envname #1utorefname\endcsname{#3}%
+\ifcsname #2refname\endcsname
+\csname #2refname\expandafter\endcsname\expandafter{\thmt@envname}{#3}{#4}%
+\fi
+}
+\makeatother
+
+
+\usepackage[pagebackref,
+pdfa,
+hidelinks,
+pdftex, 
+pdfdisplaydoctitle,
+pdfpagelabels,
+pdfauthor={},
+pdftitle={},
+pdfsubject={},
+pdfkeywords={},
+pdfproducer={Latex with the hyperref package},
+pdfcreator={pdflatex}
+]{hyperref}
+
+\usepackage[capitalise,noabbrev]{cleveref}   
+
+\usepackage{microtype}
+\usepackage{ellipsis}
+
+\usepackage[scaled=0.86]{helvet}
+\usepackage{lmodern}
+
+% Bold. 
+\newcommand{\mF}{\mathbf{F}}
+\newcommand{\mG}{\mathbf{G}}
+\newcommand{\mH}{\mathbf{H}}
+\newcommand{\mL}{\mathbf{L}}
+\newcommand{\mI}{\mathbf{I}}
+
+\newcommand{\mW}{\mathbf{W}}
+\newcommand{\ma}{\mathbf{a}}
+\newcommand{\mb}{\mathbf{b}}
+\newcommand{\mw}{\mathbf{w}}
+
+\newcommand{\ba}{\ensuremath{{\bf a}}}
+\newcommand{\bb}{\ensuremath{{\bf b}}}
+\newcommand{\bc}{\ensuremath{{\bf c}}}
+
+% Calligraphic.
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+
+% Sans serif.
+\newcommand{\sC}{\mathsf{C}}
+
+% Blackboard.
+\newcommand{\Fb}{\mathbb{F}}
+\newcommand{\Gb}{\mathbb{G}}
+\newcommand{\Nb}{\mathbb{N}}
+\newcommand{\Qb}{\mathbb{Q}}
+\newcommand{\Rb}{\mathbb{R}}
+\newcommand{\Zb}{\mathbb{Z}}
+
+% Multiset Definition
+\newcommand{\MSopen}{\{\!\!\{}
+\newcommand{\MSclose}{\}\!\!\}}
+
+
+\usepackage[auth-lg]{authblk}
+\newcommand{\cm}[1]{{{\textcolor{purple}{\textbf{[CM:} {#1}\textbf{]}}}}}
+
+
+\renewcommand*{\Affilfont}{\large\normalfont}
+\renewcommand*{\Authfont}{\normalfont}
+
+\recalctypearea
+\setcounter{Maxaffil}{2}
+
+\title{\\\emph{On the theoretical equivalence of 1-WL+NN and GNNs and the empirical advantage of GNNs in comparison}\\
+\vspace{20}
+\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science for the purpose of obtaining the academic degree of Bachelor of Sciences.}
+}
+\author{Eric Tillmann Bill}
+\affil{\vspace{100}}
+
+\author{Supervision:\\Prof. Dr. rer. nat. Christopher Morris}
+\affil{Informatik 6\\RWTH Aachen University}
+
+\date{\vspace{-30pt}}
+
+\renewcommand{\thesection}{\arabic{section}}
+
+\begin{document}
+
+  
+\maketitle
+
+\tableofcontents
+
+\begin{abstract}
+Hier steht der Abstract.
+\end{abstract}
+
+\section{Introduction}
+\begin{itemize}
+    \item Teaser the reader why graphs are important, how neural networks in general have a significant impact on machine learning up to this day, and conclude that Graph Neural Networks are very interesting as they provide a trainable framework for classification on graphs, similar to ANNs or CNNS.
+    \item Shortly outline the difficulties graphs are introducing compared to data ANNs or CNNs are working on (like regression, images) and explain how crucial it is to stay general in the approach as we can make no assumptions about the structure of the graphs.
+    \item Introduce Weisfeller and Lehman and their 1-WL algorithm, by only mentioning how it recolors every node in every iteration based on each node's and neighbor's node's colors. Thereby effectively encoding information about the substructure each node of the graph is contained in.
+    \item Teaser how GNNs in their most common architecture (message passing) somehow do the same and that between the 1-WL and GNNs are a couple of similarities, like for example that it has been shown that every GNN is at most as powerful in determining the Isomorphic Problem on graphs as the 1-WL algorithm.
+    \item Introduce the main topic of the thesis, the first more theoretical part of this thesis will try that the 1-WL algorithm combined with Neural Networks are capable of computing every function that is computable by a GNN. Therefore, showing that 1-WL + NN are equivalent to GNN in their expressiveness. The second part will investigate emprically which encoding of the features space for 1-WL works best and more importantly how 1-WL + NN compared to GNNs are generalizing their task.
+\end{itemize}
+
+\section{Related Work}
+The Weisfeiler-Leman algorithm (short 1-WL) is a graph algorithm that 
+
+
+that uses node and edge features to color code the nodes of the graph in such a way that each color encodes the local substructure of the node it is contained in. It was initially designed as a simple heuristic for the graph isomorphism problem and proposed in TODO: CITE WL. 
+
+
+\section{Preliminaries}
+\begin{itemize}
+    \item Introduce our graph framework (Definition), Notation, adjacency matrix and co, and important concepts like permutation-invariance and permutation-equivariance
+    \item 1-WL algorithms and its notation
+    \item GNN message passing architecture and its notation
+\end{itemize}
+We first introduce a couple of notations that will be used in this thesis. With $[n]$ we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and for $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
+
+\subsection{Graph Framework}
+A graph is denoted by $G$ and is a 3 tuple $G:= (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_0: V(G) \rightarrow \{0\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) := \{u \mid (u, v) \in E(G)\}$
+
+\subsection{Permutation-invariance and -equivariance}
+We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 0$. $S_n$ consists of all permutations over these elements. Let G be a graph with $V(G) = [n]$, applying a permutation $\pi \in S_n$ on G, is defined as $G_\pi := \pi \cdot G$ where $V(G_\pi) = \{\pi(1), \ldots, \pi(n) \}$ and $E(G_\pi) = \{ (\pi(v), \pi(u)) \mid (v,u) \in E(G)\}$. We will now introduce two key concepts for classifying functions on graphs. Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n_G]$ where $n_G := |V(G)|$ for every $G \in \mathcal{G}$:\\
+\noindent The function $f$ is \textit{permutation-invariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = f(\pi \cdot G)$.\\
+\noindent The function $f$ is \textit{permuation-equivariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = \pi^{-1} \cdot f(\pi \cdot G)$.
+
+TODO: Mention that those definitions are adapted and inspired by \cite{Morris2021}.
+
+\subsection{Weisfeiler and Leman Algorithm}
+We work here with a combination of the original Weisfeiler and Leman Algorithm and the color refinement algorithm which we call in general 1-dimensional Weisfeiler and Leman algorithm (short 1-WL). TODO: check the statement and add citations.
+
+Let $G = (V,E,l)$ be a graph, then in each iteration $i$, the 1-WL computes a node coloring $C_i: V(G) \rightarrow \mathbb{N}$, which depends on the coloring of the neighbors and the node itself. In iteration $i=0$, the initial coloring is $C_0 = l$ or if $l$ is non existing $C_0 = c$ for an arbitrary constant $c \in \mathbb{N}$. For $i > 0$, the algorithm assigns a color to $v \in V(G)$ as follows:
+\begin{align*}
+C_i (v) = \textsf{RELABEL}((C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N}(v) \MSclose))
+\end{align*}
+
+\noindent Where $\textsf{RELABEL}$ injectively maps the above pair to a unique, previously not used, natural number. The algorithm terminates when the number of colors between two iterations does not change, meaning the algorithm terminates after iteration $i$ if the following condition is satisfied:
+\begin{align}
+\forall v,w \in V(G):  C_i(v) = C_i(w) \iff C_{i+1}(v) = C_{i+1}(w)
+\end{align}
+Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring. Note that the algorithm always terminates after $n_G := |V(G)|$ iterations as there are only $n_G$ different cardinalities of the image under any coloring. TODO: check the reasoning, I think $|C_i|$ <$|C_{i-1}|$ but have no recollection of this.
+
+To determine if two graphs $G ,H \in \mathcal{G}$ are non-isomorphic (short $G \ncong H)$, one would apply the 1-WL algorithm on both graphs "in parallel" and check after each iteration if the occurrences of each color are equal, else the algorithm would terminate and conclude non-isomorphic. Formally, the algorithm concludes non-isomorphic in iteration $i$ if there exists a color $c$ such that: $|\{ v \in V(G) \mid c = C_i(v)\} | \neq |\{ v \in V(H) \mid c = C_i(v)\} |$. Note that this method is only sound and definitely not complete for the problem of graph isomorphism. Counterexamples where the algorithm fails to distinguish non-isomorphic graphs can be easily constructed, see Figure 3 for example.\\
+
+
+
+TODO: This definition is inspired by \cite{Morris2021} and \cite{Morris2018}. DO figure
+
+\subsection{1-WL+NN Framework}
+Lorem Ipsum
+
+\subsection{Graph Neural Networks (Message Passing)}
+Let $G = (V,E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ passes a vector representation of each node $v$ or edge $e$ through $f^{(t)}(v)$ or $f^{(t)}(e)$ respectively and retrieves thereby a new graph that is structurally identical but has new label information. To begin with, we need a function $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$, that translates all labels into a vector representation. Further, for every $t > 0$, $f$ is of the format:
+\begin{align}
+f^{(t)}(v) = f^{W_{1,t}}_{merge} (f^{(t-1)}(v), \  f^{W_{2,t}}_{agg}( \MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose ))
+\end{align}
+
+\noindent Where $f^{W_{1,t}}_{merge}$ and $f^{W_{2,t}}_{agg}$ are arbitrary differentiable functions with $W_{1,t}$ and $W_{2,t}$ their respective parameters. Additionally, $f^{W_{2,t}}_{agg}$ has to be permuation-invariant. This definition has been adapted from \cite{Morris2021}.
+
+\noindent Depending on the objective, whether the GNN is tasked with node classification or graph classification, the last layer differs. In the latter case, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, that aggregates over every node and computes a single label for the entire graph (inspired by \cite{Xu2018}). Note, in order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable.
+
+Let $\mathcal{A}$ be an instance of the described GNN framework. Further, let $K \in \mathbb{N}$ be the number of layers of the GNN, $\mathcal{G}$ the set of all graphs, $\Sigma$ the task-specific output set (e.g. labels of a classification task), then the overall function computed by $\mathcal{A}$ is:
+\begin{align}
+\mathcal{A}: \mathcal{G} \rightarrow \Sigma: x \mapsto \circ f^{(K)} \circ \ldots \circ f^{(0)}(x)\\
+\mathcal{A}: \mathcal{G} \rightarrow \Sigma: x \mapsto \textsf{READOUT} \circ f^{(K)} \circ \ldots \circ f^{(0)}(x)
+\end{align}
+As we required all aggregation functions to be permutation-invariant, the total composition $\mathcal{A}$ is permutation-invariant, and similarly, it is also differentiable. This enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs.
+
+
+\section{Main Part}
+\subsection{Theoretical Part}
+
+\subsection{Emprical / Practical Part}
+\begin{itemize}
+    \item Elaborate on the datasets I want to use? Why these, their related fields, and related work already conducted on them and why it is particularly good to use them
+
+\end{itemize}
+\subsubsection{Encoding}
+\begin{itemize}
+    \item For the different embedding schemas used for the 1-WL algorithm, I want to consider: 1. one-hot encoding 2. Look up Table 3. GNNs
+    \item Explain that I will implement all these solutions by using the state-of-the-art implementations of Pytorch and the opensource extension for graphs Pytorch\_geometric
+    \item State a hypothesis that I think that the 2. or 3. option will have a significant difference in performance in comparison to option 1.
+    \item State how I will evaluate these results. Mentioning the statistical tools I am going to use
+\end{itemize}
+
+\subsubsection{1-WL vs GNNs}
+
+\setcitestyle{numbers}
+\bibliography{references}
+\end{document}
