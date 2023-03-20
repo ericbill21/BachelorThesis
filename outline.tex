@@ -146,6 +146,9 @@ pdfcreator={pdflatex}
 \newcommand{\MSopen}{\{\!\!\{}
 \newcommand{\MSclose}{\}\!\!\}}
 
+% 1-WL+NN
+\newcommand{\wlnn}{\text{1-WL+NN }}
+
 \usetikzlibrary{calc}
 
 
@@ -263,6 +266,25 @@ Note that this test is only sound and not complete for the problem of graph isom
 \end{figure}
 
 \subsection{1-WL+NN Framework}\label{sec:1-WL+NN Definition}
+Let $\mathcal{X} \subset \mathcal{G}$ be the set of all graphs with $n$ nodes. Let $F_{1-WL}$ be the function that works over $\mathcal{X}$ and maps every graph $G$ to its color histogram of the stable coloring computed when applying the 1-WL algorithm. More formally, $F_{1-WL}: \mathcal{X} \rightarrow \mathbb{N}^c$
+
+\subsection{Question}
+Let $\mathcal{X}$ be the set of all labeled graphs $G$ with $n$ nodes.
+
+\noindent $F: \mathcal{X} \rightarrow R^C$ the function that maps every graph $G \in \mathcal{X}$ to its 1-WL color historgram.
+
+\noindent The class \wlnn of functions consists of all functions $f$ with the format: $f: \text{MLP} \circ F$\newline
+
+Wie kann man den das Color-Histogramm in einen Vektor aus $R^C$ mappen?\\
+Meine Idee dazu wäre, $R = \mathbb{N}$ und für jede Farbe $i \in \mathbb{N}$ setzten wir die $i$.te Komponente des Vektors auf die Anzahl dieser Farbe im Histogramm. Zum Beispiel wenn wir das Color-Histogramm $h = \MSopen 1, 2, 2, 4\MSclose$ haben, dann würden wir auf den Vektor: $(1, 2, 0, 1, 0, \dots, 0)^T \in \mathbb{N}^C$ abbilden.\newline
+
+In diesem Verfahren liese sich $C$ ganz gut abschätzen. Probelmatisch wird es nur wenn wir labled graphen $G = (V, E, l)$ betrachten, vorallem wenn $\forall v \in V(G): l(v) > C$ und jedes label einzigartig ist (d.h. $|V(G)| = |l(V(G))|$), dann würde der 1-WL alogrithmus nach der 1. Iteration bereits terminieren und als Color-Histogram $\MSopen l(v) \mid v \in V(G) \MSclose$ liefern. Eine Beschränkung der Labels auf $\{1, \dots, C\}$, oder ein Mapping auf neue Labels zwischen $\{1, \dots, C\}$ ist natürlich möglich, wäre aber leider schlecht für späteres Testen mit echten Testcases, da dann ein Verlust des Informationsgehalts droht. Oder man liese den 1-WL Alogrithmus eine weitere Iteration laufen, sodass dieser ein stabiles Coloring liefert dessen Bild in $\{1, \dots, C\}$ liegt. Wie soll dieser Fall behandelt werden, oder ist dies garkein Problem?
+
+
+
+
+
+\subsection{1-WL+NN Framework}
 Let $\mathcal{Y}$ be the task-specific output set (e.g. set of class labels), $\mathcal{NN}$ a feedforward neural network, $\textsf{enc}$ an encoding function, $\pi_{pool}$ a pooling function. Further, for $G \in \mathcal{G}$, let $(C^i_\infty)_{G}$ be the final coloring upon termination when applying the 1-WL algorithm on $G$. Than the computed function $\mathcal{A}$ is:
 \begin{align}
 \mathcal{A}: \mathcal{X} \rightarrow \Sigma, \  G \mapsto \mathcal{NN} \circ \pi_{pool}(\MSopen (C^i_\infty)_{G}(v) \mid v \in V(G) \MSclose)
@@ -278,10 +300,10 @@ f^{(t)}(v) = f^{W_{1,t}}_{merge} (f^{(t-1)}(v), \  f^{W_{2,t}}_{agg}( \MSopen f^
 
 \noindent Where $f^{W_{1,t}}_{merge}$ and $f^{W_{2,t}}_{agg}$ are arbitrary differentiable functions with $W_{1,t}$ and $W_{2,t}$ their respective parameters. Additionally, $f^{W_{2,t}}_{agg}$ has to be permuation-invariant. To demonstrate what kind of functions are typically used, we provide the functions used by \cite{Ham+2017}:
 \begin{align}
-    f^{W_{1,t}}_{merge}(v, agg) = \sigma (W^k \times \text{concat}(v, agg))\\
-    f^{W_{2,t}}_{agg} = max(\{ \sigma(W_{pool} \times h_u^k + b \mid u \in \mathcal{N}(v))\})
+    f^{W_{1,t}}_{merge}(v, agg) = \sigma (W^t \times \textsf{concat}(v, agg))\\
+    f^{W_{2,t}}_{agg} = \max(\{ \sigma(W_{pool}^t \times f^{(t-1)}(u) + b \mid u \in \mathcal{N}(v))\})
 \end{align}
-\noindent Where $\sigma$ is a non-linear elementwise activation function; $W^k, W_{pool}$ and $b$ are trainable parameters and concat the concatenation function.
+\noindent Where $\sigma$ is a non-linear elementwise activation function; $W^k, W_{pool}$ and $b$ are trainable parameters and \textsf{concat} the concatenation function.
 
 Depending on the objective, whether the GNN is tasked with a graph or only a node or edge task, the last layer differs. In the case of graph tasks, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, that aggregates over every node and computes a fixed-size output vector for the entire graph, e.g. a label for graph classification. In order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable.
 
