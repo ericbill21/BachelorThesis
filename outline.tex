@@ -223,7 +223,7 @@ A connection between GNNs based on the message-passing architecture and the 1-WL
 We first introduce a couple of notations that will be used in this thesis. With $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and with $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
 
 \subsection{Graph Framework}
-A graph is denoted by $G$ and is a 3 tuple $G:= (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}_0$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. Sometimes the values assigned by $l$ are called features, but this is usually only the case when $\Sigma$ is multidimensional, which we do not cover in this thesis. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_0: V(G) \rightarrow \{0\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) := \{u \mid (u, v) \in E(G)\}$.
+A graph is denoted by $G$ and is a 3 tuple $G:= (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}_0$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all finite graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. Sometimes the values assigned by $l$ are called features, but this is usually only the case when $\Sigma$ is multidimensional, which we do not cover in this thesis. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_0: V(G) \rightarrow \{0\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively, as well as $l_G$ to denote the label function of $G$. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) := \{u \mid (u, v) \in E(G)\}$.
 
 A coloring of a Graph $G$ is a function $C: V(G) \rightarrow \mathbb{N}_0$ that assigns each node in the graph a color (here a positive integer). Further, a coloring $C$ induces a partition $P$ on the set of nodes, for which we define $C^{-1}$ being the function that maps each color $c \in \mathbb{N}_0$ to its class of nodes with $C^{-1}(c) = \{ v\in V(G) \mid C(v) = c\}$. In addition, we let $h_{G, C} = \MSopen C(v) \mid v \in V(G) \MSclose$ be the histogram of graph $G$ with coloring $C$, that contains for every color in the image of $V(G)$ under $C$ the color and its frequency.
 
@@ -248,7 +248,7 @@ C_i (v) = \textsf{RELABEL}((C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N
 \begin{align}
 \forall v,w \in V(G):  C_i(v) = C_i(w) \iff C_{i+1}(v) = C_{i+1}(w)
 \end{align}
-Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring. The algorithm always terminates after $n_G:= |V(G)|$ iterations (\cite{Gro2017}). Moreover, based on the work of \cite{Pai+87} about efficient refinement strategies, \cite{Car+82} proved that the stable coloring $C_\infty$ can be computed in time $\mathcal{O}(| V(G) | + |E(G)| \cdot log | V(G) |)$.
+Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring. The algorithm always terminates after $n_G:= |V(G)|$ iterations (\cite{Gro2017}). Moreover, based on the work of \cite{Pai+87} about efficient refinement strategies, \cite{Car+82} proved that the stable coloring $C_\infty$ can be computed in time $\mathcal{O}(| V(G) | + |E(G)| \cdot log | V(G) |)$. For an illustration of this coloring algorithm, see figure \ref{Encoding example}.
 
 \subsubsection{The Weisfeiler-Leman Graph Isomorphism Test}
 To determine if two graphs $G, H \in \mathcal{G}$ are non-isomorphic (short $G \ncong H)$, one applies the 1-WL coloring algorithm on both graphs ''in parallel'' and checks after each iteration if the occurrences of each color are equal, else the algorithm would terminate and conclude non-isomorphic. Formally, the algorithm concludes non-isomorphic in iteration $i$ if there exists a color $c$ such that: 
@@ -266,29 +266,21 @@ Note that this test is only sound and not complete for the problem of graph isom
 \end{figure}
 
 \subsection{1-WL+NN Framework}\label{sec:1-WL+NN Definition}
-Let $\mathcal{X} \subset \mathcal{G}$ be the set of all graphs with $n$ nodes. Let $F_{1-WL}$ be the function that works over $\mathcal{X}$ and maps every graph $G$ to its color histogram of the stable coloring computed when applying the 1-WL algorithm. More formally, $F_{1-WL}: \mathcal{X} \rightarrow \mathbb{N}^c$
+Let $\mathcal{G}_{\leq n} \subset \mathcal{G}$ be the set of all labeled graphs $G$ with $n$ or less nodes. We define the class \wlnn of functions over $\mathcal{X} \subseteq \mathcal{G}_{\leq n}$ as all functions that are comprised of an encoding function $F: \mathcal{X} \rightarrow R^C$, followed by a multilayer perceptron that takes vectors over $R^C$ as input in. In particular, the encoding function $F$ maps the final coloring $C^i_\infty$ of $G$ computed by the 1-WL algorithm to a vector in $R^C$. Note that $R$ can be an arbitrary domain, and $C \in \Nb$ is a constant.
 
-\subsection{Question}
-Let $\mathcal{X}$ be the set of all labeled graphs $G$ with $n$ nodes.
+As an example of a class following this definition, we present the bounded \wlnn classes that use the \emph{counting-encoding} function and are parametrized by $n, k \in \Nb$:
 
-\noindent $F: \mathcal{X} \rightarrow R^C$ the function that maps every graph $G \in \mathcal{X}$ to its 1-WL color historgram.
+For $n, k \in \mathbb{N}$, let $\mathcal{X} = \{ G \in \mathcal{G}_{\leq n} \mid \forall x \in V(G) \cup E(G): l_G(x) \leq k \}$ be the set of all graphs with $n$ nodes and their label functions being bounded by $k$. We define the \emph{counting-encoding} Function $F: \mathcal{X} \rightarrow \mathbb{N}^C$ as the function that maps a graph $G$ to a vector $v \in \mathbb{N}^C$ such that the $i$.th component of $v$ is equal to the occurrence of the color $i$ in the final coloring computed by the 1-WL algorithm when applied to $G$. More formally, for $G \in \mathcal{X}$ let $C^i_\infty$ be the final coloring upon the termination of the 1-WL algorithm on $G$ and $h_{G}$ the respective color histogram. Than $F$ maps $G$ to a vector $v \in \mathbb{N}^C$, such that for all $i \in [C]: v_i = h_{G}(i)$. Important to note that due to the boundedness of the size of graphs $n$ and its labels $k$, there exists a minimal upper-bound $C$ for codomain $R^C$.
 
-\noindent The class \wlnn of functions consists of all functions $f$ with the format: $f: \text{MLP} \circ F$\newline
+The bounded \wlnn class that uses the \emph{counting-encoding} function and is parametrized by $n$ and $k$, are a collection of functions of the format $f:\mathcal{X} \rightarrow \mathcal{Y}, G \mapsto \text{MLP} \circ F(G)$, where $\mathcal{Y}$ is a task-specific output set (e.g. labels of a classification task) and MLP is an arbitrary multilayer perceptron that takes in as input, vectors over $\Nb^C$. We will refer to this collection from now on by $\mathcal{C}_{n,k}$.
 
-Wie kann man den das Color-Histogramm in einen Vektor aus $R^C$ mappen?\\
-Meine Idee dazu wäre, $R = \mathbb{N}$ und für jede Farbe $i \in \mathbb{N}$ setzten wir die $i$.te Komponente des Vektors auf die Anzahl dieser Farbe im Histogramm. Zum Beispiel wenn wir das Color-Histogramm $h = \MSopen 1, 2, 2, 4\MSclose$ haben, dann würden wir auf den Vektor: $(1, 2, 0, 1, 0, \dots, 0)^T \in \mathbb{N}^C$ abbilden.\newline
-
-In diesem Verfahren liese sich $C$ ganz gut abschätzen. Probelmatisch wird es nur wenn wir labled graphen $G = (V, E, l)$ betrachten, vorallem wenn $\forall v \in V(G): l(v) > C$ und jedes label einzigartig ist (d.h. $|V(G)| = |l(V(G))|$), dann würde der 1-WL alogrithmus nach der 1. Iteration bereits terminieren und als Color-Histogram $\MSopen l(v) \mid v \in V(G) \MSclose$ liefern. Eine Beschränkung der Labels auf $\{1, \dots, C\}$, oder ein Mapping auf neue Labels zwischen $\{1, \dots, C\}$ ist natürlich möglich, wäre aber leider schlecht für späteres Testen mit echten Testcases, da dann ein Verlust des Informationsgehalts droht. Oder man liese den 1-WL Alogrithmus eine weitere Iteration laufen, sodass dieser ein stabiles Coloring liefert dessen Bild in $\{1, \dots, C\}$ liegt. Wie soll dieser Fall behandelt werden, oder ist dies garkein Problem?
-
-
-
-
-
-\subsection{1-WL+NN Framework}
-Let $\mathcal{Y}$ be the task-specific output set (e.g. set of class labels), $\mathcal{NN}$ a feedforward neural network, $\textsf{enc}$ an encoding function, $\pi_{pool}$ a pooling function. Further, for $G \in \mathcal{G}$, let $(C^i_\infty)_{G}$ be the final coloring upon termination when applying the 1-WL algorithm on $G$. Than the computed function $\mathcal{A}$ is:
-\begin{align}
-\mathcal{A}: \mathcal{X} \rightarrow \Sigma, \  G \mapsto \mathcal{NN} \circ \pi_{pool}(\MSopen (C^i_\infty)_{G}(v) \mid v \in V(G) \MSclose)
-\end{align}
+To illustrate how this encoding function works and why we coined it \emph{counting-encoding}, we will quickly introduce an example graph $G$. In figure \ref{Encoding example}, we give a visual representation of $G$ and its stable coloring after applying the 1-WL algorithm to it. The \emph{counting-encoding} function $F$ counts through all colors $i \in [C]$ and sets each $i$.th component to the number of occurrences in the final coloring. Therefore the respective color histogram $h_G = \MSopen 2, 2, 3, 4 \MSclose$ of $G$ is being mapped to $v \in \mathbb{N}^C$ with $v = (0, 2, 1, 1,0,  \dots ,0)^T$.
+\begin{figure}[H]
+    \centering
+    \input{Figures/example2}
+    \caption{An example of the final coloring computed by applying the 1-WL algorithm on the graph $G$. The graph $G$ consists of $4$ nodes with all their labels being initially $1$.}
+    \label{Encoding example}
+\end{figure}
 
 \subsection{Graph Neural Networks (Message Passing)}\label{sec:GNN Defintion}
 Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ passes a vector representation of each node $v$ or edge $e$ through $f^{(t)}(v)$ or $f^{(t)}(e)$ respectively and retrieves thereby a new graph that is structurally identical but has new feature information. Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features. 
@@ -330,7 +322,7 @@ After proving this hypothesis formally, we can conclude that GNNs and 1-WL+NN mo
 
 As of today, no known research to us investigates the relationship between these two frameworks. Nonetheless, several works, as outlined in \ref{sec:conn gnn and 1wl}, offer results that hint that this hypothesis may be valid.  Additionally, in the research conducted by \cite{Zopf2022}, the author empirically demonstrated how well the 1-WL test is in distinguishing non-isomorphic graphs across 9 datasets and used these results to give an upper bound on the actual classification task of the datasets when training an individual GNN on each dataset. This demonstrates, how the expressiveness of a graph algorithm on an arbitrary task is somehow limited by its capacity in distinguishing non-isomorphism.
 
-Our approach for showing the validness of the hypothesis is, that the proving direction of ''1-WL+NN $\subseteq$ GNN'' is relatively trivial, as can easily encode the 1-WL coloring algorithm in each GNN layer. The other direction, however, showing ''GNN $\subseteq$ 1-WL+NN'', is more challenging, for which we want to take inspiration from the proof presented in section 3.3 by \cite{Xu2018}.
+Our approach for showing the validness of the hypothesis is, that the proving direction of ''1-WL+NN $\subseteq$ GNN'' is relatively trivial, as can easily encode the 1-WL coloring algorithm in each GNN layer. The other direction, however, showing ''GNN $\subseteq$ 1-WL+NN'', is more challenging, for which we want to take inspiration from the proof presented in section 3.3 by \cite{Xu2018}. In more detail, we will try to prove that for every $n \in \Nb$ and arbitrary $k$, the class $\mathcal{C}_{n,k}$ (bounded class of \wlnn using the \emph{counting-encoding} function) is GNN-approximating. For this, we have to prove that there exists no other encoding function that is more expressive than the \emph{counting-encoding} function and we have to define what GNN-approximating means.
 
 \subsection{Part II: Empirical Analysis and Comparison}
 In this part, we will provide a comprehensive analysis of the performance of the 1-WL+NN framework by testing it on well-established benchmark datasets for GNNs. With this analysis we will try to answer the following questions:
@@ -340,6 +332,7 @@ In this part, we will provide a comprehensive analysis of the performance of the
     \item Is one of the tasks better suited for a specific task setting? For example, is more suitable for graph classification? Why could this be, what is the fundamental difference between both frameworks leading to this result?
 \end{enumerate}
 
+\todo{Maybe rewrite the configurations of \wlnn}
 As for the model configurations, we want to test, we decided on the following 6 configurations, where the first three are 1-WL+NN models, and the last three are state-of-the-art GNNs:
 \begin{enumerate}
     \item 1-WL+NN model using a one-hot encoding of its feature space
