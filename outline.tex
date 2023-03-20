@@ -320,9 +320,9 @@ In this part, we will start by introducing the framework we coined 1-WL+NN, and 
 \end{quote}
 After proving this hypothesis formally, we can conclude that GNNs and 1-WL+NN models share the same capacity.
 
-As of today, no known research to us investigates the relationship between these two frameworks. Nonetheless, several works, as outlined in \ref{sec:conn gnn and 1wl}, offer results that hint that this hypothesis may be valid.  Additionally, in the research conducted by \cite{Zopf2022}, the author empirically demonstrated how well the 1-WL test is in distinguishing non-isomorphic graphs across 9 datasets and used these results to give an upper bound on the actual classification task of the datasets when training an individual GNN on each dataset. This demonstrates, how the expressiveness of a graph algorithm on an arbitrary task is somehow limited by its capacity in distinguishing non-isomorphism.
+As of today, no known research to us investigates the relationship between these two frameworks. Nonetheless, several works, as outlined in \ref{sec:conn gnn and 1wl}, offer results that hint that this hypothesis may be valid.  Additionally, in the research conducted by \cite{Zopf2022}, the author empirically demonstrated how well the 1-WL test is in distinguishing non-isomorphic graphs across various datasets and used these results to give an upper bound on the actual classification task of the datasets when training an individual GNN on each dataset. This demonstrates, how the expressiveness of a graph algorithm on an arbitrary task is somehow limited by its capacity in distinguishing non-isomorphism.
 
-Our approach for showing the validness of the hypothesis is, that the proving direction of ''1-WL+NN $\subseteq$ GNN'' is relatively trivial, as can easily encode the 1-WL coloring algorithm in each GNN layer. The other direction, however, showing ''GNN $\subseteq$ 1-WL+NN'', is more challenging, for which we want to take inspiration from the proof presented in section 3.3 by \cite{Xu2018}. In more detail, we will try to prove that for every $n \in \Nb$ and arbitrary $k$, the class $\mathcal{C}_{n,k}$ (bounded class of \wlnn using the \emph{counting-encoding} function) is GNN-approximating. For this, we have to prove that there exists no other encoding function that is more expressive than the \emph{counting-encoding} function and we have to define what GNN-approximating means.
+Our approach for showing the validness of the hypothesis is, that the proving direction of ''1-WL+NN $\subseteq$ GNN'' is relatively trivial, as we can easily encode the 1-WL coloring algorithm in each GNN layer. The other direction, however, showing ''GNN $\subseteq$ 1-WL+NN'', is more challenging, for which we want to take inspiration from the proof presented in section 3.3 by \cite{Xu2018}. In more detail, we will try to prove that for every $n \in \Nb$ and arbitrary $k$, the class $\mathcal{C}_{n,k}$ (bounded class of \wlnn using the \emph{counting-encoding} function) is GNN-approximating. For this, we have to prove that there exists no other encoding function that is more expressive than the \emph{counting-encoding} function and we have to define what GNN-approximating means.
 
 \subsection{Part II: Empirical Analysis and Comparison}
 In this part, we will provide a comprehensive analysis of the performance of the 1-WL+NN framework by testing it on well-established benchmark datasets for GNNs. With this analysis we will try to answer the following questions:
@@ -332,17 +332,12 @@ In this part, we will provide a comprehensive analysis of the performance of the
     \item Is one of the tasks better suited for a specific task setting? For example, is more suitable for graph classification? Why could this be, what is the fundamental difference between both frameworks leading to this result?
 \end{enumerate}
 
-\todo{Maybe rewrite the configurations of \wlnn}
-As for the model configurations, we want to test, we decided on the following 6 configurations, where the first three are 1-WL+NN models, and the last three are state-of-the-art GNNs:
+As for the encoding functions and configuration, we want to test, we have not yet determined, which one to use. As this decision strongly depends on the results of part I, we can not specify current configurations for the \wlnn. As a baseline, we will use three well-tested and state-of-the-art GNNs:
 \begin{enumerate}
-    \item 1-WL+NN model using a one-hot encoding of its feature space
-    \item 1-WL+NN model using a look-up-table for the encoding of its feature space
-    \item 1-WL+NN model using a GNN for the encoding of its feature space
     \item Graph Convolutional Network (short GCN) by \cite{Kip+2017} with and without training
     \item GraphSAGE developed by \cite{Ham+2017} with and without training
     \item Graph Isomorphism Network (short GIN) developed by \cite{Xu2018} with and without training
 \end{enumerate}
-For each configuration, we will choose suitable parameters, as well as leaving us the option of using maybe other configurations or GNNs models. Since this analysis completely depends on the results of the first part of this thesis, such that we can only speculate now, about suitable test cases.
 
 For running the test cases, we will implement the 1-WL+NN with all its different configurations in Python using the open source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and the open source extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}.
 
