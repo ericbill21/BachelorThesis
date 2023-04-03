@@ -212,7 +212,7 @@ The (1-dimensional) Weisfeiler-Leman algorithm (1-WL), proposed by \cite{Wei+196
 It works by coloring all nodes in each iteration the same color that fulfills two properties: 1. the nodes already share the same color and 2. the count of each color of their direct neighbors is equal. The algorithm continues as long as the number of colors changes in each iteration.
 For determining whether two graphs are non-isomorphic, the heuristic is applied to both graphs simultaneously and concludes that the graphs are non-isomorphic as soon as the number of occurrences of a color is different between the graphs. We present a more formal definition of the algorithm later in the \autoref{sec:1-WL Definition}.
 
-Since the \textit{graph isomorphism problem} is difficult to solve due to the best known complete algorithm only running in deterministic quasipolynomial time (\cite{Babai2016}), the 1-WL algorithm, running in polynomial deterministic time, cannot solve the problem completely. Moreover, \cite{Cai1992} constructed counterexamples of non-isomorphic graphs that the heuristic fails to distinguish, e.g. see figure \autoref{1-WL Counter Example}. However, following the work of \cite{Bab+1979}, this simple heuristic is still quite powerful and has a very low probability of failing to distinguish non-isomorphic graphs when both graphs are uniformly chosen at random as the number of nodes tends to infinity.
+Since the \textit{graph isomorphism problem} is difficult to solve due to the best known complete algorithm only running in deterministic quasipolynomial time (\cite{Babai2016}), the 1-WL algorithm, running in polynomial deterministic time, cannot solve the problem completely. Moreover, \cite{Cai1992} constructed counterexamples of non-isomorphic graphs that the heuristic fails to distinguish, e.g. see \autoref{1-WL Counter Example}. However, following the work of \cite{Bab+1979}, this simple heuristic is still quite powerful and has a very low probability of failing to distinguish non-isomorphic graphs when both graphs are uniformly chosen at random as the number of nodes tends to infinity.
 
 To overcome the limited expressiveness of the 1-WL algorithm, it has been generalized to the $k$-dimensional Weisfeiler-Leman algorithm ($k$-WL) by \cite{Bab1979, Babai2016}, as well as \cite{Imm+1990}\footnote{In \cite{Babai2016} on page 27, László Babai explains that he, together with Rudolf Mathon, first introduced this algorithm in 1979. He adds, that the work of \cite{Imm+1990} introduced this algorithm independently of him.}. This version works with $k$-tuples over the $k$-ary Cartesian product of the set of nodes. Interestingly, this created a hierarchy for the expressiveness of determining non-isomorphism, such that for all $k \in \mathbb{N}$ there exists a pair of non-isomorphic graphs that can be distinguished by the $(k+1)$-WL but not by the $k$-WL (\cite{Cai1992}).
 
@@ -255,7 +255,7 @@ To determine if two graphs $G, H \in \mathcal{G}$ are non-isomorphic ($G \ncong 
 \begin{equation*}
     |\{ v \in V(G) \mid c = C_i(v)\} | \neq |\{ v \in V(H) \mid c = C_i(v)\} |.
 \end{equation*}
-Note that this test is only sound and not complete for the \textit{graph isomorphism problem}. Counterexamples where the algorithm fails to distinguish non-isomorphic graphs can be easily constructed, see Figure \Ref{1-WL Counter Example} which was discovered and proven by \cite{Cai1992}.
+Note that this test is only sound and not complete for the \textit{graph isomorphism problem}. Counterexamples where the algorithm fails to distinguish non-isomorphic graphs can be easily constructed, see \autoref{1-WL Counter Example} which was discovered and proven by \cite{Cai1992}.
 
 \begin{figure}[H]
     \centering
@@ -373,8 +373,6 @@ If our empirical results support this assumption, we will further investigate wh
 As an example of how we will try to show the existence of a local bias to local structures in GNNs, we will create an artificial graph dataset where each graph is composed of one node marked as source, one node marked as target, and the rest marked as neutral. The task is to classify whether there exists a path between the source node and the target node. We will ensure that the minimum distance between these nodes is never greater than the total number of layers of the tested GNN model, so that we can ensure that information can be exchanged between the source and target nodes during the model's computation. The intuition here is that a \wlnn model should achieve near-perfect performance because it uses only structural information as basis of its decision, whereas a GNN model suffers from the over-squashing effect, where the farther apart two nodes are, the less information is exchanged between them, making it challenging for the model to correctly classify if there exists a path between the source and target node.
 
 We will develop more sophisticated methods and approaches as the work progresses, as we can only speculate on the outcome for now. In the end, we hope to achieve and present a thorough understanding of the representations learned by a GNN.
-
-
 
 \setcitestyle{numbers}
 \bibliography{references}
