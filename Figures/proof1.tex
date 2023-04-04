@@ -4,33 +4,45 @@
     \tikzset{arrow/.style={line,->,>=stealth}}
     \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
     
-    \draw (-1.0,0.75) (funcA) {$\cA:$};
-    \draw (-1.0, 0.0) (input) {$G$};
+    \node (inputG) {$G$};
+    \node (coloring) [right =of inputG] {$(C_\infty)_G$};
+    \node (firstV) [right =of coloring] {$v$};
+    \node (inp1) [above right =of firstV] {$v$};
+    \node (inp2) [below right =of firstV] {$v$};
+    \node (out1) [right =of inp1] {$o_1$};
+    \node (out2) [right =of inp2] {$o_n$};
+    \node (out) [below right =of out1, above right =of out2] {$o$};
+    \node (dot1) [right =of firstV] {.};
+    
 
-    \draw [|-latex] (1.2,0) -- node [text width=2.5cm,midway,above,align=center ] {1-WL} (2.7,0);
+    \draw[|-latex] (inputG.east) to node[text width=2.5cm,midway,above,align=center] {1-WL} (coloring.west);
+
+    \draw[|-latex] (coloring.east) to node[text width=2.5cm,midway,above,align=center] {$f$} (firstV.west);
+
+    \draw[-latex] (firstV.east) -- (inp1.west);
+
+    \draw[-latex] (firstV.east) -- (inp2.west);
+
+    \draw[|-latex] (inp1.east) to node[text width=2.5cm,midway,above,align=center] {$\text{MLP}_1$} (out1.west);
+
+    \draw[|-latex] (inp2.east) to node[text width=2.5cm,midway,above,align=center] {$\text{MLP}_n$} (out2.west);
+
+    \draw[-latex] (out1.east) -- (out.west);
+    \draw[-latex] (out2.east) -- (out.west);
+
+
+    %\draw (-1.5,0.75) node {$\cA(G):$};
+    %\draw (-1.0, 0.0) node {$G$};
+
+    %\draw [|-latex] (-0.6,0) -- node [text width=2.5cm,midway,above,align=center ] {1-WL} (1.0,0);
+
+    %\draw (1.6, 0.0) node {$(C_\infty)_G$};
+
+    %\draw [|-latex] (2.4, 0.0) -- node [text width=2.5cm,midway,above,align=center ] {$f$} (3.25, 0.0);
     
-    
-    \node[line,node,fill=pink] (x1) at (2.25, 0.75) {};
-    \node[line,node,fill=pink] (x2) at (1.5, -0.75) {};
-    \node[line,node,fill=pink] (x3) at (3.0, -0.75) {};
-    
-    \path[line] (x1) to (x2);
-    \path[line] (x1) to (x3);
-    \path[line] (x2) to (x3);
-    
-    \draw (3.7, 0.75) node {$H:$};
-    \node[line,node,fill=cyan] (x1) at (3.75 + 0.25, 0) {};
-    \node[line,node,fill=cyan] (x2) at (4.25 + 0.25, 0.75) {};
-    \node[line,node,fill=cyan] (x3) at (5.25 + 0.25, 0.75) {};
-    \node[line,node,fill=cyan] (x4) at (5.75 + 0.25, 0) {};
-    \node[line,node,fill=cyan] (x5) at (5.25 + 0.25, -0.75) {};
-    \node[line,node,fill=cyan] (x6) at (4.25 + 0.25, -0.75) {};
-    
-    \path[line] (x1) to (x2);
-    \path[line] (x2) to (x3);
-    \path[line] (x3) to (x4);
-    \path[line] (x4) to (x5);
-    \path[line] (x5) to (x6);
-    \path[line] (x6) to (x1);
+    %\draw (3.5, 0.0) node {$v$};
+
+    %\draw (5.0, 1.0) node {$v$};
+    %\draw (5.0, -1.0) node {$v$};
     
     \end{tikzpicture}

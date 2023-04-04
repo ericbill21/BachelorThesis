@@ -157,11 +157,12 @@ pdfcreator={pdflatex}
 \newcommand{\MSclose}{\}\!\!\}}
 
 % 1-WL+NN
-\newcommand{\wlnn}{\text{1-WL+NN }}
+\newcommand{\wlnn}{\text{1-WL+NN}}
 \newcommand{\wliso}{\simeq_{\text{1WL}}}
 \newcommand{\xnn}{\mathcal{X}^{n \times n}}
-\newcommand{\gapp}{\text{GNN-Approximating }}
+\newcommand{\gapp}{\text{GNN-Approximating}}
 \newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
+\newcommand{\wl}{\text{1-\!WL}}
 
 
 \usetikzlibrary{calc}
@@ -199,8 +200,12 @@ pdfcreator={pdflatex}
 
 
 \section{Definition}
+\begin{definition}[1-WL Relation]
+    For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
+\end{definition}
+
 \begin{definition}
-For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
+    Let $f: \xnn \rightarrow A^K$ be a well-defined encoding function compatible with the \wlnn framework and $R$ an arbitrary domain. Then we call $\cC$ a collection of permutation invariant functions from $\xnn$ to $R$ that are computed by \wlnn, where for every MLP working over $A^K$ to $R$ there exists $\beta \in \cC$ with: $\beta: \xnn \rightarrow R, G \mapsto \text{MLP} \circ f(G)$.
 \end{definition}
 
 \begin{definition}
@@ -219,7 +224,7 @@ In this thesis we concentrate on finite graphs. We therefore, let $\mathcal{X}$ 
 \end{theorem}
 
 \begin{theorem}
-    Let $\cC$ be a collection of functions that is \textbf{\wldisc}, than $\cC$ is also \textbf{\gapp}.
+    Let $\cC$ be a collection of permutation-invariant functions that is \textbf{\wldisc}, than $\cC$ is also \textbf{\gapp}.
 \end{theorem}
 
 
@@ -237,95 +242,95 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 
 \subsection{1-WL-Discrimnating is also \gapp}
 
-\begin{lemma}
-    Let $\cC$ be a collection of permuation-invariant functions computed by \wlnn. Further, $h_1, \dots h_n \in \cC$ and MLP a multilayer perceptron, than the function $\cA$ composed of $\cA(G^*) := \text{MLP}(h_1(G^*), \ldots, h_n(G^*))$ is already contained in $\cC$ with $\cA \in \cC$, where we define the weight matrix as follows:
-    \begin{align*}
-        W_{i,j} := \begin{cases}
-            1, \text{ if $(i \! \mod K) = j$}\\
-            0, \text{ else}
-        \end{cases}
-    \end{align*}
-    Then we can build $\cA := $
-
-    \begin{figure}
-        \centering
-        \input{Figures/proof1.tex}
-    \end{figure}
-
+\begin{lemma}[\wlnn Permuation Invariance]
+    Let $\cC$ be a collection of functions computed by \wlnn, then every function $\cB \in \cC$ is permutation-invariant.
 \end{lemma}
+
 \begin{proof}
-    Assume the above and let $f: \mathcal{X} \rightarrow \Nb^K$ be the encoding function used by the collection $\cC$. Further, let $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons the functions $h_1, \dots h_n$ are composed of respectively. Then we define a single layer MLP $M$, with $M: \Nb^K \rightarrow \Nb^{n\cdot K}, v \mapsto W\cdot v$ with $W \in \Nb^{n\cdot K}$
+    Let $\cC$ be a collection of functions computed by \wlnn. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Since, the $\wl$ coloring algorithm is permutation-invariant, the overall function is permutation invariant.
 \end{proof}
 
+\begin{lemma}[Composition Lemma]\label[lemma]{lem:composition_lemma}
+    Let $\cC$ be a collection of functions computed by $\wlnn$. Further, $h_1, \dots h_n \in \cC$ and $\text{MLP}$ a multilayer perceptron, than the function $\cA$ composed of $\cA(G^*) := \text{MLP}(h_1(G^*), \ldots, h_n(G^*))$ is also computable by \wlnn.
+\end{lemma}
+\begin{proof}
+    Assume the above and let $f_{\text{enc}}$ be the encoding functions used by $h_1, \dots h_n$. Further, let $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons the functions $h_1, \dots h_n$ are composed of respectively. The idea of this proof is, that we construct a new MLP that first duplicates the encoding vector $n$ times, simulates $\text{MLP}_1, \ldots, \text{MLP}_n$ each on a copy of the encoding vector in parrallel, and then use the concatetated outut of all of them as input for the new final MLP. See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix, as this proof is very technical and not that interesting.
+\end{proof}
+    
+\begin{figure}[H]
+    \centering
+    \input{Figures/proof1.tex}
+    \label{fig:proof_idea_parallelism}
+    \caption{Sketch of the proof we use to prove lemma XYZ.}
+\end{figure}
+
 \begin{lemma}[My Lemma]\label[lemma]{lem:encoding-indicator-func1}
-    Let $\cC$ be a collection of permuation-invariant functions from $\xnn$ to $\Rb$ that is \wldisc, then for all $G \in \xnn$, there exists a function $h_G \in \cC$ \todo{Actually in $\cC^{+1}$} such that for all $G^*: h_G(G^*) = 0$ if and only if $G \wliso G^*$.\todo{1-WL Discriminating and gnn approxiomating better style and command}
+    Let $\cC$ be a collection of permuation-invariant functions from $\xnn$ to $\Rb$ computed by \wlnn that is \wldisc. Then for all $G \in \xnn$, there exists a function $h_G$ computable by \wlnn such that for all $G^* \in \xnn: h_G(G^*) = 0$ if and only if $G \wliso G^*$.
 \end{lemma}
 
 \begin{proof}
-    For any $G_1, G_2 \in \xnn$ with $G_1 \not\wliso G_2$ let $h_{G_1, G_2} \in \cC$ be the function distinguishing them, with $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$. We define the function $\overline{h}_{G_1, G_2}$ to work on $G^* \in \xnn$ as follows:
+    For any $G_1, G_2 \in \xnn$ with $G_1 \not\wliso G_2$ let $h_{G_1, G_2} \in \cC$ be the function distinguishing them, with $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$. We define the function $\overline{h}_{G_1}$ working over $\xnn$ as follows:
     \begin{align*}
-        \overline{h}_{G_1, G_2} &= |h_{G_1, G_2}(G^*) - h_{G_1, G_2}(G)| \nonumber\\
-        &= \max(h_{G_1, G_2}(G^*) - h_{G_1, G_2}(G_1)) + \max(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(G^*))
+        \overline{h}_{G_1}(\cdot) &= |h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)| \nonumber\\
+        &= \max(h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)) + \max(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(\cdot))
     \end{align*}
-    Note, that $h_{G_1, G_2}(G_1)$ in the formula is a fixed constant. With this function we can ensure, that if $G^* \wliso G: \overline{h}_{G_1, G_2}(G^*) = 0$, otherwise if $G^* \not\wliso G: \overline{h}_{G_1, G_2}(G^*) > 0$.
+    Note, that $h_{G_1, G_2}(G_1)$ in the formula is a fixed constant. With this function we can ensure, that if $G^* \wliso G: \overline{h}_{G_1, G_2}(G^*) = 0$, otherwise if $G^* \not\wliso G: \overline{h}_{G_1, G_2}(G^*) > 0$. This is a result of the permutation-invariance of all functions in $\cC$. FUCK DAS GEHT NICHT! PERMUTATION INVARIANCE KANN HIER NICHT DIREKT ANGEWENDET WERDEN :3
 
-    We can than define the function $h_{G_1}$ working over all graphs $G^* \in \xnn$ as follows:
-    \begin{equation*}
-        h_{G_1}(G^*) := \sum_{G_2 \in \xnn, G_1 \wliso G_2} \overline{h}_{G_1, G_2}(G^*).
-    \end{equation*}
-    We will quickly demonstrate that this function satisfies the condition of the lemma, let $G_1$ be fixed and $G^*$ an arbitrary graph from $\xnn$:
-    \begin{enumerate}
-        \item If $G_1 \wliso G^*$, then there exists n
-        \item If $G_1 \not\wliso G^*$, then 
-    \end{enumerate}
-    TODO: can be easily encoded in a single MLP layer.
 \end{proof}
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func2}
-    Let $\mathcal{C}$ be a class of permutation-invariant functions from $\mathcal{X}^{n \times n}$ to $\Rb$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \simeq G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\phi_G \in \cC$ such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$.
+    Let $\mathcal{C}$ be a class of permutation-invariant functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computed by \wlnn so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \wliso G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\varphi_G $ computable by \wlnn such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$.
 \end{lemma}
 \begin{proof}
-    Following \cref{lem:encoding-indicator-func1}, for every $G\in \xnn$ there exists $\Tilde{h_G} \in \cC$ such that for all $G^* \in \xnn: h_G(G^*) = 0$ if and only if $G \wliso G^*$. Due to $\cX$ being finite, we can define for every graph $G$ the constant:
+    Following \cref{lem:encoding-indicator-func1}, for every $G\in \xnn$ there exists $h_G \in \cC$ such that for all $G^* \in \xnn: h_G(G^*) = 0$ if and only if $G \wliso G^*$. Due to $\cX$ being finite, we can define for every graph $G$ the constant:
     \begin{equation*}
         \delta_G := \frac{1}{2} \min_{G^* \in \xnn , G \not\wliso G^*} |h_G(G^*)| > 0.
     \end{equation*}
     With this constant, we can use a so-called ``bump'' function working from $\Rb$ to $\Rb$ that will be similar to the indicator function. For parameter $a \in \Rb$ with $a > 0$ let:
     \begin{equation*}
-        \psi_a(x) := \max(\frac{x}{a} -1,0) + \max(\frac{x}{a}+1,0) - 2 \cdot \max(\frac{x}{a}, 0).
+        \psi_a(x) := \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0).
     \end{equation*}
-    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except for $x$ being drawn from the interval $(-a, a)$. We use this property to define for every graph $G \in \xnn$ the function $\varphi_G(G^*) := \psi_{\delta_G} (h_G(G^*))$. 
+    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} in the Appendix for a plot of the relevant part of this function with exemplary values for $a$.
+    
+    We use this property to define for every graph $G \in \xnn$ the function $\varphi_G(G^*) := \psi_{\delta_G} (h_G(G^*))$. 
     We will quickly demonstrate that this function is equal to the indicator function, let $G$ be fixed and $G^*$ an arbitrary graph from $\xnn$:
     \begin{enumerate}
         \item If $G \wliso G^*$, then $h_G(G^*) = 0$ resulting in $\varphi_G(G^*) = \psi_{\delta_G}(0) = 1$.
         \item If $G \not\wliso G^*$ then $h_G(G^*) > 0$, such that $|h_G(G^*)|> \delta_G$ resulting in $\varphi_G(G^*) = 0$.
     \end{enumerate}
-    Note we can encode each $\varphi_G$ via a single MLP layer, where $\delta_G$ is a constant and the $\max$ operator is replaced by the non-linear activation function ReLU of the layer.
+    Note we can encode each $\varphi_G$ via a single MLP layer, where $\delta_G$ is a constant and the $\max$ operator is replaced by the non-linear activation function ReLU of the layer. With the Composition \cref{lem:composition_lemma} we can therefore conclude that $\varphi_G$ is computable by \wlnn for every graph $G \in \xnn$.
 \end{proof}
 
 \begin{lemma}
-    Let $\mathcal{C}$ be a class of permutation-invariant functions from $\mathcal{X}^{n \times n}$ to $\Rb$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists 
-    $\varphi_G \in \cC$ satisfying $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$ for all $G^* \in \xnn$, then $C^{+1}$ is universally approximating.
+    Let $\mathcal{C}$ be a collection of permutation-invariant functions from $\mathcal{X}^{n \times n}$ to $\Rb$  computed by \wlnn so that for all $G \in \mathcal{X}^{n \times n}$, there exists 
+    $\varphi_G \in \cC$ satisfying $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$ for all $G^* \in \xnn$, then $C$ is also \gapp.
 \end{lemma}
 
 \begin{proof}
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. For any function $\mathcal{A}$ computed by an GNN, we want to show that we can decompose it as follows for any $G^* \in \mathcal{X}^{n \times n}$:
+    Assume the above. For any function $\mathcal{A}$ computed by an GNN, we want to show that we can decompose it as follows for any $G^* \in \mathcal{X}^{n \times n}$:
     \begin{align}
         \mathcal{A}(G^*) &= \Bigl( \ \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \xnn} \mathbb{1}_{G \wliso G^*} \Bigr) \cdot \mathcal{A}(G^*) \nonumber \\
         &= \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \mathcal{X}^{n \times n}} \mathcal{A}(G) \cdot \mathbb{1}_{G \simeq G^*} \nonumber \\
-        &= \sum_{G \in \mathcal{X}^{n \times n}} \frac{\mathcal{A}(G)}{|\xnn/\!{\wliso}(G^*)|}  \cdot \varphi_G(G^*)
+        &= \sum_{G \in \mathcal{X}^{n \times n}} \frac{\mathcal{A}(G)}{|\xnn/\!{\wliso}(G)|}  \cdot \varphi_G(G^*)
     \end{align}
     with $\xnn/\!{\wliso}(G^*)$ denoting the set of all graphs $G$ over $\xnn$ that are equivalent to $G^*$ according to the $\wliso$ relation.
 
-    Since $\cA$ is permutation-invariant, and GNNs are at most as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every graph $G,H \in \xnn$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as outlined above. We can encode this decomposition in a single MLP layer with $\frac{\cA(G)}{|\xnn/\!{\wliso}(G^*)|}$ being and $\varphi_G \in \cC$ encoding the indicator function. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the size of $\xnn/\!{\wliso}(G^*)$ well-defined.
+    Since $\cA$ is permutation-invariant, and GNNs are at most as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every graph $G,H \in \xnn$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as outlined above. We can encode this decomposition in a single MLP layer with $\frac{\cA(G)}{|\xnn/\!{\wliso}(G)|}$ being a constant and $\varphi_G \in \cC$ encoding the indicator function. Combined with the \cref{lem:composition_lemma}, we can conclude that $\cA$ is computable by \wlnn. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the size of $\xnn/\!{\wliso}(G)$ well-defined for all graphs.
     
 \end{proof}
 
-\begin{figure}
+
+
+\section*{Appendix}
+\subsection*{Figures and graphs}
+\begin{figure}[H]
     \centering
     \input{Figures/plot1}
-    \label{fig:bump-function}
+    \label{fig:bump_function}
     \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ with $a = 1$ in blue, $ a = 2$ in red and $a = 3$ in green.} 
 \end{figure}
+
+\subsection*{Proofs}
 
 
 
