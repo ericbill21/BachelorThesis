@@ -206,11 +206,7 @@ pdfcreator={pdflatex}
 \end{definition}
 
 \begin{definition}
-    Let $f: \xnn \rightarrow A^K$ be a well-defined encoding function compatible with the $\wlnn$ framework and $R$ an arbitrary domain. Then we call $\cC$ a collection of permutation invariant functions from $\xnn$ to $R$ that are computed by $\wlnn$, where for every MLP working over $A^K$ to $R$ there exists $\beta \in \cC$ with: $\beta: \xnn \rightarrow R, G \mapsto \text{MLP} \circ f(G)$.
-\end{definition}
-
-\begin{definition}
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic, there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
+    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
 \end{definition}
 
 \begin{definition}
@@ -347,15 +343,58 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \end{figure}
 
 \subsection*{Proofs}
-\begin{proof}[\cref{lem:composition_lemma}]
-    Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots h_n \in \cC$, and $\text{MLP}$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$.
 
-    We define the new encoding function $f^*$ to work as follows on coloring $C_\infty$:
+\begin{definition}[Multilayer Perceptron]\label{def:mlp}
+    A multilayer perceptrons are a class of functions that map from $R^n$ to $R^m$. We define it here as a sequence. Let MLP be a multilayer perceptron:
+    \begin{align*}
+        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i)\\
+        (\mlp)_{1}(v) &:= v
+    \end{align*}
+    where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
+\end{definition}
+
+\begin{proof}[\cref{lem:composition_lemma}]
+    Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \xnn$:
     \begin{equation*}
-        f^*(C_\infty) := \textsf{concat}(f_1(C_\infty), \ldots, f_n(C_\infty)),
+        \mlp^\bullet(h_1(G), \dots ,h_n(G)) = \mlp^* \circ f^* \circ \wl(G)
+    \end{equation*}
+    such that we can conclude that the composition of multiple functions computable by $\wlnn$, is in fact also $\wlnn$ computable. 
+
+    We define the new encoding function $f^*$ to work as follows on input $C_\infty$:
+    \begin{equation*}
+        f^*(C_\infty) := \textsf{concat}(
+            \begin{bmatrix}
+                f_1(C_\infty)\\
+                \vdots\\
+                f_n(C_\infty)
+            \end{bmatrix}),
     \end{equation*}
     where $\textsf{conccat}$ is the concatenation functions, concatenating all encoding vectors to one single vector.
+
+    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ at layer $j > 1$ as follows: $(\mlp_i)_{j}(v) := \sigma(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
+    \begin{align*}
+        &(\mlp^*)_{1}(v) := v\\
+        &(\mlp^*)_{j+1}(v) := \sigma(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
+            \begin{bmatrix}
+                b^1_j\\
+                \vdots\\
+                b^n_j
+            \end{bmatrix})) &,\forall j \in [k]\\
+        &(\mlp^*)_{j+k+1}(v) := (\mlp^\bullet)_{j+1}(v) &,\forall j \in [k^\bullet - 1]
+    \end{align*}
+    where $k$ is the maximum number of layers of the set of $\mlp_i$'s, $k^\bullet$ is the number of layers of the given $\mlp^\bullet$ and $\sigma$ an element wise activation function. Thereby, we define in the first equation line, that the start of the sequence is the input, with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last equation line, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
+    \begin{align*}
+        W^*_j &:= \begin{bmatrix}
+            W^1_j & 0 & \hdots & 0\\
+            0 & W^2_j & \ddots & \vdots\\
+            \vdots & \ddots & \ddots & 0\\
+            0 & \hdots & 0 & W^n_j
+        \end{bmatrix},
+    \end{align*}
+    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$.
 \end{proof}
+
+
 
 
 
