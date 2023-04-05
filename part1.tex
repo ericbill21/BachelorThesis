@@ -218,7 +218,7 @@ pdfcreator={pdflatex}
 \end{definition}
 
 \section{Theorems}
-In this thesis we concentrate on finite graphs. We therefore, let $\mathcal{X}$ be $\mathcal{X} := \{1, \dots, k\}$ for an arbitrary $k \in \Nb$.
+In this thesis we concentrate on finite graphs. We therefore, let $\mathcal{X}$ be a XYS.
 
 \begin{theorem}[$\wlnn \subseteq \text{GNN}$]\label{theorem:1wl_in_gnn}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computed by $\wlnn$ and $\cX$ finite set of graphs. If $\cC$ is $\wldisc$, then there exists an augmentation $\cC'$ of $\cC$ that is computable by $\wlnn$, such that for every function $\cA$ computed by a GNN, $\cA \in \cC'$.
@@ -228,6 +228,7 @@ In this thesis we concentrate on finite graphs. We therefore, let $\mathcal{X}$ 
 
 \section{Proofs}
 Throughout this thesis we will concentrate on finite graphs, such that we let $\mathcal{X}$ be $\mathcal{X} := \{1, \dots, k\}$ for an arbitrary $k \in \Nb$. We will prove \cref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \cref{lem:wl_disc_exists} we show the existence of collections computed by $\wlnn$ that are 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
+We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
 \begin{lemma}\label{lem:wl_disc_exists}
     There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computed by $\wlnn$ that is 1-\!WL-Discriminating.
@@ -346,6 +347,15 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \end{figure}
 
 \subsection*{Proofs}
+\begin{proof}[\cref{lem:composition_lemma}]
+    Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots h_n \in \cC$, and $\text{MLP}$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$.
+
+    We define the new encoding function $f^*$ to work as follows on coloring $C_\infty$:
+    \begin{equation*}
+        f^*(C_\infty) := \textsf{concat}(f_1(C_\infty), \ldots, f_n(C_\infty)),
+    \end{equation*}
+    where $\textsf{conccat}$ is the concatenation functions, concatenating all encoding vectors to one single vector.
+\end{proof}
 
 
 
