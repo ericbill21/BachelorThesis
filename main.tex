@@ -1,0 +1,201 @@
+\documentclass[11pt, dvipsnames, DIV=12]{scrreprt}
+\usepackage{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{paralist}
+
+\usepackage{ifthen}
+\newcommand{\CC}[1][]{$\text{C\hspace{-.25ex}}^{_{_{_{++}}}}
+\ifthenelse{\equal{#1}{}}{}{\text{\hspace{-.625ex}#1}}$}
+
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{thmtools}		
+\usepackage{mleftright}
+\usepackage{stmaryrd}
+\usepackage{nicefrac}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\usepackage{bbold} % For the indicator function: \mathbb{1}
+
+
+% Fixes some spacing issues with braces.
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{insight}{Insight}
+\newtheorem{observation}{Observation}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\usepackage{thm-restate}
+\usepackage[mathic=true]{mathtools}
+\usepackage{fixmath}
+\usepackage{siunitx}
+
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\usepackage{blindtext}
+
+\usepackage{todonotes}
+
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0.2ex, topsep=0.5\topsep}
+\setlist[description]{itemsep=0.2ex, topsep=0.5\topsep}
+\setlist[itemize]{itemsep=0.2ex, topsep=0.5\topsep}
+
+
+% Let cleveref and thmtools work together
+\makeatletter
+\def\thmt@refnamewithcomma #1#2#3,#4,#5\@nil{%
+\@xa\def\csname\thmt@envname #1utorefname\endcsname{#3}%
+\ifcsname #2refname\endcsname
+\csname #2refname\expandafter\endcsname\expandafter{\thmt@envname}{#3}{#4}%
+\fi
+}
+\makeatother
+
+% Removed 'pagebackref,' as it makes the bilbipgraphy more cluddered in my opinion
+\usepackage[
+pdfa,
+hidelinks,
+pdftex, 
+pdfdisplaydoctitle,
+pdfpagelabels,
+pdfauthor={},
+pdftitle={},
+pdfsubject={},
+pdfkeywords={},
+pdfproducer={Latex with the hyperref package},
+pdfcreator={pdflatex}
+]{hyperref}
+
+\usepackage[capitalise,noabbrev]{cleveref}   
+
+\usepackage{microtype}
+\usepackage{ellipsis}
+
+\usepackage[scaled=0.86]{helvet}
+\usepackage{lmodern}
+
+\usepackage{pgfplots}
+
+
+% Bold. 
+\newcommand{\mF}{\mathbf{F}}
+\newcommand{\mG}{\mathbf{G}}
+\newcommand{\mH}{\mathbf{H}}
+\newcommand{\mL}{\mathbf{L}}
+\newcommand{\mI}{\mathbf{I}}
+
+\newcommand{\mW}{\mathbf{W}}
+\newcommand{\ma}{\mathbf{a}}
+\newcommand{\mb}{\mathbf{b}}
+\newcommand{\mw}{\mathbf{w}}
+
+\newcommand{\ba}{\ensuremath{{\bf a}}}
+\newcommand{\bb}{\ensuremath{{\bf b}}}
+\newcommand{\bc}{\ensuremath{{\bf c}}}
+
+% Calligraphic.
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cX}{\mathcal{X}}
+
+
+% Sans serif.
+\newcommand{\sC}{\mathsf{C}}
+
+% Blackboard.
+\newcommand{\Fb}{\mathbb{F}}
+\newcommand{\Gb}{\mathbb{G}}
+\newcommand{\Nb}{\mathbb{N}}
+\newcommand{\Qb}{\mathbb{Q}}
+\newcommand{\Rb}{\mathbb{R}}
+\newcommand{\Zb}{\mathbb{Z}}
+
+% Multiset Definition
+\newcommand{\MSopen}{\{\!\!\{}
+\newcommand{\MSclose}{\}\!\!\}}
+
+% 1-WL+NN
+\newcommand{\wlnn}{\text{1-WL+NN}}
+\newcommand{\wliso}{\simeq_{\text{1WL}}}
+\newcommand{\xnn}{\mathcal{X}^{n \times n}}
+\newcommand{\gapp}{\text{GNN-Approximating}}
+\newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
+\newcommand{\wl}{\text{1-\!WL}}
+\newcommand{\mlp}{\text{MLP}}
+
+
+\usetikzlibrary{calc}
+
+
+\usepackage[auth-lg]{authblk}
+\newcommand{\cm}[1]{{{\textcolor{purple}{\textbf{[CM:} {#1}\textbf{]}}}}}
+
+
+\renewcommand*{\Affilfont}{\large\normalfont}
+\renewcommand*{\Authfont}{\normalfont}
+
+\recalctypearea
+\setcounter{Maxaffil}{2}
+
+\title{An In-Depth Analytical Framework for Investigating Representations learned by Graph Neural Networks\\
+\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science for the purpose of obtaining the academic degree of Bachelor of Sciences.}
+}
+\author{\textbf{Eric Tillmann Bill}}
+\affil{\vspace{100pt}}
+
+\author{Supervision:\\Prof. Dr. rer. nat. Christopher Morris}
+\affil{Informatik 6\\RWTH Aachen University}
+
+\date{\vspace{-30pt}}
+
+\renewcommand{\thesection}{\arabic{section}}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\input{part1.tex}

@@ -1,205 +1,3 @@
-\documentclass[11pt, dvipsnames, DIV=12]{scrreprt}
-\usepackage{babel}
-
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{natbib}
-\bibliographystyle{abbrvnat}
-\usepackage{subcaption}
-\usepackage{booktabs}
-\usepackage{multirow}
-\usepackage{url}
-\usepackage{tikz}
-\usepackage{paralist}
-
-\usepackage{ifthen}
-\newcommand{\CC}[1][]{$\text{C\hspace{-.25ex}}^{_{_{_{++}}}}
-\ifthenelse{\equal{#1}{}}{}{\text{\hspace{-.625ex}#1}}$}
-
-\usepackage{bm}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{amsfonts}
-\usepackage{thmtools}		
-\usepackage{mleftright}
-\usepackage{stmaryrd}
-\usepackage{nicefrac}
-\usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage[noend]{algpseudocode}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-
-\usepackage{bbold} % For the indicator function: \mathbb{1}
-
-
-% Fixes some spacing issues with braces.
-\let\originalleft\left
-\let\originalright\right
-\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
-\renewcommand{\right}{\aftergroup\egroup\originalright}
-
-\theoremstyle{definition}
-\newtheorem{theorem}{Theorem}
-\newtheorem{conjecture}{Conjecture}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{insight}{Insight}
-\newtheorem{observation}{Observation}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{claim}[theorem]{Claim}
-\newtheorem{fact}[theorem]{Fact}
-\usepackage{thm-restate}
-\usepackage[mathic=true]{mathtools}
-\usepackage{fixmath}
-\usepackage{siunitx}
-
-\usepackage{pifont}
-\newcommand{\cmark}{\ding{51}}
-\newcommand{\xmark}{\ding{55}}
-\usepackage{blindtext}
-
-\usepackage{todonotes}
-
-\usepackage{enumitem}
-\setlist[enumerate]{itemsep=0.2ex, topsep=0.5\topsep}
-\setlist[description]{itemsep=0.2ex, topsep=0.5\topsep}
-\setlist[itemize]{itemsep=0.2ex, topsep=0.5\topsep}
-
-
-% Let cleveref and thmtools work together
-\makeatletter
-\def\thmt@refnamewithcomma #1#2#3,#4,#5\@nil{%
-\@xa\def\csname\thmt@envname #1utorefname\endcsname{#3}%
-\ifcsname #2refname\endcsname
-\csname #2refname\expandafter\endcsname\expandafter{\thmt@envname}{#3}{#4}%
-\fi
-}
-\makeatother
-
-% Removed 'pagebackref,' as it makes the bilbipgraphy more cluddered in my opinion
-\usepackage[
-pdfa,
-hidelinks,
-pdftex, 
-pdfdisplaydoctitle,
-pdfpagelabels,
-pdfauthor={},
-pdftitle={},
-pdfsubject={},
-pdfkeywords={},
-pdfproducer={Latex with the hyperref package},
-pdfcreator={pdflatex}
-]{hyperref}
-
-\usepackage[capitalise,noabbrev]{cleveref}   
-
-\usepackage{microtype}
-\usepackage{ellipsis}
-
-\usepackage[scaled=0.86]{helvet}
-\usepackage{lmodern}
-
-\usepackage{pgfplots}
-
-
-% Bold. 
-\newcommand{\mF}{\mathbf{F}}
-\newcommand{\mG}{\mathbf{G}}
-\newcommand{\mH}{\mathbf{H}}
-\newcommand{\mL}{\mathbf{L}}
-\newcommand{\mI}{\mathbf{I}}
-
-\newcommand{\mW}{\mathbf{W}}
-\newcommand{\ma}{\mathbf{a}}
-\newcommand{\mb}{\mathbf{b}}
-\newcommand{\mw}{\mathbf{w}}
-
-\newcommand{\ba}{\ensuremath{{\bf a}}}
-\newcommand{\bb}{\ensuremath{{\bf b}}}
-\newcommand{\bc}{\ensuremath{{\bf c}}}
-
-% Calligraphic.
-\newcommand{\cA}{\mathcal{A}}
-\newcommand{\cB}{\mathcal{B}}
-\newcommand{\cC}{\mathcal{C}}
-\newcommand{\cF}{\mathcal{F}}
-\newcommand{\cG}{\mathcal{G}}
-\newcommand{\cH}{\mathcal{H}}
-\newcommand{\cN}{\mathcal{N}}
-\newcommand{\cO}{\mathcal{O}}
-\newcommand{\cP}{\mathcal{P}}
-\newcommand{\cR}{\mathcal{R}}
-\newcommand{\cS}{\mathcal{S}}
-\newcommand{\cT}{\mathcal{T}}
-\newcommand{\cU}{\mathcal{U}}
-\newcommand{\cV}{\mathcal{V}}
-\newcommand{\cX}{\mathcal{X}}
-
-
-% Sans serif.
-\newcommand{\sC}{\mathsf{C}}
-
-% Blackboard.
-\newcommand{\Fb}{\mathbb{F}}
-\newcommand{\Gb}{\mathbb{G}}
-\newcommand{\Nb}{\mathbb{N}}
-\newcommand{\Qb}{\mathbb{Q}}
-\newcommand{\Rb}{\mathbb{R}}
-\newcommand{\Zb}{\mathbb{Z}}
-
-% Multiset Definition
-\newcommand{\MSopen}{\{\!\!\{}
-\newcommand{\MSclose}{\}\!\!\}}
-
-% 1-WL+NN
-\newcommand{\wlnn}{\text{1-WL+NN}}
-\newcommand{\wliso}{\simeq_{\text{1WL}}}
-\newcommand{\xnn}{\mathcal{X}^{n \times n}}
-\newcommand{\gapp}{\text{GNN-Approximating}}
-\newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
-\newcommand{\wl}{\text{1-\!WL}}
-\newcommand{\mlp}{\text{MLP}}
-
-
-\usetikzlibrary{calc}
-
-
-\usepackage[auth-lg]{authblk}
-\newcommand{\cm}[1]{{{\textcolor{purple}{\textbf{[CM:} {#1}\textbf{]}}}}}
-
-
-\renewcommand*{\Affilfont}{\large\normalfont}
-\renewcommand*{\Authfont}{\normalfont}
-
-\recalctypearea
-\setcounter{Maxaffil}{2}
-
-\title{\emph{A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm}\\
-\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science for the purpose of obtaining the academic degree of Bachelor of Sciences.}
-}
-\author{\textbf{Eric Tillmann Bill}}
-\affil{\vspace{100pt}}
-
-\author{Supervision:\\Prof. Dr. rer. nat. Christopher Morris}
-\affil{Informatik 6\\RWTH Aachen University}
-
-\date{\vspace{-30pt}}
-
-\renewcommand{\thesection}{\arabic{section}}
-
-\begin{document}
-
-\maketitle
-\tableofcontents
-\newpage
-
-
-
 \section{Definition}
 \begin{definition}[1-WL Relation]
     For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
@@ -227,7 +25,7 @@ Throughout this thesis we will concentrate on finite graphs, such that we let $\
 We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
 \begin{lemma}\label{lem:wl_disc_exists}
-    There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computed by $\wlnn$ that is 1-\!WL-Discriminating.
+    There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is 1-\!WL-Discriminating.
 \end{lemma}
 \begin{proof}
 We consider the collection $\mathfrak{B}_k$ of functions computed by \wlnn, where every $\mathcal{B} \in \mathfrak{B}_k$ is of the form $\mathcal{B}(\cdot) = \text{MLP} \circ f_{\text{enc}}(\cdot)$. Here MLP is an arbitrary multilayer perceptron mapping vectors from $\Nb^K$ to $\Rb$ and $f$ the \textit{counting-encoding} function. Further, let $G_1, G_2 \in \mathcal{X}^{n\times n}$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\simeq G_2$). We denote with $(C_{\infty})_G$ the final coloring computed by the 1-WL algorithm when applied on $G$.
@@ -235,26 +33,26 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Permuation Invariance]\label{lem:wlnn_permutation_invariance}
-    Let $\cC$ be a collection of functions computed by $\wlnn$, then every function $\cB \in \cC$ is permutation-invariant.
+    Let $\cC$ be a collection of functions computable by $\wlnn$, then every function $\cB \in \cC$ is permutation-invariant.
 \end{lemma}
 
 \begin{proof}
-    Let $\cC$ be a collection of functions computed by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Since, the $\wl$ coloring algorithm is permutation-invariant, the overall function is permutation invariant.
+    Let $\cC$ be a collection of functions computable by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Since, the $\wl$ coloring algorithm is permutation-invariant, the overall function is permutation invariant. \todo{Erscheint mir irgendwie nicht richtig, vlt lieber den umweg über lemma 7 nehmen}
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Equivariance]\label{lem:wl_relation_equivalence}
-    Let $\cC$ be a collection of functions computed by $\wlnn$, then for every function $\cB \in \cC$ and every pair of graphs $G_1, G_2 \in \xnn:$ if $G_1 \wliso G_2$ than $\cB(G_1) = \cB(G_2)$.
+    Let $\cC$ be a collection of functions computable by $\wlnn$, then for every function $\cB \in \cC$ and every pair of graphs $G_1, G_2 \in \xnn:$ if $G_1 \wliso G_2$ than $\cB(G_1) = \cB(G_2)$.
 \end{lemma}
 
 \begin{proof}
-    Let $\cC$ be a collection of functions computed by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Let $G_1, G_2 \in \xnn$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediatly.
+    Let $\cC$ be a collection of functions computed by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Let $G_1, G_2 \in \xnn$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediatly. \todo{the equivariance follows?}
 \end{proof}
 
-\begin{lemma}[Composition Lemma]\label[lemma]{lem:composition_lemma}
-    Let $\cC$ be a collection of functions computed by $\wlnn$. Further, $h_1, \dots h_n \in \cC$ and $\text{MLP}$ a multilayer perceptron, than the function $\cA$ composed of $\cA(\cdot) := \text{MLP}(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
+\begin{lemma}[Composition Lemma]\label[lemma]{lem:composition_lemma}=
+    Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cA$ composed of $\cA(\cdot) := \text{MLP}(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
 \end{lemma}
 \begin{proof}
-    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that maps a coloring $C_\infty$ to a concatenation of the vectors obtained when applying each encoding function $f_i$ individually. Additionally, we construct a multilayer perceptron $\mlp^*$ that takes in this concatenation of vectors and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously on their respective section of the encoding vector of $f^*$, and applies afterwards the new $\mlp$ on the concatenation of the output of all $\mlp_i$.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix, as this proof is very technical and not that interesting.
+    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that maps a coloring $C_\infty$ to a concatenation of the vectors obtained when applying each encoding function $f_i$ individually. Additionally, we construct a multilayer perceptron $\mlp^*$ that takes in this concatenation of vectors and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously on their respective section of the encoding vector of $f^*$, and applies afterwards the given $\mlp^\bullet$ on the concatenation of the output of all $\mlp_i$'s.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix, as this proof is very technical and not that interesting.
 
     \begin{figure}[H]
         \centering
@@ -267,31 +65,32 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func1}
-    Let $\cC$ be a collection of functions from $\xnn$ to $\Rb$ computed by $\wlnn$ that is $\wldisc$. Then for all $G \in \xnn$, there exists a function $h_G$ computable by $\wlnn$ such that for all $G^* \in \xnn: h_G(G^*) = 0$ if and only if $G \wliso G^*$.
+    Let $\cC$ be a collection of functions from $\xnn$ to $\Rb$ computable by $\wlnn$ that is $\wldisc$. Then for all $G \in \xnn$, there exists a function $h_G$ from $\xnn$ to $\Rb$ computable by $\wlnn$, such that for all $G^* \in \xnn: h_G(G^*) = 0$ if and only if $G \wliso G^*$.
 \end{lemma}
 
 \begin{proof}
-    For any $G_1, G_2 \in \xnn$ with $G_1 \not\wliso G_2$ let $f_{G_1, G_2} \in \cC$ be the function distinguishing them, with $f_{G_1, G_2}(G_1) \neq f_{G_1, G_2}(G_2)$. We define the function $\overline{f}_{G_1}$ working over $\xnn$ as follows:
+    For any $G_1, G_2 \in \xnn$ with $G_1 \not\wliso G_2$ let $f_{G_1, G_2} \in \cC$ be the function distinguishing them, with $f_{G_1, G_2}(G_1) \neq f_{G_1, G_2}(G_2)$. We define the function $\overline{f}_{G_1,G_2}$ working over $\xnn$ as follows:
     \begin{align}\label{eq:lem:encoding-indicator-func2}
         \overline{f}_{G_1, G_2}(\cdot) &= |f_{G_1, G_2}(\cdot) - f_{G_1, G_2}(G_1)| \nonumber \nonumber\\
         &= \max(f_{G_1, G_2}(\cdot) - f_{G_1, G_2}(G_1)) + \max(f_{G_1, G_2}(G_1) - f_{G_1, G_2}(\cdot))
     \end{align}
-    Note, that in the formula above ``$h_{G_1, G_2}(G_1)$'' is a fixed constant and the resulting function $\overline{f}_{G_1, G_2}$ is non-negative.
-    Let $G_1 \in \xnn$ now be fixed, we will construct the function $h_G$ with the desired properties as follows:
+    Note, that in the formula above ``$f_{G_1, G_2}(G_1)$'' is a fixed constant and the resulting function $\overline{f}_{G_1, G_2}$ is non-negative.
+    Let $G_1 \in \xnn$ now be fixed, we will construct the function $h_{G_1}$ with the desired properties as follows:
     \begin{align*}
         h_{G_1}(x) = \sum_{G_2 \in \xnn, \ G_1 \not\wliso G_2} \overline{f}_{G_1, G_2}(x).
     \end{align*}
     Since $\cX$ is finite, the sum is finite and therefore well-defined. Next, we will prove that for a fixed graph $G_1 \in \xnn$, the function $h_{G_1}$ is correct on input $G^* \in \xnn$:
     \begin{enumerate}
-        \item If $G_1 \wliso G^*$, then for every function $\overline{f}_{G_1, G_2}$ of the sum with $G_1 \not\wliso G_2$, we know, using \cref{lem:wl_relation_equivalence}, that $\overline{f}_{G_1, G_2}(G^*)$ is equal to $f_{G_1, G_2}(G_1)$ which is by definition $0$, such that $h_{G_1}(G^*) = 0$.
-        \item If $G_1 \not\wliso G^*$, then $\overline{f}_{G_1, G^*}(G^*)$ is a summand of the overall sum, and since $\overline{f}_{G_1, G^*}(G^*) > 0$, than due to the non-negativity of each function $\overline{f}$ we can conclude $h_{G_1}(G*) > 0$.
+        \item If $G_1 \wliso G^*$, then for every function $\overline{f}_{G_1, G_2}$ of the sum with $G_1 \not\wliso G_2$, we know, using \cref{lem:wl_relation_equivalence}, that $\overline{f}_{G_1, G_2}(G^*)$ is equal to $\overline{f}_{G_1, G_2}(G_1)$ which is by definition $0$, such that $h_{G_1}(G^*) = 0$.
+        \item If $G_1 \not\wliso G^*$, then $\overline{f}_{G_1, G^*}(G^*)$ is a summand of the overall sum, and since $\overline{f}_{G_1, G^*}(G^*) > 0$, 
+        we can conclude $h_{G_1}(G*) > 0$ due to the non-negativity of each function $\overline{f}$.
     \end{enumerate}
 
     This function can be encoded in an MLP by replacing the $\max$ terms of the last line in \autoref{eq:lem:encoding-indicator-func2} by the activation function ReLU. Therefore, we can conclude with \cref{lem:composition_lemma} that for every graph $G$, $h_G$ is also $\wlnn$ computable.
 \end{proof}
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func2}
-    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computed by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \wliso G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\varphi_G $ computable by $\wlnn$ such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$.
+    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computable by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \wliso G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\varphi_G $ computable by $\wlnn$ such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$.
 \end{lemma}
 \begin{proof}
     Assuming the above. Due to $\cX$ being finite, we can define for every graph $G$ the constant:
@@ -310,25 +109,24 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
         \item If $G \wliso G^*$, then $h_G(G^*) = 0$ resulting in $\varphi_G(G^*) = \psi_{\delta_G}(0) = 1$.
         \item If $G \not\wliso G^*$ then $h_G(G^*) > 0$, such that $|h_G(G^*)|> \delta_G$ resulting in $\varphi_G(G^*) = 0$.
     \end{enumerate}
-    Note we can encode each $\varphi_G$ via a single MLP layer, where $\delta_G$ is a constant and the $\max$ operator is replaced by the non-linear activation function ReLU of the layer. With \cref{lem:composition_lemma} we can therefore conclude that $\varphi_G$ is computable by $\wlnn$ for every graph $G \in \xnn$.
+    Note that we can encode $\varphi_G$ via a single MLP layer, where $\delta_G$ is a constant and the $\max$ operator is replaced by the non-linear activation function ReLU of the layer. With \cref{lem:composition_lemma} we can therefore conclude that $\varphi_G$ is computable by $\wlnn$ for every graph $G \in \xnn$.
 \end{proof}
 
 \begin{lemma}\label{lem:decompose_gnn_as_wl}
-    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computed by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists 
-    $\varphi_G \in \cC$ satisfying $\forall G^* \in \xnn: \varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$, then $C$ is also \gapp.
+    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computable by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists 
+    $\varphi_G \in \cC$ satisfying $\forall G^* \in \xnn: \varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$, then $C$ is also \gapp \todo{Even stronger, not only approximating!}.
 \end{lemma}
 
 \begin{proof}
-    Assume the above. For any permutation invariant function $\mathcal{A}$ computed by an GNN that works over $\xnn$ to $\Rb$, we show that it can be decomposed it as follows for any $G^* \in \mathcal{X}^{n \times n}$:
+    Assume the above. For any permutation invariant function $\mathcal{A}$ computed by an GNN that works over $\xnn$ to $\Rb$, we show that it can be decomposed as follows for any $G^* \in \mathcal{X}^{n \times n}$:
     \begin{align}
-        \mathcal{A}(G^*) &= \Bigl( \ \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \xnn} \mathbb{1}_{G^* \wliso G} \Bigr) \cdot \mathcal{A}(G^*) \nonumber \\
-        &= \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \mathcal{X}^{n \times n}} \mathcal{A}(G) \cdot \mathbb{1}_{G^* \wliso G} \nonumber \\
+        \mathcal{A}(G^*) &= \Bigl( \ \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \xnn} \mathbb{1}_{G \wliso G^*} \Bigr) \cdot \mathcal{A}(G^*) \nonumber \\
+        &= \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \mathcal{X}^{n \times n}} \mathcal{A}(G) \cdot \mathbb{1}_{G \wliso G^*} \nonumber \\
         &= \sum_{G \in \mathcal{X}^{n \times n}} \frac{\mathcal{A}(G)}{|\xnn/\!{\wliso}(G)|}  \cdot \varphi_G(G^*)
     \end{align}
-    with $\xnn/\!{\wliso}(G^*)$ denoting the set of all graphs $G$ over $\xnn$ that are equivalent to $G^*$ according to the $\wliso$ relation.
+    with $\xnn/\!{\wliso}(G^*)$ we denote the set of all graphs $G$ over $\xnn$ that are equivalent to $G^*$ according to the $\wliso$ relation.
 
-    Since $\cA$ is permutation-invariant, and GNNs are at most as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every graph $G,H \in \xnn$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as outlined above. We can encode this decomposition in a single MLP layer with $\frac{\cA(G)}{|\xnn/\!{\wliso}(G)|}$ being a constant and $\varphi_G \in \cC$ encoding the indicator function. Combined with the \cref{lem:composition_lemma}, we can conclude that $\cA$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the size of $\xnn/\!{\wliso}(G)$ well-defined for all graphs.
-    
+    Since $\cA$ is permutation-invariant, and GNNs are at most as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every graph $G,H \in \xnn$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as outlined above. We can encode this decomposition in a single MLP layer with $\frac{\cA(G)}{|\xnn/\!{\wliso}(G)|}$ being a constant and $\varphi_G \in \cC$ encoding the indicator function. Combined with the \cref{lem:composition_lemma}, we can conclude that $\cA$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\xnn/\!{\wliso}(G)$ well-defined for all graphs.
 \end{proof}
 
 
@@ -345,7 +143,7 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \subsection*{Proofs}
 
 \begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    A multilayer perceptrons are a class of functions that map from $R^n$ to $R^m$. We define it here as a sequence. Let MLP be a multilayer perceptron:
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$. In this definition, we define them as a finite sequence. Let $\mlp$ be a multilayer perceptron, then $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers
     \begin{align*}
         (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i)\\
         (\mlp)_{1}(v) &:= v
