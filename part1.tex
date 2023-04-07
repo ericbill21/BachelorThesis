@@ -1,35 +1,171 @@
 \section{Definition}
+We will quickly go over some fundamental definitions.\todo{More!!!}
+
+\subsection{Basics}
+\begin{definition}[Multilayer Perceptron]\label{def:mlp}
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
+    \begin{align*}
+        (\mlp)_{1}(v) &:= v\\
+        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
+    \end{align*}
+    where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
+    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) := (\mlp)_k(v)$.
+\end{definition}
+
+\subsubsection{Permutation-invariance and -equivariance}
+We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 0$. $S_n$ consists of all permutations over these elements. Let $G$ be a graph with $V(G) = [n]$, applying a permutation $\pi \in S_n$ on $G$, is defined as $G_\pi := \pi \cdot G$ where $V(G_\pi) = \{\pi(1), \ldots, \pi(n) \}$ and $E(G_\pi) = \{ (\pi(v), \pi(u)) \mid (v,u) \in E(G)\}$. We will now introduce two key concepts for classifying functions on graphs.
+
+\begin{definition}[Permutation Invariant]
+    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permutation-invariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = f(\pi \cdot G)$.
+\end{definition}
+
+\begin{definition}[Permuation Equivariant]
+    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permuation-equivariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = \pi^{-1} \cdot f(\pi \cdot G)$.
+\end{definition}
+
+\subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
+The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section.
+
+\subsubsection{The Weisfeiler-Leman graph coloring algorithm}
+
+\begin{definition}[$\wl$ Algorithm]
+Let $G = (V, E, l)$ be a graph, then in each iteration $i$, the 1-WL computes a node coloring $C_i: V(G) \rightarrow \mathbb{N}$, which depends on the coloring of the neighbors and the node itself. In iteration $i=0$, the initial coloring is $C_0 = l$ or if $l$ is non-existing $C_0(v) = c$ for all $v \in V(G)$ for an arbitrary constant $c \in \mathbb{N}$. For $i > 0$, the algorithm assigns a color to $v \in V(G)$ as follows:
+\begin{equation*}
+C_i (v) = \textsf{RELABEL}(C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N}(v) \MSclose),
+\end{equation*}
+
+\noindent where $\textsf{RELABEL}$ injectively maps the above pair to a unique, previously not used, natural number. Although this is not a formal restriction by the inventors, we further require the function to always map to the next minimal natural number. Thereby we can contain the size of the codomain of each coloring for all iterations. The algorithm terminates when the number of colors between two iterations does not change, meaning the algorithm terminates after iteration $i$ if the following condition is satisfied:
+\begin{equation*}
+\forall v,w \in V(G):  C_i(v) = C_i(w) \iff C_{i+1}(v) = C_{i+1}(w).
+\end{equation*}
+Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring, such that $\wl(G) := C_\infty$. The algorithm always terminates after $n_G:= |V(G)|$ iterations (\cite{Gro2017}). 
+\end{definition}
+For an illustration of this coloring algorithm, see \autoref{Encoding example}. Moreover, based on the work of \cite{Pai+87} about efficient refinement strategies, \cite{Car+82} proved that the stable coloring $C_\infty$ can be computed in time $\mathcal{O}(| V(G) | + |E(G)| \cdot \log | V(G) |)$.\todo{Bring many infos outside of the definiton. And add that we call this algorihm $\wl$.}
+
+\subsubsection{The Weisfeiler-Leman Graph Isomorphism Test}
+
+\begin{definition}[$\wl$ Isomorphism Test]
+    To determine if two graphs $G, H \in \mathcal{G}$ are non-isomorphic ($G \ncong H)$, one applies the 1-WL coloring algorithm on both graphs ``in parallel'' and checks after each iteration if the occurrences of each color are equal, else the algorithm would terminate and conclude non-isomorphic. Formally, the algorithm concludes non-isomorphic in iteration $i$ if there exists a color $c$ such that: 
+    \begin{equation*}
+        |\{ v \in V(G) \mid c = C_i(v)\} | \neq |\{ v \in V(H) \mid c = C_i(v)\} |.
+    \end{equation*}
+\end{definition}
+Note that this test is only sound and not complete for the \textit{graph isomorphism problem}. Counterexamples where the algorithm fails to distinguish non-isomorphic graphs can be easily constructed, see \autoref{1-WL Counter Example} which was discovered and proven by \cite{Cai1992}.
+\begin{figure}[H]
+    \centering
+    \input{Figures/example1}
+    \caption{An example of two graphs $G$ and $H$ that are non-isomorphic but cannot be distinguished by the 1-WL.}
+    \label{1-WL Counter Example}
+\end{figure}
+
+\subsection{$\wlnn$}
+Text ABC \todo{Here to do}
+
+\begin{definition}[$\wlnn$]
+    We say the function $\cB: \mathcal{G} \rightarrow \Rb^m$ is computable by $\wlnn$, if it can be compromised as $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$, where $f_{\text{enc}}$ is an encoding function that maps graph coloring to fixed-sized vectors, and $\mlp$ is a multilayer perceptron. \todo{f must be permutation invariant?}
+\end{definition}
+
+As a concrete example of a collection of functions computable by $\wlnn$ we will introduce the collection $\mathfrak{B}_k$ that is parametrized by $k \in \Nb_{\geq 1}$. All functions $\cB \in \mathfrak{B}_k$ use the \emph{counting-encoding} function $f_{\text{count}}$ as their encoding function, and are constrained in their domain to only work over a subset $\cX$ of $\cG$. We will define this particular encoding function in the following:
+\begin{definition}[Counting Encoding Functions]
+    For $k \in \mathbb{N}$, let 
+    \begin{equation*}
+        \mathcal{X} = \{ G \in \mathcal{G} \mid \forall x \in V(G) \cup E(G): l_G(x) \leq k \} \subset \cG
+    \end{equation*}
+        be the set of all graphs, where the label alphabet $\Sigma$ of the respective label function $l$ is bounded with $\Sigma \subseteq [k]$. We define the \emph{counting-encoding} function $f_{\text{count}}: \mathcal{X} \rightarrow \mathbb{N}^K$ as the function that maps a graph coloring $C_\infty$ of a graph $G \in \cX$ to a vector $v \in \mathbb{N}^K$ such that the $c$.th component of $v$ is equal to the number of occurrences of the color $c$ in the coloring $C_\infty$. More formally, for $G \in \mathcal{X}$ let $C_\infty$ be the final coloring upon the termination of the 1-WL algorithm on $G$ and $h_{G, C_\infty}$ the respective color histogram. Then $F$ maps $G$ to a vector $v \in \mathbb{N}^K$, such that for all $c \in [K]: v_c = h_{G, C_\infty}(c)$, where $v_c$ denotes the $c$.th component of the vector $v$. Important to note, due to the bounded label alphabet $\Sigma$ of all graphs $G 
+    \in \mathcal{X}$ by the parameter $k$, there exists a minimal $K$ for the codomain $\Nb^K$ of $f_{\text{count}}$, such that $f_{\text{count}}$ is well-defined on all graphs $G \in \mathcal{X}$.
+\end{definition}
+
+To illustrate how this encoding function works and why we coined it \emph{counting-encoding}, we will quickly introduce an example graph $G$. In \autoref{Encoding example}, we give a visual representation of $G$ and its stable coloring after applying the 1-WL algorithm to it. The \emph{counting-encoding} function $f_{\text{count}}$ counts through all colors $i \in [K]$ and sets each $i$.th component of the output vector to the number of occurrences in the final coloring. Therefore, the respective color histogram $h_{G, C_\infty} = \MSopen 2, 2, 3, 4 \MSclose$ of $G$ is being mapped to $v \in \mathbb{N}^K$ with $v = (0, 2, 1, 1,0,  \dots ,0)^T$, since color $2$ appears two times, while color $3$ and $4$ occur only once. All other components of $v$ are set to $0$.
+\begin{figure}[H]
+    \centering
+    \input{Figures/example2}
+    \caption{An example of the final coloring computed by applying the 1-WL algorithm on the graph $G$. The graph $G$ consists of $4$ nodes with all their labels being initially set to $1$. Note that each label corresponds to a color, which we have also plotted for illustration purposes.}
+    \label{Encoding example}
+\end{figure}
+
+\subsection{Graph Neural Networks (Message Passing)}\label{sec:GNN Defintion}
+Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ passes a vector representation of each node $v$ or edge $e$ through $f^{(t)}(v)$ or $f^{(t)}(e)$ respectively and retrieves thereby a new graph that is structurally identical but has new feature information. Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features.\todo{Better intro text}
+
+\begin{definition}[Graph Neural Network]
+    Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ is represented by a function $f^{(t)}$ that works over the set of nodes $V(G)$. To begin with, we need a function $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$, that translates all labels into a vector representation. Further, for every $t > 0$, $f^{(t)}$ is of the format:
+    \begin{align*}
+    f^{(t)}(v) = f^{W_{1,t}}_{\text{merge}} (f^{(t-1)}(v), \  f^{W_{2,t}}_{\text{agg}}( \MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose )),
+    \end{align*}
+    where $f^{W_{1,t}}_{\text{merge}}$ and $f^{W_{2,t}}_{\text{agg}}$ are arbitrary differentiable functions with $W_{1,t}$ and $W_{2,t}$ their respective parameters. Additionally, $f^{W_{2,t}}_{\text{agg}}$ has to be permuation-invariant.
+
+    Depending on the objective, whether the GNN is tasked with a graph or a node task, the last layer differs. In the case of graph tasks, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, that aggregates over every node and computes a fixed-size output vector for the entire graph, e.g. a label for graph classification. In order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable. Let $\mathcal{A}$ be an instance of the described GNN framework. Further, let $K \in \mathbb{N}$ be the number of layers of the GNN, $\mathcal{G}$ the set of all graphs, $\mathcal{Y}$ the task-specific output set (e.g. labels of a classification task), then the overall function computed by $\mathcal{A}$ is:
+    \begin{align*}
+        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}: x \mapsto \textsf{READOUT} \circ f^{(K)} \circ \ldots \circ f^{(0)}(x),
+    \end{align*}
+    if $\mathcal{A}$ is configured for a graph task, otherwise:
+    \begin{align*}
+        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}: x \mapsto f^{(K)} \circ \ldots \circ f^{(0)}(x).
+    \end{align*}
+\end{definition}
+
+Note that, as we require all aggregation functions to be permutation-invariant, the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. This definition and use of notation are inspired by \cite{Morris2018} and \cite{Xu2018}.
+
+To demonstrate what kind of functions are typically used, we provide functions used by \cite{Ham+2017} for a node classification:
+\begin{align*}
+f^{W_{1,t}}_{\text{merge}}(v) &= \sigma (W_{\text{merge}} \cdot \textsf{concat}(f^{(t-1)}(v), \ f^{W_{2,t}}_{\text{agg}}(v)))\\
+f^{W_{2,t}}_{\text{agg}}(v) &= \max(\{ \sigma(W_{\text{pool}} \cdot f^{(t-1)}(u) + b) \mid u \in \mathcal{N}(v)\})
+\end{align*}
+where $\sigma$ is a non-linear element wise activation function; $W_{\text{merge}}$, $W_{\text{pool}}$ are trainable matrices, $b$ a trainable vector and \textsf{concat} the concatenation function.
+
+
+
+\subsection{Important for later}
 \begin{definition}[1-WL Relation]
     For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
 \end{definition}
 
-\begin{definition}
+\begin{definition}[$\wldisc$]
     Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
 \end{definition}
 
-\begin{definition}
+\begin{definition}[$\gapp$]
     Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty := \sup_{G \in \mathcal{X}} |f(G) - h_{\cA,\epsilon}(G)| < \epsilon$
 \end{definition}
 
 \section{Theorems}
-In this thesis we concentrate on finite graphs. We therefore, let $\mathcal{X}$ be a XYS.
+Throughout this thesis we will concentrate on a finite collection of finite graphs which we will denote with $\cX \subset \cG$.
 
-\begin{theorem}[$\wlnn \subseteq \text{GNN}$]\label{theorem:1wl_in_gnn}
-    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computed by $\wlnn$ and $\cX$ finite set of graphs. If $\cC$ is $\wldisc$, then there exists an augmentation $\cC'$ of $\cC$ that is computable by $\wlnn$, such that for every function $\cA$ computed by a GNN, $\cA \in \cC'$.
+\begin{theorem}[Finite Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:1wl_in_gnn}
+    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs, then $\cC$ is also computable by $\wlnn$.
 \end{theorem}
-\noindent With this theorem we can conclude that every function computable by a GNN is also computable by a $\wlnn$.
+
+\begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']
+    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$, then $\cC$ is also computable by GNNs.
+\end{theorem}
 
 
-\section{Proofs}
-Throughout this thesis we will concentrate on finite graphs, such that we let $\mathcal{X}$ be $\mathcal{X} := \{1, \dots, k\}$ for an arbitrary $k \in \Nb$. We will prove \cref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \cref{lem:wl_disc_exists} we show the existence of collections computed by $\wlnn$ that are 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
+\subsection{Proof of \cref{theorem:1wl_in_gnn}}
+We will prove \cref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \cref{lem:wl_disc_exists} we show the existence of a collection computed by $\wlnn$ that is 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
 We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
 \begin{lemma}\label{lem:wl_disc_exists}
     There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is 1-\!WL-Discriminating.
 \end{lemma}
 \begin{proof}
-We consider the collection $\mathfrak{B}_k$ of functions computed by \wlnn, where every $\mathcal{B} \in \mathfrak{B}_k$ is of the form $\mathcal{B}(\cdot) = \text{MLP} \circ f_{\text{enc}}(\cdot)$. Here MLP is an arbitrary multilayer perceptron mapping vectors from $\Nb^K$ to $\Rb$ and $f$ the \textit{counting-encoding} function. Further, let $G_1, G_2 \in \mathcal{X}^{n\times n}$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\simeq G_2$). We denote with $(C_{\infty})_G$ the final coloring computed by the 1-WL algorithm when applied on $G$.
-Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a color $c \in \Nb$ such that $(C_{\infty})_{G_1}(c) \neq (C_{\infty})_{G_2}(c)$. If we now consider as MLP the following function $\text{MLP}: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} := 1$ and $W_{1,i} := 0$ for all $i \in [K] \setminus \{c\}$. Then we can conclude that $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$. Since $G_1,G_2$ are arbitrary, we can conclude the proof.
+We consider the collection $\mathfrak{B}_k$ of functions from $\cX$ to $\Rb$ computed by \wlnn, where we choose $k$ as follows:
+\begin{equation*}
+    k := \max \bigl( \{ l_G(v) \mid G \in \cX, v \in V(G)\} \bigr),
+\end{equation*}
+the largest label of any node of any graph in $\cX$. Note that we can compute $k$, since $\cX$ is finite.
+
+Let $G_1, G_2 \in \cX$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$). We denote with $(C_{\infty})_G$ the final coloring computed by the 1-WL algorithm when applied on $G$.
+Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, (C_\infty)_{G_1}}(c) \neq h_{G_2, (C_\infty)_{G_1}}(c)$. If we now consider as mu the following function $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} := 1$ and $W_{1,i} := 0$ for all $i \in [K] \setminus \{c\}$, we can construct $\cB$ as $\cB(\cdot) := \mlp \circ f_{\text{count}} \circ \wl(\cdot)$. Then $\cB(G) := h_{G, (C_\infty)_G}(c)$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$, 
+
+
+Then we can conclude that $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$. Since $G_1,G_2$ are arbitrary, we can conclude the proof.
+\end{proof}
+
+\begin{lemma}[$\wlnn$ Equivalence]\label{lem:wl_relation_equivalence}
+    Let $\cC$ be a collection of functions computable by $\wlnn$, then for every function $\cB \in \cC$ and every pair of graphs $G_1, G_2 \in \xnn:$ if $G_1 \wliso G_2$ than $\cB(G_1) = \cB(G_2)$.
+\end{lemma}
+
+\begin{proof}
+    Let $\cC$ be a collection of functions computed by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Let $G_1, G_2 \in \xnn$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediatly.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Permuation Invariance]\label{lem:wlnn_permutation_invariance}
@@ -37,18 +173,10 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \end{lemma}
 
 \begin{proof}
-    Let $\cC$ be a collection of functions computable by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Since, the $\wl$ coloring algorithm is permutation-invariant, the overall function is permutation invariant. \todo{Erscheint mir irgendwie nicht richtig, vlt lieber den umweg über lemma 7 nehmen}
+    Let $\cC$ be a collection of functions computable by $\wlnn$. Let $G_1, G_2 \in \xnn$ be arbitrary graphs with $G_1 \simeq G_2$ and $\cB$ be an arbitrary function in $\cC$. Since the $\wl$ algorithm is sound, we know that $G_1 \simeq G_2$ implies $G_1 \wliso G_2$. Using \cref{lem:wl_relation_equivalence}, we can therefore conclude that: $\cB(G_1) = \cB(G_2)$.
 \end{proof}
 
-\begin{lemma}[$\wlnn$ Equivariance]\label{lem:wl_relation_equivalence}
-    Let $\cC$ be a collection of functions computable by $\wlnn$, then for every function $\cB \in \cC$ and every pair of graphs $G_1, G_2 \in \xnn:$ if $G_1 \wliso G_2$ than $\cB(G_1) = \cB(G_2)$.
-\end{lemma}
-
-\begin{proof}
-    Let $\cC$ be a collection of functions computed by $\wlnn$. Let $\cB$ be an arbitrary function in $\cC$, then $\cB$ is comprised as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Let $G_1, G_2 \in \xnn$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediatly. \todo{the equivariance follows?}
-\end{proof}
-
-\begin{lemma}[Composition Lemma]\label[lemma]{lem:composition_lemma}=
+\begin{lemma}[$\wlnn$ Composition]\label[lemma]{lem:composition_lemma}
     Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cA$ composed of $\cA(\cdot) := \text{MLP}(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
 \end{lemma}
 \begin{proof}
@@ -90,7 +218,7 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \end{proof}
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func2}
-    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computable by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \wliso G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\varphi_G $ computable by $\wlnn$ such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$.
+    Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computable by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists $h_G \in \mathcal{C}$ satisfying $h_G(G^*) = 0 $ if and only if $G \wliso G^*$ for all $G^* \in \mathcal{X}^{n \times n}$. Then for every $G \in \xnn$, there exists a function $\varphi_G $ computable by $\wlnn$ such that for all $G^* \in \xnn$: $\varphi_G(G^*) = \mathds{1}_{G \wliso G^*}$.
 \end{lemma}
 \begin{proof}
     Assuming the above. Due to $\cX$ being finite, we can define for every graph $G$ the constant:
@@ -114,14 +242,14 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 
 \begin{lemma}\label{lem:decompose_gnn_as_wl}
     Let $\mathcal{C}$ be a collection of functions from $\mathcal{X}^{n \times n}$ to $\Rb$ computable by $\wlnn$ so that for all $G \in \mathcal{X}^{n \times n}$, there exists 
-    $\varphi_G \in \cC$ satisfying $\forall G^* \in \xnn: \varphi_G(G^*) = \mathbb{1}_{G \wliso G^*}$, then $C$ is also \gapp \todo{Even stronger, not only approximating!}.
+    $\varphi_G \in \cC$ satisfying $\forall G^* \in \xnn: \varphi_G(G^*) = \mathds{1}_{G \wliso G^*}$, then every permutation invariant function computable by a GNN is also computable by $\wlnn$.
 \end{lemma}
 
 \begin{proof}
     Assume the above. For any permutation invariant function $\mathcal{A}$ computed by an GNN that works over $\xnn$ to $\Rb$, we show that it can be decomposed as follows for any $G^* \in \mathcal{X}^{n \times n}$:
     \begin{align}
-        \mathcal{A}(G^*) &= \Bigl( \ \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \xnn} \mathbb{1}_{G \wliso G^*} \Bigr) \cdot \mathcal{A}(G^*) \nonumber \\
-        &= \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \mathcal{X}^{n \times n}} \mathcal{A}(G) \cdot \mathbb{1}_{G \wliso G^*} \nonumber \\
+        \mathcal{A}(G^*) &= \Bigl( \ \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \xnn} \mathds{1}_{G \wliso G^*} \Bigr) \cdot \mathcal{A}(G^*) \nonumber \\
+        &= \frac{1}{|\xnn/\!{\wliso}(G^*)|}\sum_{G \in \mathcal{X}^{n \times n}} \mathcal{A}(G) \cdot \mathds{1}_{G \wliso G^*} \nonumber \\
         &= \sum_{G \in \mathcal{X}^{n \times n}} \frac{\mathcal{A}(G)}{|\xnn/\!{\wliso}(G)|}  \cdot \varphi_G(G^*)
     \end{align}
     with $\xnn/\!{\wliso}(G^*)$ we denote the set of all graphs $G$ over $\xnn$ that are equivalent to $G^*$ according to the $\wliso$ relation.
@@ -136,20 +264,12 @@ Due to the 1-WL isomorphism test concluding $G_1 \not\simeq G_2$, there exists a
 \begin{figure}[H]
     \centering
     \input{Figures/plot1}
-    \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ with $a = 1$ in blue, $ a = 2$ in red and $a = 3$ in green.}
+    \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ used in the proof of \cref{lem:encoding-indicator-func2}. Here the colors of the displayed functions correspond to the parameter $a$ set to
+    $a:=1$ in blue, $a:=2$ in red and $a:=3$ in green.}
     \label{fig:bump_function}
 \end{figure}
 
 \subsection*{Proofs}
-
-\begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$. In this definition, we define them as a finite sequence. Let $\mlp$ be a multilayer perceptron, then $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers
-    \begin{align*}
-        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i)\\
-        (\mlp)_{1}(v) &:= v
-    \end{align*}
-    where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
-\end{definition}
 
 \begin{proof}[\cref{lem:composition_lemma}]
     Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \xnn$:
