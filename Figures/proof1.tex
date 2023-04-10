@@ -5,20 +5,30 @@
     \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
     
     \node (inputG) {$G$};
-    \node (coloring) [right =of inputG] {$(C_\infty)_G$};
-    \node (firstV) [right =of coloring] {$f^*(v)$};
-    \node (inp1) [above right =of firstV] {$f_1(v)$};
-    \node (inp2) [below right =of firstV] {$f_n(v)$};
+    \node (coloring) [right =of inputG] {$C_\infty$};
+    \node (firstV) [right =of coloring] {$\begin{bmatrix*}
+        f_1(C_\infty)\\
+        \vdots\\
+        f_n(C_\infty)
+    \end{bmatrix*}$};
+    \node (inp1) [above right =of firstV] {$f_1(C_\infty)$};
+    \node (inp2) [below right =of firstV] {$f_n(C_\infty)$};
     \node (out1) [right =of inp1] {$o_1$};
     \node (out2) [right =of inp2] {$o_n$};
-    \node (out) [below right =of out1, above right =of out2] {$o$};
-    \node (dot1) [right =of firstV] {.};
+    \node (out) [below right =of out1, above right =of out2] {$\begin{bmatrix*}
+        o_1\\
+        \vdots\\
+        o_n
+    \end{bmatrix*}$};
+    \node (dot1) [right =of firstV] {$\vdots$};
     \node (final_out) [right =of out] {$O$};
+    \node (dot2) [below =of out1] {$\vdots$};
+
     
 
     \draw[|-latex] (inputG.east) to node[text width=2.5cm,midway,above,align=center] {$\wl$} (coloring.west);
 
-    \draw[-latex] (coloring.east) -- (firstV.west);
+    \draw[-latex] (coloring.east) to node[text width=2.5cm,midway,above,align=center] {$f^*$} (firstV.west);
 
     \draw[-latex] (firstV.east) -- (inp1.west);
 
@@ -31,7 +41,9 @@
     \draw[-latex] (out1.east) -- (out.west);
     \draw[-latex] (out2.east) -- (out.west);
 
-    \draw[|-latex] (out.east) to node[text width=2.5cm,midway,above,align=center] {$\mlp^*$} (final_out.west);
+    \draw[|-latex] (out.east) to node[text width=2.5cm,midway,above,align=center] {$\mlp^\bullet$} (final_out.west);
+
+    %\draw [thick, decoration={brace,mirror,raise=0.5cm},decorate, below =of out2] (firstV.south) -- (final_out.west);
 
 
     %\draw (-1.5,0.75) node {$\cA(G):$};
@@ -48,4 +60,4 @@
     %\draw (5.0, 1.0) node {$v$};
     %\draw (5.0, -1.0) node {$v$};
     
-    \end{tikzpicture}
+\end{tikzpicture}
