@@ -1,5 +1,5 @@
 \section{Preliminaries}
-First, we introduce a number of notions and definitions that will be used in this paper. In particular, the definitions will play a crucial role in the theoretical part that follows. We start with some general notations, introduce a general graph framework, and familiarize the reader with the Weisfeiler-Leman algorithm. We will then introduce each framework independently, first the $\wlnn$ and then GNN. At the end, we will briefly introduce important properties of collections of functions computed by both methods.
+First, we introduce a couple of notions and definitions that will be used throughout this thesis. In particular, the definitions will play a crucial role in the theoretical part that follows. We start with some general notations, introduce a general graph definition, and familiarize the reader with the Weisfeiler-Leman algorithm. We will then introduce each framework independently, first the $\wlnn$ and then GNN. At the end, we will briefly introduce important properties of collections of functions computed by both methods.
 
 \subsection{General Notation}
 We first introduce a couple of notations and definitions that will be used throughout the thesis. With $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and with $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
@@ -24,9 +24,10 @@ We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 
 The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section.
 
 \subsubsection{The Weisfeiler-Leman graph coloring algorithm}
+The $\wl$ algorithm computes a node coloring of its input graph in each iteration. A color for a node is computed using only the coloring of its neighbors and the node itself. The algorithm will continue as long as it has not converged, and returns the final coloring of the graph.
 
 \begin{definition}[$\wl$ Algorithm]
-Let $G = (V, E, l)$ be a graph, then in each iteration $i$, the 1-WL computes a node coloring $C_i: V(G) \rightarrow \mathbb{N}$, which depends on the coloring of the neighbors and the node itself. In iteration $i=0$, the initial coloring is $C_0 = l$ or if $l$ is non-existing $C_0(v) = c$ for all $v \in V(G)$ for an arbitrary constant $c \in \mathbb{N}$. For $i > 0$, the algorithm assigns a color to $v \in V(G)$ as follows:
+Let $G = (V, E, l)$ be a graph, then in each iteration $i$, the 1-WL computes a node coloring $C_i: V(G) \rightarrow \mathbb{N}$. In iteration $i=0$, the initial coloring is $C_0 = l$ or if $l$ is non-existing $\forall v \in V(G): C_0(v) = c$ for an arbitrary constant $c \in \mathbb{N}$. For $i > 0$, the algorithm assigns a color to $v \in V(G)$ as follows:
 \begin{equation*}
 C_i (v) = \textsf{RELABEL}(C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N}(v) \MSclose),
 \end{equation*}
@@ -35,9 +36,12 @@ C_i (v) = \textsf{RELABEL}(C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N}
 \begin{equation*}
 \forall v,w \in V(G):  C_i(v) = C_i(w) \iff C_{i+1}(v) = C_{i+1}(w).
 \end{equation*}
-Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring, such that $\wl(G) := C_\infty$. The algorithm always terminates after $n_G:= |V(G)|$ iterations (\cite{Gro2017}). 
+Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring, such that $\wl(G) := C_\infty$.
 \end{definition}
-For an illustration of this coloring algorithm, see \autoref{Encoding example}. Moreover, based on the work of \cite{Pai+87} about efficient refinement strategies, \cite{Car+82} proved that the stable coloring $C_\infty$ can be computed in time $\mathcal{O}(| V(G) | + |E(G)| \cdot \log | V(G) |)$.\todo{Bring many infos outside of the definiton. And add that we call this algorihm $\wl$.}
+
+
+The colorings computed in each iteration always converge to the final one, such that the algorithm always terminates. In more detail, \cite{Gro2017} showed that it always holds after at most $|V(G)|$ iterations.
+For an illustration of this coloring algorithm, see \autoref{Encoding example}. Moreover, based on the work of \cite{Pai+87} about efficient refinement strategies, \cite{Car+82} proved that the stable coloring $C_\infty$ can be computed in time $\mathcal{O}(| V(G) | + |E(G)| \cdot \log | V(G) |)$.
 
 \subsubsection{The Weisfeiler-Leman Graph Isomorphism Test}
 
@@ -56,10 +60,10 @@ Note that this test is only sound and not complete for the \textit{graph isomorp
 \end{figure}
 
 \subsection{$\wlnn$}
-Text ABC \todo{Here to do}
+As seen in the previous section, the $\wl$ algorithm is quite powerful in identifying substructures. With the $\wlnn$ framework, we define functions that utilize this structural information to derive further application-specific insights. We do this by combining well-known machine learning techniques and the algorithm.
 
 \begin{definition}[$\wlnn$]
-    We say the function $\cB: \mathcal{G} \rightarrow \Rb^m$ is computable by $\wlnn$, if it can be compromised as $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$, where $f_{\text{enc}}$ is an encoding function that maps graph coloring to fixed-sized vectors, and $\mlp$ is a multilayer perceptron. \todo{f must be permutation invariant?}
+    We say the function $\cB: \mathcal{G} \rightarrow \Rb^m$ is computable by $\wlnn$, if it can be compromised as $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$, where $f_{\text{enc}}$ is a permutation invariant encoding function that maps graph-colorings to fixed-sized vectors, and $\mlp$ is a multilayer perceptron.
 \end{definition}
 
 As a concrete example of a collection of functions computable by $\wlnn$ we will introduce the collection $\mathfrak{B}_k$ that is parametrized by $k \in \Nb_{\geq 1}$. All functions $\cB \in \mathfrak{B}_k$ use the \emph{counting-encoding} function $f_{\text{count}}$ as their encoding function, and are constrained in their domain to only work over a subset $\cX$ of $\cG$. We will define this particular encoding function in the following:
@@ -82,7 +86,10 @@ To illustrate how this encoding function works and why we coined it \emph{counti
 \end{figure}
 
 \subsection{Graph Neural Networks (Message Passing)}\label{sec:GNN Defintion}
-Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ passes a vector representation of each node $v$ or edge $e$ through $f^{(t)}(v)$ or $f^{(t)}(e)$ respectively and retrieves thereby a new graph that is structurally identical but has new feature information. Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features.\todo{Better intro text}
+A Graph Neural Network (GNN) is a composition of multiple layers, where each layer computes a new feature for each node and edge. The GNN layer thus technically obtains a new graph that is structurally identical to the previous one, but contains new feature information. After an input graph has been passed through all layers, there can be an additional final function, aggregating the computed information into a fixed size output. With this, it is possible to apply a GNN to every graph, regardless of its size, as the ``computation'' will only take place on the nodes and edges of the graph.
+
+
+Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features.
 
 \begin{definition}[Graph Neural Network]
     Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ is represented by a function $f^{(t)}$ that works over the set of nodes $V(G)$. To begin with, we need a function $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$, that translates all labels into a vector representation. Further, for every $t > 0$, $f^{(t)}$ is of the format:
@@ -105,14 +112,15 @@ Note that, as we require all aggregation functions to be permutation-invariant, 
 
 To demonstrate what kind of functions are typically used, we provide functions used by \cite{Ham+2017} for a node classification:
 \begin{align*}
-f^{W_{1,t}}_{\text{merge}}(v) &= \sigma (W_{\text{merge}} \cdot \textsf{concat}(f^{(t-1)}(v), \ f^{W_{2,t}}_{\text{agg}}(v)))\\
-f^{W_{2,t}}_{\text{agg}}(v) &= \max(\{ \sigma(W_{\text{pool}} \cdot f^{(t-1)}(u) + b) \mid u \in \mathcal{N}(v)\})
+    f^{W_{1,t}}_{\text{merge}}(v) &= \text{ReLU} (W_{\text{merge}} \cdot \textsf{concat}(f^{(t-1)}(v), \ f^{W_{2,t}}_{\text{agg}}(v)))\\
+    f^{W_{2,t}}_{\text{agg}}(v) &= \textsf{MAX}(\{ \text{ReLU}(W_{\text{pool}} \cdot f^{(t-1)}(u) + b) \mid u \in \mathcal{N}(v)\})
 \end{align*}
-where $\sigma$ is a non-linear element wise activation function; $W_{\text{merge}}$, $W_{\text{pool}}$ are trainable matrices, $b$ a trainable vector and \textsf{concat} the concatenation function.
+where $\text{ReLU}$ is a non-linear element wise activation function, $\textsf{MAX}$ the element-wise $\max$ operator; $W_{\text{merge}}$, $W_{\text{pool}}$ are trainable matrices, $b$ a trainable vector and \textsf{concat} the concatenation function.
 
 
 
 \subsection{Important for later}
+In this section, we introduce a formal definition of multilayer perceptron as it is required in a later proof, as well as the $\wliso$ relation. Additionally, two very important properties for collections of functions.
 
 \begin{definition}[Multilayer Perceptron]\label{def:mlp}
     Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
@@ -180,8 +188,8 @@ We consider the collection $\mathfrak{B}_k$ (\cref{def:counting_encoding}) of fu
 the largest label of any node of any graph in $\cX$. Note that we can compute $k$, since $\cX$ is finite.
 
 Let $G_1, G_2 \in \cX$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$). Let $C_1, C_2$ be the final coloring computed by the $\wl$ algorithm when applied on $G_1, G_2$ respectively.
-Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, C_1}(c) \neq h_{G_2, C_2}(c)$. If we now consider as multilayer perceptron $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} := 1$ and $W_{1,i} := 0$ for all $i \in [K] \setminus \{c\}$, we can construct $\cB$ as $\cB(\cdot) := \mlp \circ f_{\text{count}} \circ \wl(\cdot)$, such that $\cB \in \mathfrak{B}_k$. Then $\cB(G) := h_{G, (C_\infty)_G}(c)$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$,and since $G_1,G_2$ were arbitrary chosen, we can conclude the proof.
-\end{proof}\todo{Big $K$ explaining, linking to defintion of $\mathfrak{B}$}
+Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, C_1}(c) \neq h_{G_2, C_2}(c)$. If we now consider as multilayer perceptron $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} := 1$ and $W_{1,i} := 0$ for all $i \in [K] \setminus \{c\}$, we can construct $\cB$ as $\cB(\cdot) := \mlp \circ f_{\text{count}} \circ \wl(\cdot)$, such that $\cB \in \mathfrak{B}_k$ ($K$ is a constant introduced by $f_\text{count}$). Then $\cB(G_i) := h_{G, C_i}(c)$ for $i \in \{1, 2\}$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$, and since $G_1,G_2$ were arbitrary chosen, we can conclude the proof.
+\end{proof}
 
 \begin{lemma}[$\wlnn$ Equivalence]\label{lem:wl_relation_equivalence}
     Let $\cC$ be a collection of functions computable by $\wlnn$, then for every function $\cB \in \cC$ and every pair of graphs $G_1, G_2 \in \cX:$ if $G_1 \wliso G_2$ than $\cB(G_1) = \cB(G_2)$.
@@ -314,73 +322,11 @@ OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm 
 \subsection{Proof of \cref{theorem:gnn_approximating_in_1wl}}
 \begin{proof}
     Let $\cC$ be a collection of continues functions from $\knn$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \knn$ with $G_1 \not\wliso G_2$, then we define $f_{G_1}(G^*) = \min_{\pi \in S_n} d(G_1, \  \pi^T G^* \pi)$, where $d(\cdot, \ \cdot)$ is the euclidean distance between two matrices. Since $f_{G_1}$ is permutation invariant, we can construct a GNN with $0$ layers and $f_{G_1}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $f_{G_1}$ and consequently showing that the function is GNN computable.
-    We choose $\epsilon := \frac{1}{3} \cdot f_{G_1}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $f_{G_1}$ within $\epsilon$ accuracy. With this, we have a function that $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$. 
+    We choose $\epsilon := \frac{1}{2} \cdot f_{G_1}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $f_{G_1}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
+    \begin{align*}
+        | h_\epsilon(G_1) - h_\epsilon(G_2)| &> | (f_{G_1}(G_1) - \epsilon) - (f_{G_1}(G_2) + \epsilon)|\\
+        &= |f_{G_1}(G_2) -2 \cdot \epsilon| \quad&\text{by definition $f_{G_1}(G_1) = 0$}\\
+        &= |f_{G_1}(G_2) -2 \cdot \frac{1}{2} \cdot f_{G_1}(G_2)| = 0.\\
+    \end{align*}
 \end{proof}
-
-
-
-
-
 \newpage
-\section*{Appendix}
-\subsection*{Figures and graphs}
-\begin{figure}[H]
-    \centering
-    \input{Figures/plot1}
-    \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ used in the proof of \cref{lem:encoding-indicator-func2}. Here the colors of the displayed functions correspond to the parameter $a$ set to $a:=1$ in blue, $a:=2$ in red and $a:=3$ in green.}
-    \label{fig:bump_function}
-\end{figure}
-
-\subsection*{Proofs}
-
-\begin{proof}[\cref{lem:composition_lemma}]
-    Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \cX$:
-    \begin{equation*}
-        \mlp^\bullet(h_1(G), \dots ,h_n(G)) = \mlp^* \circ f^* \circ \wl(G)
-    \end{equation*}
-    such that we can conclude that the composition of multiple functions computable by $\wlnn$, is in fact also $\wlnn$ computable. 
-
-    We define the new encoding function $f^*$ to work as follows on input $C_\infty$:
-    \begin{equation*}
-        f^*(C_\infty) := \textsf{concat}(
-            \begin{bmatrix}
-                f_1(C_\infty)\\
-                \vdots\\
-                f_n(C_\infty)
-            \end{bmatrix}),
-    \end{equation*}
-    where $\textsf{conccat}$ is the concatenation functions, concatenating all encoding vectors to one single vector.
-
-    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ at layer $j > 1$ as follows: $(\mlp_i)_{j}(v) := \sigma(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
-    \begin{align*}
-        &(\mlp^*)_{1}(v) := v\\
-        &(\mlp^*)_{j+1}(v) := \sigma(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
-            \begin{bmatrix}
-                b^1_j\\
-                \vdots\\
-                b^n_j
-            \end{bmatrix})) &,\forall j \in [k]\\
-        &(\mlp^*)_{j+k+1}(v) := (\mlp^\bullet)_{j+1}(v) &,\forall j \in [k^\bullet - 1]
-    \end{align*}
-    where $k$ is the maximum number of layers of the set of $\mlp_i$'s, $k^\bullet$ is the number of layers of the given $\mlp^\bullet$ and $\sigma$ an element wise activation function. Thereby, we define in the first equation line, that the start of the sequence is the input, with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last equation line, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
-    \begin{align*}
-        W^*_j &:= \begin{bmatrix}
-            W^1_j & 0 & \hdots & 0\\
-            0 & W^2_j & \ddots & \vdots\\
-            \vdots & \ddots & \ddots & 0\\
-            0 & \hdots & 0 & W^n_j
-        \end{bmatrix},
-    \end{align*}
-    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$.
-
-
-    Then $\cB(\cdot) := \mlp^* \circ f^* \circ \wl(\cdot)$ is $\wlnn$ computable and equavalent to $\mlp^\bullet(h_1, \dots, h_n)$ \todo{fine tune.}
-\end{proof}
-
-
-
-
-
-\setcitestyle{numbers}
-\bibliography{references}
-\end{document}
