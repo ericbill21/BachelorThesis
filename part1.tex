@@ -1,16 +1,13 @@
-\section{Definition}
-We will quickly go over some fundamental definitions.\todo{More!!!}
+\section{Preliminaries}
+First, we introduce a number of notions and definitions that will be used in this paper. In particular, the definitions will play a crucial role in the theoretical part that follows. We start with some general notations, introduce a general graph framework, and familiarize the reader with the Weisfeiler-Leman algorithm. We will then introduce each framework independently, first the $\wlnn$ and then GNN. At the end, we will briefly introduce important properties of collections of functions computed by both methods.
 
-\subsection{Basics}
-\begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
-    \begin{align*}
-        (\mlp)_{1}(v) &:= v\\
-        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
-    \end{align*}
-    where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
-    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) := (\mlp)_k(v)$.
-\end{definition}
+\subsection{General Notation}
+We first introduce a couple of notations and definitions that will be used throughout the thesis. With $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and with $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
+
+\subsection{Graphs}
+A graph $G$ is a 3-tuple $G:= (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all finite graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. Sometimes the values assigned by $l$ are called features, but this is usually only the case when $\Sigma$ is multidimensional, which we do not cover in this thesis. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_1: V(G) \rightarrow \{1\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ such that for every $(v,u) \in E$ also $(u,v) \in E$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively, as well as $l_G$ to denote the label function of $G$. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) := \{u \mid (u, v) \in E(G)\}$.
+
+A coloring of a Graph $G$ is a function $C: V(G) \rightarrow \mathbb{N}$ that assigns each node in the graph a color (here a positive integer). Further, a coloring $C$ induces a partition $P$ on the set of nodes, for which we define $C^{-1}$ being the function that maps each color $c \in \mathbb{N}$ to its class of nodes with $C^{-1}(c) = \{ v\in V(G) \mid C(v) = c\}$. In addition, we define $h_{G, C}$ as the histogram of graph $G$ with coloring $C$, that maps every color in the image of $C$ under $V(G)$ to the number of occurrences. In detail, $\forall c \in \mathbb{N}: h_{G, C}(c) := | \{ v \in V(G) \mid C(v) = c  \} | = | C^{-1}(c) |$
 
 \subsubsection{Permutation-invariance and -equivariance}
 We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 0$. $S_n$ consists of all permutations over these elements. Let $G$ be a graph with $V(G) = [n]$, applying a permutation $\pi \in S_n$ on $G$, is defined as $G_\pi := \pi \cdot G$ where $V(G_\pi) = \{\pi(1), \ldots, \pi(n) \}$ and $E(G_\pi) = \{ (\pi(v), \pi(u)) \mid (v,u) \in E(G)\}$. We will now introduce two key concepts for classifying functions on graphs.
@@ -116,20 +113,33 @@ where $\sigma$ is a non-linear element wise activation function; $W_{\text{merge
 
 
 \subsection{Important for later}
+
+\begin{definition}[Multilayer Perceptron]\label{def:mlp}
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
+    \begin{align*}
+        (\mlp)_{1}(v) &:= v\\
+        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
+    \end{align*}
+    where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
+    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) := (\mlp)_k(v)$.
+\end{definition}
+
 \begin{definition}[1-WL Relation]
     For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
 \end{definition}
 
 \begin{definition}[$\wldisc$]
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
+    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
 \end{definition}
 
 \begin{definition}[$\gapp$]
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\mathcal{X}^{n\times n}$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty := \sup_{G \in \mathcal{X}} |f(G) - h_{\cA,\epsilon}(G)| < \epsilon$
+    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty := \sup_{G \in \mathcal{X}} |f(G) - h_{\cA,\epsilon}(G)| < \epsilon$
 \end{definition}
 
-\section{Theorems}
-Throughout this thesis we will concentrate on a finite collection of finite graphs which we will denote with $\cX \subset \cG$.
+\section{Theoretical Connection}
+This section is the main part of our theoretical investigation of the two frameworks. We will present 4 intriguing theorems, which will be proven separately afterwards. These results will form the basis for the empirical part that follows. The first two theorems will establish an equivalence between the two frameworks when the set of graphs is finite. The last two theorems will go one step further and establish a connection for continuous graph features and prove a somewhat weaker connection between them.
+
+Throughout the first two theorems we will concentrate on a finite collection of finite graphs which we will denote with $\cX \subset \cG$.
 
 \begin{theorem}[Finite Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:1wl_in_gnn}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs, then $\cC$ is also computable by $\wlnn$.
@@ -138,7 +148,22 @@ Throughout this thesis we will concentrate on a finite collection of finite grap
 \begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:gnn_in_1wl}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$, then $\cC$ is also computable by GNNs.
 \end{theorem}
+With these, we showed the equivalence between both frameworks such that every function computed by $\wlnn$ is also computable by a GNN, and vice versa. Since, we can typically limit the set of graphs.
 
+Notice that, we didn't leverage any constraints on the format of graphs throughout the theorems and their corresponding proves, but rather kept it general. In order to investigate the relation between both frameworks for continuous features spaces, we will first introduce an encoding of graphs that will be used throughout the proof of both the following theorems.
+
+\begin{definition}
+    Let $K$ be an arbitrary continuous body, we decode graphs with $n$ nodes as a matrix $G \in K^{n \times n}$, where $G_{i,i}$ decode the node labels for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decode edge connectivity and corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric.
+\end{definition}
+
+
+\begin{theorem}[General Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:1wl_in_gnn_approximating}
+    Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is GNN-Approximating, than $\cC$ is also $\wldisc$.
+\end{theorem}
+
+\begin{theorem}[General Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:gnn_approximating_in_1wl}
+    Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is $\wldisc$, then $\cC$ is also GNN-Approximating.
+\end{theorem}
 
 \subsection{Proof of \cref{theorem:1wl_in_gnn}}
 We will prove \cref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \cref{lem:wl_disc_exists} we show the existence of a collection computed by $\wlnn$ that is 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
@@ -282,6 +307,17 @@ Let $n := \max \{ |V(G)| \mid G \in \cX \}$ be the maximum number of nodes of a 
 \end{align*}
 Here $h_{m,t}$ is a function that maps the tuples injectively to an integer of the set $\{ (t+1)\cdot m +1, \ldots, (t+2)\cdot m \}$. With this, we ensure that each layer, maps a tuple to a new, previously not used, color. Therefore, every layer of this GNN, computes a sinlge iteration of the $\wl$ algorithm. Further, since the $\wl$ algorithm converges after at most $|V(G)| =: n$ iterations, we set the number of layers to $n$.\todo{Frage im Allgemeinem: Soll ich hier lieber einen konstruktiven Beweis schreiben, oder langt so ein existenzieller Beweis?}
 \end{proof}
+
+\subsection{Proof of \cref{theorem:1wl_in_gnn_approximating}}
+OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm does not seem to work well over continuous graph features.
+
+\subsection{Proof of \cref{theorem:gnn_approximating_in_1wl}}
+\begin{proof}
+    Let $\cC$ be a collection of continues functions from $\knn$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \knn$ with $G_1 \not\wliso G_2$, then we define $f_{G_1}(G^*) = \min_{\pi \in S_n} d(G_1, \  \pi^T G^* \pi)$, where $d(\cdot, \ \cdot)$ is the euclidean distance between two matrices. Since $f_{G_1}$ is permutation invariant, we can construct a GNN with $0$ layers and $f_{G_1}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $f_{G_1}$ and consequently showing that the function is GNN computable.
+    We choose $\epsilon := \frac{1}{3} \cdot f_{G_1}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $f_{G_1}$ within $\epsilon$ accuracy. With this, we have a function that $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$. 
+\end{proof}
+
+
 
 
 

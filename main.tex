@@ -162,7 +162,7 @@ pdfcreator={pdflatex}
 % 1-WL+NN
 \newcommand{\wlnn}{\text{1-WL+NN}}
 \newcommand{\wliso}{\simeq_{\text{1WL}}}
-\newcommand{\xnn}{\mathcal{X}^{n \times n}}
+\newcommand{\knn}{K^{n \times n}}
 \newcommand{\gapp}{\text{GNN-Approximating}}
 \newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
 \newcommand{\wl}{\text{1-\!WL}}
@@ -182,8 +182,8 @@ pdfcreator={pdflatex}
 \recalctypearea
 \setcounter{Maxaffil}{2}
 
-\title{An In-Depth Analytical Framework for Investigating Representations learned by Graph Neural Networks\\
-\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science for the purpose of obtaining the academic degree of Bachelor of Sciences.}
+\title{A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm\\
+\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science approved for the purpose of obtaining the academic degree of Bachelor of Sciences.}
 }
 \author{\textbf{Eric Tillmann Bill}}
 \affil{\vspace{100pt}}
@@ -200,5 +200,7 @@ pdfcreator={pdflatex}
 \maketitle
 \tableofcontents
 \newpage
-
+\input{intro.tex}
+\input{related_work.tex}
 \input{part1.tex}
+\input{part2.tex}
