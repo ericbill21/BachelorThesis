@@ -21,7 +21,7 @@ We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 
 \end{definition}
 
 \subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
-The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section.
+The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section. \todo{Add the continues variant of the 1-WL by adding HASH functiions Morris: Faster kernel for graphs with continuous attributes via hashing}
 
 \subsubsection{The Weisfeiler-Leman graph coloring algorithm}
 The $\wl$ algorithm computes a node coloring of its input graph in each iteration. A color for a node is computed using only the coloring of its neighbors and the node itself. The algorithm will continue as long as it has not converged, and returns the final coloring of the graph.
@@ -91,7 +91,7 @@ A Graph Neural Network (GNN) is a composition of multiple layers, where each lay
 
 Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features.
 
-\begin{definition}[Graph Neural Network]
+\begin{definition}[Graph Neural Network]\label{def:gnn}
     Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ is represented by a function $f^{(t)}$ that works over the set of nodes $V(G)$. To begin with, we need a function $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$, that translates all labels into a vector representation. Further, for every $t > 0$, $f^{(t)}$ is of the format:
     \begin{align*}
     f^{(t)}(v) = f^{W_{1,t}}_{\text{merge}} (f^{(t-1)}(v), \  f^{W_{2,t}}_{\text{agg}}( \MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose )),
@@ -156,7 +156,7 @@ Throughout the first two theorems we will concentrate on a finite collection of 
 \begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:gnn_in_1wl}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$, then $\cC$ is also computable by GNNs.
 \end{theorem}
-With these, we showed the equivalence between both frameworks such that every function computed by $\wlnn$ is also computable by a GNN, and vice versa. Since, we can typically limit the set of graphs.
+With these, we showed the equivalence between both frameworks such that every function computed by $\wlnn$ is also computable by a GNN, and vice versa.
 
 Notice that, we didn't leverage any constraints on the format of graphs throughout the theorems and their corresponding proves, but rather kept it general. In order to investigate the relation between both frameworks for continuous features spaces, we will first introduce an encoding of graphs that will be used throughout the proof of both the following theorems.
 
@@ -165,11 +165,11 @@ Notice that, we didn't leverage any constraints on the format of graphs througho
 \end{definition}
 
 
-\begin{theorem}[General Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:1wl_in_gnn_approximating}
+\begin{theorem}[General Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:gnn_approximating_in_1wl}
     Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is GNN-Approximating, than $\cC$ is also $\wldisc$.
 \end{theorem}
 
-\begin{theorem}[General Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:gnn_approximating_in_1wl}
+\begin{theorem}[General Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn_approximating}
     Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is $\wldisc$, then $\cC$ is also GNN-Approximating.
 \end{theorem}
 
@@ -289,39 +289,20 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 \end{proof}
 
 \subsection{Proof of \cref{theorem:gnn_in_1wl}}
+In this section we will shortly prove the converse direction. However, the proof is not as interesting as the previous one, as it is mainly just a consequence of \cref{def:gnn} of GNNs.
 
-\begin{lemma}\label{lem:1wl_color_upper_bound}
-    Let $G$ be an arbitrary graph with $n := |V(G)|$ the number of nodes and $C$ a coloring of the graph $G$. Then the total number of possible tuples of the form:
-    \begin{equation*}
-        (C(v), \ \MSopen C(u) \mid u \in \cN(v) \MSclose),
-    \end{equation*}
-    for all $v \in V(G)$ can be upper bounded by
-    \begin{equation*}
-        n \cdot \sum_{i=0}^{n-1} \binom{n+i -1}{i}
-    \end{equation*}
-\end{lemma}
-\begin{proof}
-    Assume the above. For the first entry of the tuple, there exist at most $n$ different colors, since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that we can sum over each cardinality of a multiset over $n$ different colors. In the end, we simply combine both results by multiplying both together.
+\begin{proof}[Proof of \cref{theorem:gnn_in_1wl}]
+    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$. For any $\cB \in \cC$ we know, by using \cref{lem:wlnn_permutation_invariance} that $\cB$ is permutation invariant such that it qualifies as a $\textsf{READOUT}$ function for GNNs. By constructing a GNN with $0$ layers and $\textsf{READOUT}(\cdot) := \cB(\cdot)$, we obtain a function $\cA$ that is computed by this GNN. Moreover, $\cA$ is equivalent to $\cB$, proving that every function in $\cC$ is computable by GNNs.
 \end{proof}
-
-\begin{lemma}
-    Let $\cX$ be a finite collection of graphs. Then there exists a function $\cA$ computable by a GNN, that computes a coloring $C$ on input $G$, that is equivalent under automorphism to the final coloring $C'$ computed by the $\wl$ algorithm when applied on $G$. Formally, there exists an bijective function $\varphi: \Nb \rightarrow \Nb$, such that for every $c \in \Nb: |h_{G, C}(c)| = |h_{G, C'}(\varphi(c))|$
-\end{lemma}
-
-\begin{proof}
-Let $n := \max \{ |V(G)| \mid G \in \cX \}$ be the maximum number of nodes of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We construct the GNN with $n$ layers, where each layer $t > 0$ works as follows for any $v \in V(G)$:
-\begin{align*}
-    f^{(t)}(v) = h_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v) \MSclose).
-\end{align*}
-Here $h_{m,t}$ is a function that maps the tuples injectively to an integer of the set $\{ (t+1)\cdot m +1, \ldots, (t+2)\cdot m \}$. With this, we ensure that each layer, maps a tuple to a new, previously not used, color. Therefore, every layer of this GNN, computes a sinlge iteration of the $\wl$ algorithm. Further, since the $\wl$ algorithm converges after at most $|V(G)| =: n$ iterations, we set the number of layers to $n$.\todo{Frage im Allgemeinem: Soll ich hier lieber einen konstruktiven Beweis schreiben, oder langt so ein existenzieller Beweis?}
-\end{proof}
-
-\subsection{Proof of \cref{theorem:1wl_in_gnn_approximating}}
-OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm does not seem to work well over continuous graph features.
 
 \subsection{Proof of \cref{theorem:gnn_approximating_in_1wl}}
-\begin{proof}
-    Let $\cC$ be a collection of continues functions from $\knn$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \knn$ with $G_1 \not\wliso G_2$, then we define $f_{G_1}(G^*) = \min_{\pi \in S_n} d(G_1, \  \pi^T G^* \pi)$, where $d(\cdot, \ \cdot)$ is the euclidean distance between two matrices. Since $f_{G_1}$ is permutation invariant, we can construct a GNN with $0$ layers and $f_{G_1}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $f_{G_1}$ and consequently showing that the function is GNN computable.
+We took inspiration for this proof from the work of \cite{Chen2019}.
+
+\begin{proof}[Proof of \cref{theorem:gnn_approximating_in_1wl}]
+    Let $\cC$ be a collection of continues functions from $\knn$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \knn$ with $G_1 \not\wliso G_2$, then we define the function $f_{G_1}$ on input $G^* \in \cX$:
+    \begin{equation*}
+         f_{G_1}(G^*) = \min_{\pi \in S_n} d(G_1, \  \pi^T G^* \pi),
+    \end{equation*} where $d(\cdot, \ \cdot)$ is the euclidean distance between two matrices. Since $f_{G_1}$ is permutation invariant, we can construct a GNN with $0$ layers and $f_{G_1}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $f_{G_1}$ and consequently showing that the function is GNN computable.
     We choose $\epsilon := \frac{1}{2} \cdot f_{G_1}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $f_{G_1}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
     \begin{align*}
         | h_\epsilon(G_1) - h_\epsilon(G_2)| &> | (f_{G_1}(G_1) - \epsilon) - (f_{G_1}(G_2) + \epsilon)|\\
@@ -329,4 +310,57 @@ OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm 
         &= |f_{G_1}(G_2) -2 \cdot \frac{1}{2} \cdot f_{G_1}(G_2)| = 0.\\
     \end{align*}
 \end{proof}
+
+\newpage
+\subsection{Proof of \cref{theorem:1wl_in_gnn_approximating}}
+OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm does not seem to work well over continuous graph features.
+
+\begin{lemma}
+    Let $\cC$ be a collection of continuous functions from $\cG$ to $\Rb$ computable by $\wlnn$. If $\cC$ is 1-\!WL-Discriminating, then for any chosen graph $G^* \in \cG$ and any $\epsilon \in \Rb$ with $\epsilon > $, the function $h_{G^*}$ from $\cG$ to $\Rb$ with the following properties:
+    \begin{enumerate}
+        \item For all $G \in \cG:  h_{G^*}(G) \geq 0$.
+        \item For all $G \in \cG$ with $G \wliso G^*: h_{G^*}(G)=0$.
+        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cG$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a permutation $\pi \in S_n$ such that $\| \pi^t G \pi - G^* \|_2 < \epsilon$
+    \end{enumerate}
+\end{lemma}
+
+One can interpret this function $h_{G^*}$ as a kind of loss function, yielding no loss on input $G$ if $G$ is not distinguishable by the $\wl$ algorithm from $G^*$ ($G \wliso G^*$), only a small loss if $G$ is close to $G^*$ (the loss is upper bounded by $\delta_{G^*}$), and a large loss otherwise (loss greater or equal than $\delta_{G^*}$).
+
+\begin{proof}
+    Let $G^* \in \cG$ be fixed and $\epsilon > 0$ be given. Since $\cC$ is 1-\!WL-Discriminating, we know that for every $G \in \cG$ with $G^* \not\wliso G$, there exists a function $h_{G, G^*} \in \cC$ such that $h_{G, G^*}(G) \neq h_{G, G^*}(G^*)$. We use this property and construct for each $G \in \cG$ with $G^* \not\wliso G$ a set $A_{G, G^*}$ as follows:
+    \begin{equation*}
+        A_{G, G^*} := \{ G' \in \cG \mid h_{G, G^*}(G') \in (h_{G, G^*}(G) \pm \frac{|h_{G, G^*}(G) - h_{G, G^*}(G^*)|}{2})\}.
+    \end{equation*}
+    One can use the illustration below for a better understanding, when a graph $G'$ is contained in $A_{G, G^*}$ and when not. Also one can easily see, that $G \in A_{G, G^*}$ and $G^* \not\in A_{G, G^*}$.
+
+    \includegraphics[width=\textwidth]{proof idea.jpeg}
+
+   Furthermore, by assumption $h_{G, G^*}$ is continuous, $A_{G, G^*}$ is an open set. For every $G \in \cG$ with $G \wliso G^*$ we define $A_{G, G^*}$ as follows:
+    \begin{equation*}
+        A_{G, G^*} := \{ G' \in \cG \mid \| G' - G \|_2 < \epsilon\},
+    \end{equation*}
+    where $\|\cdot\|_2$ is the $l_p$ norm with $p=2$.
+
+    Thus $\{ A_{G, G^*} \}_{G \in \cG}$ is an open cover of $\cG$. Since $\cG$ is compact, there exists a finite subset $\cG_0$ such that $\{ A_{G, G^*} \}_{G \in \cG_0}$ also covers $\cG$. Hence, $\forall G \in \cG \exists G_0 \in \cG_0: G \in A_{G_0, G^*}$.
+
+
+    We define the desired function $h_{G^*}$ on input $G \in \cG$ as follows:
+    \begin{equation*}
+        h_{G^*}(G) = \sum_{G_0 \in \cG_0 \setminus \cX/\!{\wliso}(G^*)} \overline{h}_{G_0, G^*},
+    \end{equation*}
+    where we define $\overline{h}_{G_0, G^*}$ almost exactly the same as in the previous proof:
+    \begin{align*}
+        \overline{h}_{G_0, G^*}(\cdot) &= |h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)| \\
+        &= \max(h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)) + \max(h_{G_0, G^*}(G^*) - h_{G_0, G^*}(\cdot))
+    \end{align*}
+
+    We will shortly proof, that $h_{G^*}$ fulfills the desired properties:
+    \begin{enumerate}
+        \item By construction, any $\overline{h}_{G_0, G^*}$ is non-negative, such that the sum over these functions is also non-negative.
+        \item If $G \wliso G^*$, using \cref{lem:wl_relation_equivalence} we know that $h_{G^*}(G) = h_{G^*}(G^*)$, and by definition $h_{G^*}(G^*) = 0$, such that we can conclude $h_{G^*}(G)=0$.
+        \item Let $\delta_{G^*} := \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)|$. Prove by contraposition,  assume that for every permutation $\pi \in S_n$ such that $\| \pi^t G \pi - G^* \|_2 \geq \epsilon$. Then we know that no graph $G'$ in the equivalence class $G' \in \cX/\!{\wliso}(G)$ of $G$ is the $l_2$ epsilon ball arround $G^*$.\todo{Probably rewrite the $\pi^t G \pi$ term to an $\wliso$ term}.
+    \end{enumerate}
+
+\end{proof}
+
 \newpage
