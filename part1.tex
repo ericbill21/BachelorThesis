@@ -395,13 +395,27 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
 \end{lemma}
 
 \begin{proof}
-    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is even uniformaly continuous on $\cG$. This implies that $\forall \epsilon > 0 \exists \delta > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 |\_2 < \delta$, then $|f(G_1) - f(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 |\_2 < \delta$ exists, than $|f(G_1) - f(G_2)| < \epsilon$.\todo{Somehow talk about the not being better at distinguishing graphs!}
+    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is even uniformaly continuous on $\cG$. This implies that $\forall \epsilon > 0 \exists \delta > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 |\_2 < \delta$, then $|f(G_1) - f(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|\_2 < \delta$ exists, than $|f(G_1) - f(G_2)| < \epsilon$.\todo{Somehow talk about the not being better at distinguishing graphs!}
 
     Given any $G \in \cG$. By assumption, we know that $h_{G} \in \cC$ exists. We define the set $B_{G, a} := \{ G' \in \cG \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
     \begin{equation*}
-        B_{G, \delta_G} \subseteq \bigcup_{G' \in \cG, \ G' \wliso G} \{ G'' \in \cG \mid \| G'' - G' |\_2 < r \}.
+        B_{G, \delta_G} \subseteq \bigcup_{G' \in \cG, \ G' \wliso G} \{ G'' \in \cG \mid \| G'' - G' \|\_2 < r \}.
     \end{equation*}
-    
+    Hence, we know that $\{ B_{G, a} \}_{G \in \cG}$ is an oper cover of $\cG$.
+    Because $\cG$ is compact, there exists a finite subset $G_0 \subseteq \cG$ such that $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ also covers $\cG$.
+
+    For each $G_0 \in \cG_0$, we construct the function $\varphi_{G_0}$ on $\cG$ as follows:
+    \begin{equation*}
+        \varphi_{G_0} (\cdot) := \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
+    \end{equation*}
+    The function has two important properties, for once it is non-negative and for any $G \in \cG: \varphi_{G_0}(G) = 0$ if and only if $G \in B_{G_0, \delta_{G_0}}$.
+
+    Further, using $\varphi_{G_0}$ we construct for each $G_0 \in \cG_0$ the function $\varphi_{G_0}$ on $\cG$ as follows:
+    \begin{equation*}
+        \psi_{G_0}(\cdot) := \frac{\varphi_{G_0(\cdot)}}{\sum_{G' \in G_0} \varphi_{G'}(\cdot)},
+    \end{equation*}
+    which is well-defined, since $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is a cover of $\cG$, we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a $G_0 \in \cG_0$ such that $\varphi_{G_0}(G) > 0$ making the denominator not $0$.
+
 \end{proof}
 
 \newpage
