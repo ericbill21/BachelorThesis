@@ -335,7 +335,12 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
     \end{equation*}
     One can use the illustration below for a better understanding, when a graph $G'$ is contained in $A_{G, G^*}$ and when not. Also one can easily see, that $G \in A_{G, G^*}$ and $G^* \not\in A_{G, G^*}$.
 
-    \includegraphics[width=\textwidth]{proof idea.jpeg}
+    \begin{figure}[H]
+        \centering
+        \input{Figures/proof_continuous1.tex}
+        \caption{An illustration to better understand the proof. The set $A_{G, G^*}$ consists of all graphs $G$ that are mapped by $h_{G, G^*}$ into the pink area, which size depends on the distance between the image of $G$ and $G^*$ under $h_{G, G^*}$. In detail, the blue distance all have the same length.}
+        \label{fig:proof_continous1}
+    \end{figure}
 
    Furthermore, by assumption $h_{G, G^*}$ is continuous, $A_{G, G^*}$ is an open set. For every $G \in \cG$ with $G \wliso G^*$ we define $A_{G, G^*}$ as follows:
     \begin{equation*}
@@ -375,7 +380,14 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=\textwidth]{proof idea2.jpeg}
+            \begin{subfigure}{0.45\textwidth}
+                \centering
+                \input{Figures/proof_continuous2.tex}        
+            \end{subfigure}
+            \begin{subfigure}{0.45\textwidth}
+                \centering
+                \input{Figures/proof_continuous3.tex}        
+            \end{subfigure}
             \caption{An illustration to better understand the above proof. Since we are using the absolute function to measure the distance, we do not need to illustrate all possible case scenarios, since they are symmetric to one of those already shown. In the table below, you find a legend, explaining which color represents which term.}
             \begin{tabular}{ c | c }
                 Color & Term \\
@@ -395,27 +407,49 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
 \end{lemma}
 
 \begin{proof}
-    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is even uniformaly continuous on $\cG$. This implies that $\forall \epsilon > 0 \exists \delta > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 |\_2 < \delta$, then $|f(G_1) - f(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|\_2 < \delta$ exists, than $|f(G_1) - f(G_2)| < \epsilon$.\todo{Somehow talk about the not being better at distinguishing graphs!}
+    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is uniformaly continuous on $\cG$, which further implies that $\forall \epsilon > 0 \exists r > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 \|_2 < r$, then $|\cA(G_1) - \cA(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G_1 \wliso G_2: \cA(G_1) = \cA(G_2)$, hence if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|_2 < r$ exists, than $|\cA(G_1) - \cA(G_2)| < \epsilon$.\newline
 
-    Given any $G \in \cG$. By assumption, we know that $h_{G} \in \cC$ exists. We define the set $B_{G, a} := \{ G' \in \cG \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
+    Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cG$ with the above described properties. We choose $\epsilon' := r$ for all $h_{G} \in \cC$ throughout the proof.\newline
+
+    For any $G \in \cG$, we define the set $B_{G, a} := \{ G' \in \cG \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
     \begin{equation*}
-        B_{G, \delta_G} \subseteq \bigcup_{G' \in \cG, \ G' \wliso G} \{ G'' \in \cG \mid \| G'' - G' \|\_2 < r \}.
+        B_{G, \delta_G} \subseteq \bigcup_{G'\in \cX/\!{\wliso}(G)} \{ G'' \in \cG \mid \| G'' - G' \|_2 < r \}.
     \end{equation*}
-    Hence, we know that $\{ B_{G, a} \}_{G \in \cG}$ is an oper cover of $\cG$.
-    Because $\cG$ is compact, there exists a finite subset $G_0 \subseteq \cG$ such that $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ also covers $\cG$.
-
-    For each $G_0 \in \cG_0$, we construct the function $\varphi_{G_0}$ on $\cG$ as follows:
+    Since $h_G$ is continuous by definition, $B_{G, \delta_G}$ is an open set. Hence, $\{ B_{G, a} \}_{G \in \cG}$ is an open cover of $\cG$, and further as $\cG$ is compact, there exists a finite subset $G_0 \subseteq \cG$ such that $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is also a cover of $\cG$. For each $G_0 \in \cG_0$, we construct the function $\varphi_{G_0}$ on $\cG$ as follows:
     \begin{equation*}
         \varphi_{G_0} (\cdot) := \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
     \end{equation*}
-    The function has two important properties, for once it is non-negative and for any $G \in \cG: \varphi_{G_0}(G) = 0$ if and only if $G \in B_{G_0, \delta_{G_0}}$.
-
-    Further, using $\varphi_{G_0}$ we construct for each $G_0 \in \cG_0$ the function $\varphi_{G_0}$ on $\cG$ as follows:
+    The function has two important properties, for once it is non-negative and for any $G \in \cG: \varphi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$, thereby acting as a sort of weak indicator function. Building up on this property, we construct for each $G_0 \in \cG_0$ the function $\psi_{G_0}$ on $\cG$ as follows:
     \begin{equation*}
         \psi_{G_0}(\cdot) := \frac{\varphi_{G_0(\cdot)}}{\sum_{G' \in G_0} \varphi_{G'}(\cdot)},
     \end{equation*}
-    which is well-defined, since $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is a cover of $\cG$, we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a $G_0 \in \cG_0$ such that $\varphi_{G_0}(G) > 0$ making the denominator not $0$.
+    which is well-defined, because $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is a cover of $\cG$, such that we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a $B_{G_0, \delta_{G_0}}$ with $G \in B_{G_0, \delta_{G_0}}$ implying $\varphi_{G_0}(G) > 0$, making the denominator not $0$. The function $\psi_{G_0}$ has two important properties, for once it is non-negative, because $\varphi_{G}$ for all $G \in \cG$ is non-negative, and for any $G \in \cG: \psi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$.
 
+    Further, we can observe that the set of functions $\{ \psi_{G_0}\}_{G_0 \in \cG_0}$ is a partition of unity on $\cG$ with respect to the open cover $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$, because:
+    \begin{enumerate}
+        \item For any $G \in \cG$ the set of functions mapping $G$ not to $0$ is finite, as the set of all functions $\{ \psi_{G_0}\}_{G_0 \in \cG_0}$ is finite.
+        \item For any $G \in \cG: \sum_{G_0 \in \cG_0} \psi_{G_0}(G) = 1$, since: \begin{align*}
+            \sum_{G_0 \in \cG_0} \psi_{G_0}(G) = \sum_{G_0 \in \cG_0} \frac{\varphi_{G_0(G)}}{\sum_{G' \in \cG_0} \varphi_{G'}(G)} = \frac{\sum_{G_0 \in \cG_0} \varphi_{G_0(G)}}{\sum_{G' \in \cG_0} \varphi_{G'}(G)}= 1.
+        \end{align*}
+    \end{enumerate}
+    We can use this property to decompose the given function $\cA$ as follows on any input $G \in \cG$:
+    \begin{equation*}
+        \cA(G) = \cA(G) \cdot \Bigl( \sum_{G_0 \in \cG_0} \psi_{G_0}(G) \Bigr) = \sum_{G_0 \in \cG_0} \cA(G) \cdot \psi_{G_0}(G) 
+    \end{equation*}
+    Recall the property from the beginning of the proof that for any $G \in \cG$ if $G \in B_{G_0, \delta{G_0}}$, then there exists a $G' \in \cX/\!{\wliso}(G)$ with $\| G' - G_0 \|_2 < r$, which implies that $|\cA(G) - \cA(G_0)| < \epsilon$. With this, we can construct a function $\hat{\cA}$ on $\cG$ that approximates $\cA$ within accuracy $\epsilon$:
+    \begin{equation*}
+        \hat{\cA}(\cdot) = \sum_{G_0 \in \cG_0} \cA(G_0) \cdot \psi_{G_0}(\cdot).
+    \end{equation*}
+    Note that, ``$\cA(G_0)$'' is a constant here.
+    To prove that $\hat{\cA}$ approximates $\cA$ within accuracy $\epsilon$ we need to show that $\sup_{G \in \cG} |\cA(G) - \hat{\cA}(G) | < \epsilon$. Let $G \in \cG$ be arbitrary, then:
+    \begin{align*}
+        |\cA(G) - \hat{\cA}(G) | &= \Big|\sum_{G_0 \in \cG_0} \cA(G) \cdot \psi_{G_0}(G) - \sum_{G_0 \in \cG_0} \cA(G_0) \cdot \psi_{G_0}(G)\Big|\\
+        &= \sum_{G_0 \in \cG_0} |\cA(G) - \cA(G_0) | \cdot \psi_{G_0}(G)\\
+        &\leq \sum_{\substack{G_0 \in \cG_0\\G' \in B_{G_0, \delta_{G_0}}}}|\cA(G') - \cA(G_0) | \cdot \psi_{G_0}(G')\\
+        &= \sum_{\substack{G_0 \in \cG_0\\G' \in B_{G_0, \delta_{G_0}}}} \epsilon \cdot \psi_{G_0}(G)\\
+        &< \epsilon
+    \end{align*}
+    
 \end{proof}
 
 \newpage

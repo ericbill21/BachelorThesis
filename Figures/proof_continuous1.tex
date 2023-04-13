@@ -1,0 +1,29 @@
+\begin{tikzpicture}[scale=2.5]
+
+    %yellow box
+    \filldraw[magenta!40] (0.0 ,0.05) rectangle (1.0 ,-0.05);
+
+    % Baseline
+    \draw[-{Latex[length=3mm, width=3mm]}] (-0.5,0) -- (2.5,0);
+
+    \draw (0.5 ,0.2) node {$h_{G,G^*}(G)$};
+    \draw (0.5 ,0.1) -- (0.5,-0.1);
+
+    % Interval
+    \draw (0.0 ,0.0) node {(};
+    \draw (1.0 ,0.0) node {)};
+
+
+    \draw (1.5, 0.2) node {$h_{G,G^*}(G*)$};
+    \draw (1.5, 0.1) -- (1.5,-0.1);
+
+    \draw (2.4, 0.2) node {$\Rb$};
+
+    %Blue lines
+    \draw[color=blue, line width=0.3mm] (0,-0.225) -- (1.5,-0.225);
+    \draw[color=blue, line width=0.3mm] (0, -0.15) -- (0,-0.3);
+    \draw[color=blue, line width=0.5mm] (0.5, -0.15) -- (0.5,-0.3);
+    \draw[color=blue, line width=0.5mm] (1.0, -0.15) -- (1,-0.3);
+    \draw[color=blue, line width=0.3mm] (1.5, -0.15) -- (1.5,-0.3);
+
+\end{tikzpicture}
