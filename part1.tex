@@ -136,6 +136,8 @@ In this section, we introduce a formal definition of multilayer perceptron as it
     For any graphs $G,H$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
 \end{definition}
 
+The $\wliso$ relation can further be classified as an equivalence relation, as it is reflexive, symmetric and transitive. With this, we introduce a notation of its equivalence classes. Let $G \in \cG$, then we denote with $\cG/\!{\wliso}(G): = \{ G' \in \cG \mid G \wliso G' \}$ its equivalence class.
+
 \begin{definition}[$\wldisc$]
     Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $f(G_1) \neq f(G_2)$.
 \end{definition}
@@ -320,11 +322,11 @@ OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm 
     \begin{enumerate}
         \item For all $G \in \cG:  h_{G^*}(G) \geq 0$.
         \item For all $G \in \cG$ with $G \wliso G^*: h_{G^*}(G)=0$.
-        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cG$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a permutation $\pi \in S_n$ such that $\| \pi^t G \pi - G^* \|_2 < \epsilon$
+        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cG$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$ such that $\| G' - G^* \|_2 < \epsilon$
     \end{enumerate}
 \end{lemma}
 
-One can interpret this function $h_{G^*}$ as a kind of loss function, yielding no loss on input $G$ if $G$ is not distinguishable by the $\wl$ algorithm from $G^*$ ($G \wliso G^*$), only a small loss if $G$ is close to $G^*$ (the loss is upper bounded by $\delta_{G^*}$), and a large loss otherwise (loss greater or equal than $\delta_{G^*}$).
+One can interpret this function $h_{G^*}$ as a kind of loss function, yielding no loss on input $G$ if $G$ is not distinguishable by the $\wl$ algorithm from $G^*$ ($G \wliso G^*$), only a small loss then $G$ is close to $G^*$ (the loss is upper bounded by $\delta_{G^*}$), and a large loss otherwise.
 
 \begin{proof}
     Let $G^* \in \cG$ be fixed and $\epsilon > 0$ be given. Since $\cC$ is 1-\!WL-Discriminating, we know that for every $G \in \cG$ with $G^* \not\wliso G$, there exists a function $h_{G, G^*} \in \cC$ such that $h_{G, G^*}(G) \neq h_{G, G^*}(G^*)$. We use this property and construct for each $G \in \cG$ with $G^* \not\wliso G$ a set $A_{G, G^*}$ as follows:
@@ -358,9 +360,48 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
     \begin{enumerate}
         \item By construction, any $\overline{h}_{G_0, G^*}$ is non-negative, such that the sum over these functions is also non-negative.
         \item If $G \wliso G^*$, using \cref{lem:wl_relation_equivalence} we know that $h_{G^*}(G) = h_{G^*}(G^*)$, and by definition $h_{G^*}(G^*) = 0$, such that we can conclude $h_{G^*}(G)=0$.
-        \item Let $\delta_{G^*} := \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)|$. Prove by contraposition,  assume that for every permutation $\pi \in S_n$ such that $\| \pi^t G \pi - G^* \|_2 \geq \epsilon$. Then we know that no graph $G'$ in the equivalence class $G' \in \cX/\!{\wliso}(G)$ of $G$ is the $l_2$ epsilon ball arround $G^*$.\todo{Probably rewrite the $\pi^t G \pi$ term to an $\wliso$ term}.
+        \item Let $\delta_{G^*} := \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|$. Prove by contraposition,  assume that for every graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$, $\| G' - G^* \|_2 \geq \epsilon$. Hence, $G \not\in \bigcup_{G' \in \cX/\!{\wliso}(G)} A_{G', G^*}$ (not in the union of $l_2$ balls of size $\epsilon$ around graphs of the equivalence class of $G^*$). However, since $\{ A_{G, G^*} \}_{G \in \cG_0}$ is a cover of $\cG$, there must exist a $G_0 \in \cG_0$ with $G_0 \not\wliso G^*$ such that $G \in A_{G_0, G^*}$. Thus, by definition of $A_{G_0, G^*}$ we know that $h_{G_0, G^*}(G) \in (h_{G_0, G^*}(G_0) \pm \frac{|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|}{2})$, which when reformulated states:
+        \begin{equation}\label{eq:continous_proof3}
+             |h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)| < \frac{1}{2}|h_{G_0, G_0}(G) - h_{G_0, G^*}(G^*)|
+        \end{equation}
+        With this property we can prove $\overline{h}_{G_0, G^*}(G) \leq \delta_{G^*}$:
+        \begin{align}
+            \overline{h}_{G_0, G^*}(G) &= |h_{G_0, G^*}(G) - h_{G_0, G^*}(G^*)| \nonumber \\
+            &\geq |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)| - |h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)|\label{eq:continous_proof1}\\
+            &\geq \frac{1}{2} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|\label{eq:continous_proof2}\\
+            &\geq \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)| =: \delta_{G^*} \nonumber
+        \end{align}
+        To understand these inequalities, it helps to visualize them, see therefor \autoref{fig:proof_support}. Further, by using \autoref{eq:continous_proof3}, we know that the blue segment is always small than half of the green segment. Then one can easily see that for the inequality used in \autoref{eq:continous_proof1}, that the green minus the blue segment is always smaller than the yellow segment. And for  \autoref{eq:continous_proof2}, since we know that the blue segment is at most half the green segment, we can lower bound their difference by half the green segment.
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=\textwidth]{proof idea2.jpeg}
+            \caption{An illustration to better understand the above proof. Since we are using the absolute function to measure the distance, we do not need to illustrate all possible case scenarios, since they are symmetric to one of those already shown. In the table below, you find a legend, explaining which color represents which term.}
+            \begin{tabular}{ c | c }
+                Color & Term \\
+                \hline
+                yellow  & $|h_{G_0, G^*}(G) - h_{G_0, G^*}(G^*)|$\\
+                green & $|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|$\\ 
+                blue & $|h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)|$\\
+            \end{tabular}
+            \label{fig:proof_support}
+        \end{figure}
     \end{enumerate}
 
+\end{proof}
+
+\begin{lemma}
+    Ich hab angst.
+\end{lemma}
+
+\begin{proof}
+    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is even uniformaly continuous on $\cG$. This implies that $\forall \epsilon > 0 \exists \delta > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 |\_2 < \delta$, then $|f(G_1) - f(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 |\_2 < \delta$ exists, than $|f(G_1) - f(G_2)| < \epsilon$.\todo{Somehow talk about the not being better at distinguishing graphs!}
+
+    Given any $G \in \cG$. By assumption, we know that $h_{G} \in \cC$ exists. We define the set $B_{G, a} := \{ G' \in \cG \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
+    \begin{equation*}
+        B_{G, \delta_G} \subseteq \bigcup_{G' \in \cG, \ G' \wliso G} \{ G'' \in \cG \mid \| G'' - G' |\_2 < r \}.
+    \end{equation*}
+    
 \end{proof}
 
 \newpage
