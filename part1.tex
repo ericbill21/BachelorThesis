@@ -163,16 +163,16 @@ With these, we showed the equivalence between both frameworks such that every fu
 Notice that, we didn't leverage any constraints on the format of graphs throughout the theorems and their corresponding proves, but rather kept it general. In order to investigate the relation between both frameworks for continuous features spaces, we will first introduce an encoding of graphs that will be used throughout the proof of both the following theorems.
 
 \begin{definition}
-    Let $K$ be an arbitrary continuous body, we decode graphs with $n$ nodes as a matrix $G \in K^{n \times n}$, where $G_{i,i}$ decode the node labels for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decode edge connectivity and corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric.
+    Let $X$ be a compact subset of $\Rb$, we decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decode the node labels for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decode edge connectivity and corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric. For simplicity, we denote $\cX := X^{n \times n}$ throughout the next two theorems and their respective proofs.
 \end{definition}
 
 
 \begin{theorem}[General Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:gnn_approximating_in_1wl}
-    Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is GNN-Approximating, than $\cC$ is also $\wldisc$.
+    Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ that is GNN-Approximating, then $\cC$ is also $\wldisc$.
 \end{theorem}
 
 \begin{theorem}[General Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn_approximating}
-    Let $\cC$ be a collection of functions from $\knn$ to $\Rb$ that is $\wldisc$, then $\cC$ is also GNN-Approximating.
+    Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ that is $\wldisc$, then $\cC$ is also GNN-Approximating.
 \end{theorem}
 
 \subsection{Proof of \cref{theorem:1wl_in_gnn}}
@@ -313,25 +313,24 @@ We took inspiration for this proof from the work of \cite{Chen2019}.
     \end{align*}
 \end{proof}
 
-\newpage
 \subsection{Proof of \cref{theorem:1wl_in_gnn_approximating}}
 OPEN FOR NOW: Can $\wlnn$ even compute continuous functions? The $wl$ algorithm does not seem to work well over continuous graph features.
 
 \begin{lemma}
-    Let $\cC$ be a collection of continuous functions from $\cG$ to $\Rb$ computable by $\wlnn$. If $\cC$ is 1-\!WL-Discriminating, then for any chosen graph $G^* \in \cG$ and any $\epsilon \in \Rb$ with $\epsilon > $, the function $h_{G^*}$ from $\cG$ to $\Rb$ with the following properties:
+    Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$. If $\cC$ is 1-\!WL-Discriminating, then for any chosen graph $G^* \in \cX$ and any $\epsilon \in \Rb$ with $\epsilon > $, the function $h_{G^*}$ from $\cX$ to $\Rb$ with the following properties:
     \begin{enumerate}
-        \item For all $G \in \cG:  h_{G^*}(G) \geq 0$.
-        \item For all $G \in \cG$ with $G \wliso G^*: h_{G^*}(G)=0$.
-        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cG$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$ such that $\| G' - G^* \|_2 < \epsilon$
+        \item For all $G \in \cX:  h_{G^*}(G) \geq 0$.
+        \item For all $G \in \cX$ with $G \wliso G^*: h_{G^*}(G)=0$.
+        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cX$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$ such that $\| G' - G^* \|_2 < \epsilon$
     \end{enumerate}
 \end{lemma}
 
-One can interpret this function $h_{G^*}$ as a kind of loss function, yielding no loss on input $G$ if $G$ is not distinguishable by the $\wl$ algorithm from $G^*$ ($G \wliso G^*$), only a small loss then $G$ is close to $G^*$ (the loss is upper bounded by $\delta_{G^*}$), and a large loss otherwise.
+One can interpret this function $h_{G^*}$ as a kind of loss function that measures the similarity between two graphs. It yields no loss for the input $G$ if $G$ is indistinguishable from $G^*$ by the algorithm $\wl$ ($G \wliso G^*$), only a small loss if $G$ is close to $G^*$ (the loss is upper bounded by $\delta_{G^*}$), and a large loss otherwise.
 
 \begin{proof}
-    Let $G^* \in \cG$ be fixed and $\epsilon > 0$ be given. Since $\cC$ is 1-\!WL-Discriminating, we know that for every $G \in \cG$ with $G^* \not\wliso G$, there exists a function $h_{G, G^*} \in \cC$ such that $h_{G, G^*}(G) \neq h_{G, G^*}(G^*)$. We use this property and construct for each $G \in \cG$ with $G^* \not\wliso G$ a set $A_{G, G^*}$ as follows:
+    Let $G^* \in \cX$ be fixed and $\epsilon > 0$ be given. Since $\cC$ is 1-\!WL-Discriminating, we know that for every $G \in \cX$ with $G^* \not\wliso G$, there exists a function $h_{G, G^*} \in \cC$ such that $h_{G, G^*}(G) \neq h_{G, G^*}(G^*)$. We use this property and construct for each $G \in \cX$ with $G^* \not\wliso G$ a set $A_{G, G^*}$ as follows:
     \begin{equation*}
-        A_{G, G^*} := \{ G' \in \cG \mid h_{G, G^*}(G') \in (h_{G, G^*}(G) \pm \frac{|h_{G, G^*}(G) - h_{G, G^*}(G^*)|}{2})\}.
+        A_{G, G^*} := \{ G' \in \cX \mid h_{G, G^*}(G') \in (h_{G, G^*}(G) \pm \frac{|h_{G, G^*}(G) - h_{G, G^*}(G^*)|}{2})\}.
     \end{equation*}
     One can use the illustration below for a better understanding, when a graph $G'$ is contained in $A_{G, G^*}$ and when not. Also one can easily see, that $G \in A_{G, G^*}$ and $G^* \not\in A_{G, G^*}$.
 
@@ -342,30 +341,30 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
         \label{fig:proof_continous1}
     \end{figure}
 
-   Furthermore, by assumption $h_{G, G^*}$ is continuous, $A_{G, G^*}$ is an open set. For every $G \in \cG$ with $G \wliso G^*$ we define $A_{G, G^*}$ as follows:
+   Furthermore, by assumption $h_{G, G^*}$ is continuous, $A_{G, G^*}$ is an open set. For every $G \in \cX$ with $G \wliso G^*$ we define $A_{G, G^*}$ as follows:
     \begin{equation*}
-        A_{G, G^*} := \{ G' \in \cG \mid \| G' - G \|_2 < \epsilon\},
+        A_{G, G^*} := \{ G' \in \cX \mid \| G' - G \|_2 < \epsilon\},
     \end{equation*}
     where $\|\cdot\|_2$ is the $l_p$ norm with $p=2$.
 
-    Thus $\{ A_{G, G^*} \}_{G \in \cG}$ is an open cover of $\cG$. Since $\cG$ is compact, there exists a finite subset $\cG_0$ such that $\{ A_{G, G^*} \}_{G \in \cG_0}$ also covers $\cG$. Hence, $\forall G \in \cG \exists G_0 \in \cG_0: G \in A_{G_0, G^*}$.
+    Thus $\{ A_{G, G^*} \}_{G \in \cX}$ is an open cover of $\cX$. Since $\cX$ is compact, there exists a finite subset $\cX_0$ such that $\{ A_{G, G^*} \}_{G \in \cX_0}$ also covers $\cX$. Hence, $\forall G \in \cX \exists G_0 \in \cX_0: G \in A_{G_0, G^*}$.
 
 
-    We define the desired function $h_{G^*}$ on input $G \in \cG$ as follows:
-    \begin{equation*}
-        h_{G^*}(G) = \sum_{G_0 \in \cG_0 \setminus \cX/\!{\wliso}(G^*)} \overline{h}_{G_0, G^*},
-    \end{equation*}
+    We define the desired function $h_{G^*}$ on input $G \in \cX$ as follows:
+    \begin{equation}\label{eq:continous_proof4}
+        h_{G^*}(G) = \sum_{G_0 \in \cX_0 \setminus \cX/\!{\wliso}(G^*)} \overline{h}_{G_0, G^*},
+    \end{equation}
     where we define $\overline{h}_{G_0, G^*}$ almost exactly the same as in the previous proof:
-    \begin{align*}
+    \begin{align}
         \overline{h}_{G_0, G^*}(\cdot) &= |h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)| \\
-        &= \max(h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)) + \max(h_{G_0, G^*}(G^*) - h_{G_0, G^*}(\cdot))
-    \end{align*}
+        &= \max(h_{G_0, G^*}(\cdot) - h_{G_0, G^*}(G^*)) + \max(h_{G_0, G^*}(G^*) - h_{G_0, G^*}(\cdot))\label{eq:continous_proof5}
+    \end{align}
 
     We will shortly proof, that $h_{G^*}$ fulfills the desired properties:
     \begin{enumerate}
         \item By construction, any $\overline{h}_{G_0, G^*}$ is non-negative, such that the sum over these functions is also non-negative.
         \item If $G \wliso G^*$, using \cref{lem:wl_relation_equivalence} we know that $h_{G^*}(G) = h_{G^*}(G^*)$, and by definition $h_{G^*}(G^*) = 0$, such that we can conclude $h_{G^*}(G)=0$.
-        \item Let $\delta_{G^*} := \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|$. Prove by contraposition,  assume that for every graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$, $\| G' - G^* \|_2 \geq \epsilon$. Hence, $G \not\in \bigcup_{G' \in \cX/\!{\wliso}(G)} A_{G', G^*}$ (not in the union of $l_2$ balls of size $\epsilon$ around graphs of the equivalence class of $G^*$). However, since $\{ A_{G, G^*} \}_{G \in \cG_0}$ is a cover of $\cG$, there must exist a $G_0 \in \cG_0$ with $G_0 \not\wliso G^*$ such that $G \in A_{G_0, G^*}$. Thus, by definition of $A_{G_0, G^*}$ we know that $h_{G_0, G^*}(G) \in (h_{G_0, G^*}(G_0) \pm \frac{|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|}{2})$, which when reformulated states:
+        \item Let $\delta_{G^*} := \frac{1}{2} \min_{G_0 \in \cX \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|$. Prove by contraposition,  assume that for every graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$, $\| G' - G^* \|_2 \geq \epsilon$. Hence, $G \not\in \bigcup_{G' \in \cX/\!{\wliso}(G)} A_{G', G^*}$ (not in the union of $l_2$ balls of size $\epsilon$ around graphs of the equivalence class of $G^*$). However, since $\{ A_{G, G^*} \}_{G \in \cX_0}$ is a cover of $\cX$, there must exist a $G_0 \in \cX_0$ with $G_0 \not\wliso G^*$ such that $G \in A_{G_0, G^*}$. Thus, by definition of $A_{G_0, G^*}$ we know that $h_{G_0, G^*}(G) \in (h_{G_0, G^*}(G_0) \pm \frac{|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|}{2})$, which when reformulated states:
         \begin{equation}\label{eq:continous_proof3}
              |h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)| < \frac{1}{2}|h_{G_0, G_0}(G) - h_{G_0, G^*}(G^*)|
         \end{equation}
@@ -374,25 +373,27 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
             \overline{h}_{G_0, G^*}(G) &= |h_{G_0, G^*}(G) - h_{G_0, G^*}(G^*)| \nonumber \\
             &\geq |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)| - |h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)|\label{eq:continous_proof1}\\
             &\geq \frac{1}{2} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|\label{eq:continous_proof2}\\
-            &\geq \frac{1}{2} \min_{G_0 \in \cG \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)| =: \delta_{G^*} \nonumber
+            &\geq \frac{1}{2} \min_{G_0 \in \cX \setminus \cX/\!{\wliso}(G^*)} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)| =: \delta_{G^*} \nonumber
         \end{align}
-        To understand these inequalities, it helps to visualize them, see therefor \autoref{fig:proof_support}. Further, by using \autoref{eq:continous_proof3}, we know that the blue segment is always small than half of the green segment. Then one can easily see that for the inequality used in \autoref{eq:continous_proof1}, that the green minus the blue segment is always smaller than the yellow segment. And for  \autoref{eq:continous_proof2}, since we know that the blue segment is at most half the green segment, we can lower bound their difference by half the green segment.
+        To understand these inequalities, it helps to visualize them, see therefore \autoref{fig:proof_support}. We will try to give an explanation now, using the colored distances depicted in \autoref{fig:proof_support}. In \autoref{eq:continous_proof1}, we use the fact that the red distance is always greater than the green minus the blue distance. Further, using \autoref{eq:continous_proof3}, we know that the blue distance is always smaller than half of than the green distance. Using this fact, it is easy to see that in \autoref{eq:continous_proof2} the green minus the blue distance is always greater than or equal than the half of the green distance.
 
         \begin{figure}[H]
             \centering
             \begin{subfigure}{0.45\textwidth}
                 \centering
-                \input{Figures/proof_continuous2.tex}        
+                \input{Figures/proof_continuous2.tex}
+                \caption{Scenario 1}      
             \end{subfigure}
             \begin{subfigure}{0.45\textwidth}
                 \centering
-                \input{Figures/proof_continuous3.tex}        
+                \input{Figures/proof_continuous3.tex} 
+                \caption{Scenario 2}        
             \end{subfigure}
-            \caption{An illustration to better understand the above proof. Since we are using the absolute function to measure the distance, we do not need to illustrate all possible case scenarios, since they are symmetric to one of those already shown. In the table below, you find a legend, explaining which color represents which term.}
+            \caption{An illustration of two general scenarios to better understand the above used inequalities. Note that, there exists two more general scenarios, with $h_{G_0, G^*}(G^*) < h_{G_0, G^*}(G_0)$, but since we use the absolute function as our measure of distance, these scenarios are equivalent to the ones depicted due to the symmetry of the absolute function. In the table below, we listed all colors used to decode the distances in the figures with their corresponding term in the inequalities.}
             \begin{tabular}{ c | c }
                 Color & Term \\
                 \hline
-                yellow  & $|h_{G_0, G^*}(G) - h_{G_0, G^*}(G^*)|$\\
+                red  & $|h_{G_0, G^*}(G) - h_{G_0, G^*}(G^*)|$\\
                 green & $|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|$\\ 
                 blue & $|h_{G_0, G^*}(G) - h_{G_0, G^*}(G_0)|$\\
             \end{tabular}
@@ -400,54 +401,62 @@ One can interpret this function $h_{G^*}$ as a kind of loss function, yielding n
         \end{figure}
     \end{enumerate}
 
+    As a final note, the construction of $h_{G_0, G^*}(\cdot)$ shown in \autoref{eq:continous_proof4} can be encoded by a single layer multilayer perceptron, because the overall sum is finite as $\cX_0$ is finite, and each summand, defined as in \autoref{eq:continous_proof4}, can be encoded by replacing the $\max$ operator by the non-linear activation function ReLU.
+
 \end{proof}
 
 \begin{lemma}
-    Ich hab angst.
+    Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$. If for every $\epsilon > 0$ exists $h_{G^*} \in \cX$ for any graph $G^* \in \cX$ with the following properties:
+    \begin{enumerate}
+        \item For all $G \in \cX:  h_{G^*}(G) \geq 0$.
+        \item For all $G \in \cX$ with $G \wliso G^*: h_{G^*}(G)=0$.
+        \item There exists a constant $\delta_{G^*} > 0$, such that for all $G \in \cX$ with $h_{G^*}(G) < \delta_{G^*}$ there exists a graph $G' \in \cX/\!{\wliso}(G)$ in the equivalence class of $G$ such that $\| G' - G^* \|_2 < \epsilon$.
+    \end{enumerate}
+    Then $\cC$ is also GNN-Approximating.
 \end{lemma}
 
 \begin{proof}
-    Let $\cA$ be a continuous function from $\cG$ to $\Rb$ computable by a GNN. Since $\cG$ is compact, this implies that $\cA$ is uniformaly continuous on $\cG$, which further implies that $\forall \epsilon > 0 \exists r > 0$ such that $\forall G_1, G_2 \in \cG$, if $\| G_1 - G_2 \|_2 < r$, then $|\cA(G_1) - \cA(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cG$, if $G_1 \wliso G_2: \cA(G_1) = \cA(G_2)$, hence if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|_2 < r$ exists, than $|\cA(G_1) - \cA(G_2)| < \epsilon$.\newline
+    Let $\cA$ be a continuous function from $\cX$ to $\Rb$ computable by a GNN. Since $\cX$ is compact, this implies that $\cA$ is uniformaly continuous on $\cX$, which further implies that $\forall \epsilon > 0 \exists r > 0$ such that $\forall G_1, G_2 \in \cX$, if $\| G_1 - G_2 \|_2 < r$, then $|\cA(G_1) - \cA(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cX$, if $G_1 \wliso G_2: \cA(G_1) = \cA(G_2)$, hence if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|_2 < r$ exists, than $|\cA(G_1) - \cA(G_2)| < \epsilon$.\newline
 
-    Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cG$ with the above described properties. We choose $\epsilon' := r$ for all $h_{G} \in \cC$ throughout the proof.\newline
+    Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cX$ with the above described properties. We choose $\epsilon' := r$ for all $h_{G} \in \cC$ throughout the proof.\newline
 
-    For any $G \in \cG$, we define the set $B_{G, a} := \{ G' \in \cG \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
+    For any $G \in \cX$, we define the set $B_{G, a} := \{ G' \in \cX \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. Then, by definition of $h_G$, there exists a constant $\delta_G$ such that:
     \begin{equation*}
-        B_{G, \delta_G} \subseteq \bigcup_{G'\in \cX/\!{\wliso}(G)} \{ G'' \in \cG \mid \| G'' - G' \|_2 < r \}.
+        B_{G, \delta_G} \subseteq \bigcup_{G'\in \cX/\!{\wliso}(G)} \{ G'' \in \cX \mid \| G'' - G' \|_2 < r \}.
     \end{equation*}
-    Since $h_G$ is continuous by definition, $B_{G, \delta_G}$ is an open set. Hence, $\{ B_{G, a} \}_{G \in \cG}$ is an open cover of $\cG$, and further as $\cG$ is compact, there exists a finite subset $G_0 \subseteq \cG$ such that $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is also a cover of $\cG$. For each $G_0 \in \cG_0$, we construct the function $\varphi_{G_0}$ on $\cG$ as follows:
+    Since $h_G$ is continuous by definition, $B_{G, \delta_G}$ is an open set. Hence, $\{ B_{G, a} \}_{G \in \cX}$ is an open cover of $\cX$, and further as $\cX$ is compact, there exists a finite subset $G_0 \subseteq \cX$ such that $\{ B_{G_0, a} \}_{G_0 \in \cX_0}$ is also a cover of $\cX$. For each $G_0 \in \cX_0$, we construct the function $\varphi_{G_0}$ on $\cX$ as follows:
     \begin{equation*}
         \varphi_{G_0} (\cdot) := \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
     \end{equation*}
-    The function has two important properties, for once it is non-negative and for any $G \in \cG: \varphi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$, thereby acting as a sort of weak indicator function. Building up on this property, we construct for each $G_0 \in \cG_0$ the function $\psi_{G_0}$ on $\cG$ as follows:
+    The function has two important properties, for once it is non-negative and for any $G \in \cX: \varphi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$, thereby acting as a sort of weak indicator function. Building up on this property, we construct for each $G_0 \in \cX_0$ the function $\psi_{G_0}$ on $\cX$ as follows:
     \begin{equation*}
         \psi_{G_0}(\cdot) := \frac{\varphi_{G_0(\cdot)}}{\sum_{G' \in G_0} \varphi_{G'}(\cdot)},
     \end{equation*}
-    which is well-defined, because $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$ is a cover of $\cG$, such that we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a $B_{G_0, \delta_{G_0}}$ with $G \in B_{G_0, \delta_{G_0}}$ implying $\varphi_{G_0}(G) > 0$, making the denominator not $0$. The function $\psi_{G_0}$ has two important properties, for once it is non-negative, because $\varphi_{G}$ for all $G \in \cG$ is non-negative, and for any $G \in \cG: \psi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$.
+    which is well-defined, because $\{ B_{G_0, a} \}_{G_0 \in \cX_0}$ is a cover of $\cX$, such that we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a $B_{G_0, \delta_{G_0}}$ with $G \in B_{G_0, \delta_{G_0}}$ implying $\varphi_{G_0}(G) > 0$, making the denominator not $0$. The function $\psi_{G_0}$ has two important properties, for once it is non-negative, because $\varphi_{G}$ for all $G \in \cX$ is non-negative, and for any $G \in \cX: \psi_{G_0}(G) > 0$, if and only if $G \in B_{G_0, \delta_{G_0}}$.
 
-    Further, we can observe that the set of functions $\{ \psi_{G_0}\}_{G_0 \in \cG_0}$ is a partition of unity on $\cG$ with respect to the open cover $\{ B_{G_0, a} \}_{G_0 \in \cG_0}$, because:
+    Further, we can observe that the set of functions $\{ \psi_{G_0}\}_{G_0 \in \cX_0}$ is a partition of unity on $\cX$ with respect to the open cover $\{ B_{G_0, a} \}_{G_0 \in \cX_0}$, because:
     \begin{enumerate}
-        \item For any $G \in \cG$ the set of functions mapping $G$ not to $0$ is finite, as the set of all functions $\{ \psi_{G_0}\}_{G_0 \in \cG_0}$ is finite.
-        \item For any $G \in \cG: \sum_{G_0 \in \cG_0} \psi_{G_0}(G) = 1$, since: \begin{align*}
-            \sum_{G_0 \in \cG_0} \psi_{G_0}(G) = \sum_{G_0 \in \cG_0} \frac{\varphi_{G_0(G)}}{\sum_{G' \in \cG_0} \varphi_{G'}(G)} = \frac{\sum_{G_0 \in \cG_0} \varphi_{G_0(G)}}{\sum_{G' \in \cG_0} \varphi_{G'}(G)}= 1.
+        \item For any $G \in \cX$ the set of functions mapping $G$ not to $0$ is finite, as the set of all functions $\{ \psi_{G_0}\}_{G_0 \in \cX_0}$ is finite.
+        \item For any $G \in \cX: \sum_{G_0 \in \cX_0} \psi_{G_0}(G) = 1$, since: \begin{align*}
+            \sum_{G_0 \in \cX_0} \psi_{G_0}(G) = \sum_{G_0 \in \cX_0} \frac{\varphi_{G_0(G)}}{\sum_{G' \in \cX_0} \varphi_{G'}(G)} = \frac{\sum_{G_0 \in \cX_0} \varphi_{G_0(G)}}{\sum_{G' \in \cX_0} \varphi_{G'}(G)}= 1.
         \end{align*}
     \end{enumerate}
-    We can use this property to decompose the given function $\cA$ as follows on any input $G \in \cG$:
+    We can use this property to decompose the given function $\cA$ as follows on any input $G \in \cX$:
     \begin{equation*}
-        \cA(G) = \cA(G) \cdot \Bigl( \sum_{G_0 \in \cG_0} \psi_{G_0}(G) \Bigr) = \sum_{G_0 \in \cG_0} \cA(G) \cdot \psi_{G_0}(G) 
+        \cA(G) = \cA(G) \cdot \Bigl( \sum_{G_0 \in \cX_0} \psi_{G_0}(G) \Bigr) = \sum_{G_0 \in \cX_0} \cA(G) \cdot \psi_{G_0}(G) 
     \end{equation*}
-    Recall the property from the beginning of the proof that for any $G \in \cG$ if $G \in B_{G_0, \delta{G_0}}$, then there exists a $G' \in \cX/\!{\wliso}(G)$ with $\| G' - G_0 \|_2 < r$, which implies that $|\cA(G) - \cA(G_0)| < \epsilon$. With this, we can construct a function $\hat{\cA}$ on $\cG$ that approximates $\cA$ within accuracy $\epsilon$:
+    Recall the property from the beginning of the proof that for any $G \in \cX$ if $G \in B_{G_0, \delta{G_0}}$, then there exists a $G' \in \cX/\!{\wliso}(G)$ with $\| G' - G_0 \|_2 < r$, which implies that $|\cA(G) - \cA(G_0)| < \epsilon$. With this, we can construct a function $\hat{\cA}$ on $\cX$ that approximates $\cA$ within accuracy $\epsilon$:
     \begin{equation*}
-        \hat{\cA}(\cdot) = \sum_{G_0 \in \cG_0} \cA(G_0) \cdot \psi_{G_0}(\cdot).
+        \hat{\cA}(\cdot) = \sum_{G_0 \in \cX_0} \cA(G_0) \cdot \psi_{G_0}(\cdot).
     \end{equation*}
     Note that, ``$\cA(G_0)$'' is a constant here.
-    To prove that $\hat{\cA}$ approximates $\cA$ within accuracy $\epsilon$ we need to show that $\sup_{G \in \cG} |\cA(G) - \hat{\cA}(G) | < \epsilon$. Let $G \in \cG$ be arbitrary, then:
+    To prove that $\hat{\cA}$ approximates $\cA$ within accuracy $\epsilon$ we need to show that $\sup_{G \in \cX} |\cA(G) - \hat{\cA}(G) | < \epsilon$. Let $G \in \cX$ be arbitrary, then:
     \begin{align*}
-        |\cA(G) - \hat{\cA}(G) | &= \Big|\sum_{G_0 \in \cG_0} \cA(G) \cdot \psi_{G_0}(G) - \sum_{G_0 \in \cG_0} \cA(G_0) \cdot \psi_{G_0}(G)\Big|\\
-        &= \sum_{G_0 \in \cG_0} |\cA(G) - \cA(G_0) | \cdot \psi_{G_0}(G)\\
-        &\leq \sum_{\substack{G_0 \in \cG_0\\G' \in B_{G_0, \delta_{G_0}}}}|\cA(G') - \cA(G_0) | \cdot \psi_{G_0}(G')\\
-        &= \sum_{\substack{G_0 \in \cG_0\\G' \in B_{G_0, \delta_{G_0}}}} \epsilon \cdot \psi_{G_0}(G)\\
-        &< \epsilon
+        |\cA(G) - \hat{\cA}(G) | &= \Big|\sum_{G_0 \in \cX_0} \cA(G) \cdot \psi_{G_0}(G) - \sum_{G_0 \in \cX_0} \cA(G_0) \cdot \psi_{G_0}(G)\Big|\\
+        &= \sum_{G_0 \in \cX_0} |\cA(G) - \cA(G_0) | \cdot \psi_{G_0}(G)\\
+        &< \sum_{G_0 \in \cX_0} \epsilon \cdot \psi_{G_0}(G)\\
+        &= \epsilon \cdot \sum_{G_0 \in \cX_0} \psi_{G_0}(G)\\
+        &= \epsilon \cdot 1
     \end{align*}
     
 \end{proof}
