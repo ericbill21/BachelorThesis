@@ -21,7 +21,7 @@ We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 
 \end{definition}
 
 \subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
-The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section. \todo{Add the continues variant of the 1-WL by adding HASH functiions Morris: Faster kernel for graphs with continuous attributes via hashing}
+The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section.
 
 \subsubsection{The Weisfeiler-Leman graph coloring algorithm}
 The $\wl$ algorithm computes a node coloring of its input graph in each iteration. A color for a node is computed using only the coloring of its neighbors and the node itself. The algorithm will continue as long as it has not converged, and returns the final coloring of the graph.
@@ -310,7 +310,7 @@ In this section we will shortly prove the converse direction. However, the proof
 \end{proof}
 
 \subsection{Proof of \autoref{theorem:1wl_in_gnn_approximating}}
-We will prove \autoref{theorem:1wl_in_gnn_approximating} by first introducing a definition, and then 2 lemmas using that definition, which together prove the entire theorem. In particular, we define the property that a collection of functions is capable of locating any $\wliso$ equivalence class. Then, in \autoref{lem:continuous_proof1}, we prove that for a collection of functions that is $\wldisc$, there exists an augmentation of that function that is capable of locating any $\wliso$-equivalence class. And finally, in \autoref{lem:continuous_proof2} we prove that for such collections there exists another augmentation which is GNN-approximating. The entire proof, is inspired by the work of \cite{Chen2019}.\todo{Rewrite!!}
+We will prove \autoref{theorem:1wl_in_gnn_approximating} by first introducing a definition and then 2 lemmas using that definition which collectively prove the entire theorem. In particular, we define the property that a collection of functions is able to find any $\wliso$ equivalence class. Then, in \autoref{lem:continuous_proof1}, we prove that $\wldisc$ somehow implies being able to locate any $\wliso$-equivalence class. And finally, in \autoref{lem:continuous_proof2}, we prove that being able to locate any $\wliso$ equivalence class further implies being somehow GNN-approximating. The overall proof is inspired by the work of \cite{Chen2019}.
 
 \begin{definition}[Locating $\wliso$ equivalence classes]
     Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$. If for all $\epsilon \in \Rb$ with $\epsilon > 0$ and for every graph $G^* \in \cX$ the function $h_{G^*}$ exists in $\cC$, with the following properties:
@@ -425,12 +425,12 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
 
     Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$, we fix this aswell. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cX$ with the above described properties. We choose $\epsilon' := r$ for all $h_{G} \in \cC$ throughout the proof.\newline
 
-    For any $G \in \cX$, we define the set $h_{G}^{-1}(a) := \{ G' \in \cX \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. We illustrated this set in \autoref{fig:continuous_proof2} for a better understanding.
+    For any $G \in \cX$, we define the set $h_{G}^{-1}(a) := \{ G' \in \cX \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. We illustrated this set in \autoref{fig:continuous_proof2} for better understanding.
     
     \begin{figure}[H]
         \centering
         \input{Figures/proof_continuous4.tex}
-        \caption{Illustration of the set $h_{G}^{-1}(\cdot)$ for two arbitrary values $a,b$ with $a < b$.}
+        \caption{Illustration of the set $h_{G}^{-1}(\cdot)$ for two arbitrary values $a,b$ with $a < b$. The pink area visualizes the open interval $[0, a)$, and similarly in blue for $[0, b)$.}
         \label{fig:continuous_proof2}
     \end{figure}
     
@@ -491,15 +491,15 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
 In this section we will shortly prove that GNN-Approximating implies $\wldisc$. Similar to the proof of \autoref{theorem:1wl_in_gnn}, we will take advantage of the fact that our \autoref{def:gnn} of GNNs does not impose any constraints on the readout function, apart from the fact that it must be permutation invariant and computable. We have drawn inspiration for this proof from the work of \cite{Chen2019}.
 
 \begin{proof}[Proof of \autoref{theorem:gnn_approximating_in_1wl}]
-    Let $\cC$ be a collection of continues functions from $\cX$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$, then we define the function $f_{G_1}$ on input $G \in \cX$:
+    Let $\cC$ be a collection of continues functions from $\cX$ to $\Rb$ that is GNN approximating. Let $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$, then we define the function $h_{G_1, G_2}$ on input $G \in \cX$:
     \begin{equation*}
-         f_{G_1}(G) = \min_{\pi \in S_n} \|\pi^T G \pi - G_1\|_2,
-    \end{equation*} where $\|\cdot\|_2$ is the $l_2$ norm. Note that, $f_{G_1}$ is computable as the number of permutations $\pi$ in $S_n$ are finite. Since $f_{G_1}$ is permutation invariant, we can construct a GNN with $0$ layers and $f_{G_1}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $f_{G_1}$ and consequently showing that the function is GNN computable.
-    We choose $\epsilon := \frac{1}{2} \cdot f_{G_1}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $f_{G_1}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
+        h_{G_1, G_2}(G) = \min_{\pi \in S_n} \|\pi^T G \pi - G_1\|_2,
+    \end{equation*} where $\|\cdot\|_2$ is the $l_2$ norm. Note that, $h_{G_1, G_2}$ is computable as the number of permutations $\pi$ in $S_n$ are finite. Since $h_{G_1, G_2}$ is permutation invariant, we can construct a GNN with $0$ layers and $h_{G_1, G_2}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $h_{G_1, G_2}$ and consequently showing that the function is GNN computable.
+    We choose $\epsilon := \frac{1}{2} \cdot h_{G_1, G_2}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $h_{G_1, G_2}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
     \begin{align*}
-        | h_\epsilon(G_1) - h_\epsilon(G_2)| &> | (f_{G_1}(G_1) - \epsilon) - (f_{G_1}(G_2) + \epsilon)|\\
-        &= |f_{G_1}(G_2) -2 \cdot \epsilon| \quad&\text{by definition $f_{G_1}(G_1) = 0$}\\
-        &= |f_{G_1}(G_2) -2 \cdot \frac{1}{2} \cdot f_{G_1}(G_2)| = 0.\\
+        | h_\epsilon(G_1) - h_\epsilon(G_2)| &> | (h_{G_1, G_2}(G_1) - \epsilon) - (h_{G_1, G_2}(G_2) + \epsilon)|\\
+        &= |h_{G_1, G_2}(G_2) -2 \cdot \epsilon| \quad&\text{by definition $h_{G_1, G_2}(G_1) = 0$}\\
+        &= |h_{G_1, G_2}(G_2) -2 \cdot \frac{1}{2} \cdot h_{G_1, G_2}(G_2)| = 0.\\
     \end{align*}
 \end{proof}
 
