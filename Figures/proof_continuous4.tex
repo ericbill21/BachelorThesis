@@ -1,0 +1,29 @@
+\begin{tikzpicture}[scale=2.5]
+
+    %yellow box
+    \filldraw[magenta!40] (0.0 ,0.05) rectangle (0.89 ,0);
+    \filldraw[cyan!40] (0.0 ,-0.05) rectangle (1.49 ,0);
+
+    % Baseline
+    \draw[-{Latex[length=3mm, width=3mm]}] (-0.5,0) -- (2.5,0);
+
+    % a
+    \draw (0.9 ,0.2) node {$a$};
+    \draw[line width=0.2mm] (0.9 ,0.1) -- (0.9,-0.1);
+    \draw (0.89 ,0.0) node {)};
+
+
+    % Interval
+    \draw (0.0 ,0.2) node {$0$};
+    \draw[line width=0.2mm] (0.0, 0.1) -- (0.0,-0.1);
+
+    % b
+    \draw (1.5, 0.2) node {$b$};
+    \draw[line width=0.2mm] (1.5, 0.1) -- (1.5,-0.1);
+    \draw (1.49 ,0.0) node {)};
+
+    \draw (2.4, 0.2) node {$\Rb$};
+
+    \draw (0.0, 0.4) node {$h^{-1}_{G}(a) \subset h^{-1}_{G}(b):$};    
+
+\end{tikzpicture}

@@ -15,7 +15,7 @@
     \begin{equation*}
         \mlp^\bullet(h_1(G), \dots ,h_n(G)) = \mlp^* \circ f^* \circ \wl(G)
     \end{equation*}
-    such that we can conclude that the composition of multiple functions computable by $\wlnn$, is in fact also $\wlnn$ computable. 
+    with which we can conclude that the composition of multiple functions computable by $\wlnn$, is in fact also $\wlnn$ computable. 
 
     We define the new encoding function $f^*$ to work as follows on input $C_\infty$:
     \begin{equation*}
@@ -26,11 +26,11 @@
                 f_n(C_\infty)
             \end{bmatrix}),
     \end{equation*}
-    where $\textsf{conccat}$ is the concatenation functions, concatenating all encoding vectors to one single vector.
+    where $\textsf{conccat}$ is the concatenation function, concatenating all encoding vectors to one single vector.
 
-    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ at layer $j > 1$ as follows: $(\mlp_i)_{j}(v) := \sigma(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
+    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ for $i \in [n]$ at layer $j > 0$ as follows: $(\mlp_i)_{j}(v) := \sigma(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
     \begin{align*}
-        &(\mlp^*)_{1}(v) := v\\
+        &(\mlp^*)_{0}(v) := v\\
         &(\mlp^*)_{j+1}(v) := \sigma(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
             \begin{bmatrix}
                 b^1_j\\
@@ -49,7 +49,4 @@
         \end{bmatrix},
     \end{align*}
     such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$.
-
-
-    Then $\cB(\cdot) := \mlp^* \circ f^* \circ \wl(\cdot)$ is $\wlnn$ computable and equavalent to $\mlp^\bullet(h_1, \dots, h_n)$ \todo{fine tune.}
 \end{proof}
