@@ -98,14 +98,19 @@ Note that in the following we will restrict the definition to only consider node
     \end{align*}
     where $f^{W_{1,t}}_{\text{merge}}$ and $f^{W_{2,t}}_{\text{agg}}$ are arbitrary differentiable functions with $W_{1,t}$ and $W_{2,t}$ their respective parameters. Additionally, $f^{W_{2,t}}_{\text{agg}}$ has to be permuation-invariant.
 
-    Depending on the objective, whether the GNN is tasked with a graph or a node task, the last layer differs. In the case of graph tasks, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, that aggregates over every node and computes a fixed-size output vector for the entire graph, e.g. a label for graph classification. In order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable. Let $\mathcal{A}$ be an instance of the described GNN framework. Further, let $K \in \mathbb{N}$ be the number of layers of the GNN, $\mathcal{G}$ the set of all graphs, $\mathcal{Y}$ the task-specific output set (e.g. labels of a classification task), then the overall function computed by $\mathcal{A}$ is:
+    Depending on the objective, whether the GNN is tasked with a graph or a node task, the last layer differs. In the case of graph tasks, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, working as follows:
     \begin{align*}
-        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}: x \mapsto \textsf{READOUT} \circ f^{(K)} \circ \ldots \circ f^{(0)}(x),
+        \textsf{READOUT}(\MSopen f^{(K)}(v) \mid v \in V(G) \MSclose),
+    \end{align*}
+    that aggregates over every node and computes a fixed-size output vector for the entire graph, e.g. a label for graph classification. In order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable. Let $\mathcal{A}$ be an instance of the described GNN framework. Further, let $K \in \mathbb{N}$ be the number of layers of the GNN, $\mathcal{G}$ the set of all graphs, $\mathcal{Y}$ the task-specific output set (e.g. labels of a classification task), then the overall function computed by $\mathcal{A}$ is:
+    \begin{align*}
+        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto \textsf{READOUT}(\MSopen f^{(K)}(v) \mid v \in V(G) \MSclose),
     \end{align*}
     if $\mathcal{A}$ is configured for a graph task, otherwise:
     \begin{align*}
-        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}: x \mapsto f^{(K)} \circ \ldots \circ f^{(0)}(x).
+        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto G' := (V(G), \ E(G), \ f^{(K)}),
     \end{align*}
+    where a graph $G$ is mapped to a structurally identical graph $G'$ with the key difference being the label function is $f^{(K)}$.
 \end{definition}
 
 Note that, as we require all aggregation functions to be permutation-invariant, the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. This definition and use of notation are inspired by \cite{Morris2018} and \cite{Xu2018}.
@@ -303,11 +308,49 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 \end{proof}
 
 \subsection{Proof of \autoref{theorem:gnn_in_1wl}}
-In this section we will shortly prove the converse direction. However, the proof is not as interesting as the previous one, as it is mainly just a consequence of \autoref{def:gnn} of GNNs.
+In this section we will shortly prove the converse direction. However, the proof is not as interesting as the previous one, as it is mainly just a consequence of \autoref{def:gnn} of GNNs. \todo{!}
 
-\begin{proof}[Proof of \autoref{theorem:gnn_in_1wl}]
-    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$. For any $\cB \in \cC$ we know, by using \autoref{lem:wlnn_permutation_invariance} that $\cB$ is permutation invariant such that it qualifies as a $\textsf{READOUT}$ function for GNNs. By constructing a GNN with $0$ layers and $\textsf{READOUT}(\cdot) := \cB(\cdot)$, we obtain a function $\cA$ that is computed by this GNN. Moreover, $\cA$ is equivalent to $\cB$, proving that every function in $\cC$ is computable by GNNs.
+\begin{lemma}\label{lem:1wl_color_upper_bound}
+    Let $G$ be an arbitrary graph with $n := |V(G)|$ the number of nodes and $C$ a coloring of the graph $G$. Then the total number of possible tuples of the form:
+    \begin{equation*}
+        (C(v), \ \MSopen C(u) \mid u \in \cN(v) \MSclose),
+    \end{equation*}
+    for all $v \in V(G)$ can be upper bounded by
+    \begin{equation*}
+        n \cdot \sum_{i=0}^{n-1} \binom{n+i -1}{i}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    Assume the above. For the first entry of the tuple, there exist at most $n$ different colors, since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that we can sum over each cardinality of a multiset over $n$ different colors. In the end, we soundly combine both results by multiplying both together.
 \end{proof}
+
+\begin{lemma}
+    There exists a collection of functions $C$ computable by GNNs, such that $C$ is \wldisc. Meaning for every $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ there exists $\cA \in C$ such that $\cA(G_1) \neq \cA(G_2)$.
+\end{lemma}
+
+\begin{proof}
+Since $\cX$ is finite, we define $n := \max \{ |V(G)| \mid G \in \cX \}$ to be the maximum number of nodes of a graph in $\cX$, and $k := \max \{ l_G(v) \mid v \in V(G), G \in \cX \}$ to be the largest label of any node of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We construct a GNN with $n$ layers working as follows for any $v \in V(G)$: 
+\begin{align*}
+    f^{(0)}(v) &:= l_G(v), \\
+    f^{(t)}(v) &:= h_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose), \quad 0 < t < n.
+\end{align*}
+Here $h_{m,t}$ is a function that maps the tuples injectively to an integer of the set:
+\begin{align*}
+    \{k + (t-1)\cdot m +1, \ldots, k + t \cdot m\},
+\end{align*}
+such that each layer uses its own coloring domain. With this, we ensure that each layer, maps a tuple to a new, previously not used, color. Therefore, every layer of this GNN, computes a single iteration of the $\wl$ algorithm. Further, since the $\wl$ algorithm converges after at most $|V(G)| =: n$ iterations, we set the number of layers to $n$.
+
+We define the collection $C$ of functions computable by GNNs as 
+\begin{align*}
+C := \{ \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
+\end{align*}
+where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored $c$ in the coloring of $f^{(n)}$.
+\end{proof}
+
+\begin{lemma}
+    Let $C$ be a collection of function computable by GNNs, $\cA_1, \dots , \cA_n \in C$ and $\textsf{Readout}$ as suitable \textsf{READOUT} function for GNNs, then $\hat{\cA} := \textsf{Readout}(\cA_1, \cA_n)$
+\end{lemma}
+
 
 \subsection{Proof of \autoref{theorem:1wl_in_gnn_approximating}}
 We will prove \autoref{theorem:1wl_in_gnn_approximating} by first introducing a definition and then 2 lemmas using that definition which collectively prove the entire theorem. In particular, we define the property that a collection of functions is able to find any $\wliso$ equivalence class. Then, in \autoref{lem:continuous_proof1}, we prove that $\wldisc$ somehow implies being able to locate any $\wliso$-equivalence class. And finally, in \autoref{lem:continuous_proof2}, we prove that being able to locate any $\wliso$ equivalence class further implies being somehow GNN-approximating. The overall proof is inspired by the work of \cite{Chen2019}.
