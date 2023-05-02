@@ -163,15 +163,14 @@ Throughout the first two theorems we will concentrate on a finite collection of 
 \begin{theorem}[Finite Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:gnn_in_1wl}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$, then $\cC$ is also computable by GNNs.
 \end{theorem}
-With these theorems, we showed the equivalence between both frameworks such that every function computed by $\wlnn$ is also computable by a GNN, and vice versa.
+With these theorems, we showed the equivalence between both frameworks such that every function computed by $\wlnn$ is also computable by a GNN, and vice versa Notice that, we didn't leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves, but rather kept it general. 
 
-Notice that, we didn't leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves, but rather kept it general. In order to investigate the relation between both frameworks for continuous features spaces, we will first introduce an encoding of graphs that will be used throughout the proof of both the following theorems.
+Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of $\wldisc$ by investigating a relationship between the two frameworks for continuous feature spaces and continuous functions. However, since the graph isomorphism problem is an inherently discrete problem, extending the definition of the $\wl$-algorithm to continuous functions is not very trivial and, to our knowledge, has not yet been widely investigated. We therefore assume in the proofs and the following theorems that there exists a continuous version of the $\wl$-algorithm. 
 
+We define the set of graphs with continuous features using the following definition:
 \begin{definition}
     Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric. For simplicity, we denote $\cX \coloneqq X^{n \times n}$ throughout the next two theorems and their respective proofs.
 \end{definition}
-
-OPEN FOR NOW: Can $\wlnn$ even be applied on continuous graphs, since the $\wl$ algorithm seems to only work with discrete color values. Two things why I still believe it is possible, first \cite{Mor+2016} developed a Weisfeiler Leman subtree kernel working on continuous graphs. Secondly, in my case, graph attributes are always drawn from a compact subset of $\Rb$, such that one can define the $\textsf{RELABEL}$ of the $\wl$ algorithm to work over $\Rb$.\todo{!}
 
 \begin{theorem}[Continuous Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn_approximating}
     Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ computable by $\wlnn$. If $\cC$ is $\wldisc$, then there exists a collection of functions $\cC'$ computable by $\wlnn$ that is GNN-Approximating.
@@ -197,17 +196,18 @@ We will prove \autoref{theorem:1wl_in_gnn} by introducing a couple of small lemm
 We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
 \begin{lemma}\label{lem:wl_disc_exists}
-    There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is 1-\!WL-Discriminating.
+    There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is 1-\!WL-Discriminating.\todo{Add in the converse direction from X to Rb}
 \end{lemma}
-\begin{proof}
-We consider the collection $\mathfrak{B}_k$ (\autoref{def:counting_encoding}) of functions from $\cX$ to $\Rb$ computed by \wlnn, where we choose $k$ as follows:
-\begin{equation*}
-    k \coloneqq \max \bigl( \{ l_G(v) \mid G \in \cX, v \in V(G)\} \bigr),
-\end{equation*}
-the largest label of any node of any graph in $\cX$. Note that we can compute $k$, since $\cX$ is finite.
 
-Let $G_1, G_2 \in \cX$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$). Let $C_1, C_2$ be the final colorings computed by the $\wl$ algorithm when applied on $G_1, G_2$ respectively.
-Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, C_1}(c) \neq h_{G_2, C_2}(c)$. If we now consider as multilayer perceptron $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} \coloneqq 1$ and $W_{1,i} \coloneqq 0$ for all $i \in [K] \setminus \{c\}$ (Note, $K$ is a constant introduced by $f_\text{count}$). We can construct $\cB(\cdot) \coloneqq \mlp_c \circ f_{\text{count}} \circ \wl(\cdot)$, such that $\cB \in \mathfrak{B}_k$. Then $\cB(G_i) \coloneqq h_{G, C_i}(c)$ for $i \in \{1, 2\}$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$, and since $G_1,G_2$ were arbitrary chosen, we can conclude the proof.
+\begin{proof}
+    We define $f_c$  for $c \in \Nb$ as the encoding functions that returns the number of nodes colored as $c$. With this we can construct the collection of functions $C$ as follows:
+    \begin{align*}
+        C := \{ \cB_c(\cdot) := \mlp_\text{id} \circ f_c \circ \wl(\cdot) \mid c \in \Nb\},
+    \end{align*}
+    where $\mlp_\text{id}$ is a dummy multilayer perceptron that just returns the input. Since every function $\cB_c \in C$ is composed of the $\wl$ algorithm, an encoding function and a multilayer perceptron, each function is computable by $\wlnn$, and consequently also the whole collection.
+
+    Let $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$. Further, let $C_1, C_2$ be the final colorings computed by the $\wl$ algorithm when applied on $G_1, G_2$
+    respectively. Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,C_1}(c)  \neq h_{G_2,C_2}(c)$. Such that $\cB_c \in C$ exists with $\cB_c(G_1) \neq \cB_c(G_2)$.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Equivalence]\label{lem:wl_relation_equivalence}
@@ -311,7 +311,7 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 In this section we will prove the converse direction. We start with \cref{lem:1wl_color_upper_bound}, where we introduce an upper bound that we will use in \cref{lem:gnn_1wl_disc} to show that there exists a collection of GNN-computable functions that is $\wldisc$. After that, we will prove a composition lemma similar to the one we introduced in the previous section using \cref{lem:composition_lemma_gnn}. From this point on, the proof continues as in the previous section and concludes the property to be proved in \cref{lem:decompose_gnn_as_wl}.
 
 \begin{lemma}\label{lem:1wl_color_upper_bound}
-    Let $G$ be an arbitrary graph with $n \coloneqq |V(G)|$ the number of nodes and $C$ a coloring of the graph $G$. Then the total number of possible tuples of the form:
+    Let $G$ be an arbitrary graph with $n \coloneqq |V(G)|$ the number of nodes and $C: V(G) \rightarrow \Nb$ an arbitrary coloring of the graph $G$. Then the total number of possible tuples of the form:
     \begin{equation*}
         (C(v), \ \MSopen C(u) \mid u \in \cN(v) \MSclose),
     \end{equation*}
@@ -324,8 +324,9 @@ In this section we will prove the converse direction. We start with \cref{lem:1w
     Assume the above. For the first entry of the tuple, there exist at most $n$ different colors, since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that we can sum over each cardinality of a multiset over $n$ different colors. In the end, we soundly combine both results by multiplying both together.
 \end{proof}
 
+
 \begin{lemma}[GNN \wldisc]\label{lem:gnn_1wl_disc}
-    There exists a collection of functions $C$ computable by GNNs, such that $C$ is \wldisc. Meaning for every $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ there exists $\cA \in C$ such that $\cA(G_1) \neq \cA(G_2)$.
+    There exists a collection $\cC$ of functions from $\cX$ to $\Rb$ computable by GNNs that is $\wldisc$. Meaning for every $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ there exists $\cA \in C$ such that $\cA(G_1) \neq \cA(G_2)$.
 \end{lemma}
 
 \begin{proof}
@@ -344,7 +345,7 @@ We define the collection $C$ of functions computable by GNNs as
 \begin{align*}
 C \coloneqq \{ \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
 \end{align*}
-where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored $c$ in the coloring of $f^{(n)}$.
+where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored as $c$ in the coloring of $f^{(n)}$.
 \end{proof}
 
 Similar to the proof in the previous section, we will use \cref*{lem:composition_lemma_gnn} to introduce the ability to construct GNNs that take in as input multiple GNNs and then apply a multilayer perceptron to the combined output.
@@ -355,7 +356,7 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
 \end{lemma}
 
 \begin{proof}
-    Assume the above. Further, for the ease of readability we make the assumptions that the node features computed in each layer by each $\cA$ is one dimensional. Note that, one can easily extend this proof to work over arbitrary feature dimensions.
+    Assume the above. Further, for the ease of readability we make the assumptions that the node features computed in each layer by each $\cA_i$ is one dimensional. Note that, one can easily extend this proof to work over arbitrary feature dimensions.
 
     Further, we will for any $x \in \Rb^d$ use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we use the following notation to indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge, i}}$ and $f^{(t)}_{\text{agg, i}}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function of $\cA_i$.
     
@@ -385,16 +386,7 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
         f^{(t)}_{\text{merge, i}}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v)\text{, and}\\
         f^{(t)}_{\text{agg}, n}(\MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose) &\coloneqq 0.
     \end{align*}
-    These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. For the first layer $t=0$ we will use:
-    \begin{align*}
-        \hat{f}^{(0)}(v) \coloneqq \begin{bmatrix}
-            f^{(0)}_1(v)\\
-            \vdots\\
-            f^{(0)}_n(v)
-        \end{bmatrix}
-    \end{align*}
-    
-    Finally, the \textsf{READOUT} function is constructed as follows:
+    These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. Finally, we construct the \textsf{READOUT} function of $\hat{\cA}$ as follows:
     \begin{align*}
         \textsf{Readout}(\MSopen \hat{f}^{(t)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
             \textsf{Readout}_i(\MSopen f^{(t)}_{\text{merge, 1}}(v) \mid v \in V(G) \MSclose)\\
