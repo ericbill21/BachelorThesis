@@ -5,19 +5,19 @@ First, we introduce a couple of notions and definitions that will be used throug
 We first introduce a couple of notations and definitions that will be used throughout the thesis. With $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and with $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
 
 \subsection{Graphs}
-A graph $G$ is a 3-tuple $G:= (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all finite graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. Sometimes the values assigned by $l$ are called features, but this is usually only the case when $\Sigma$ is multidimensional, which we do not cover in this thesis. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_1: V(G) \rightarrow \{1\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ such that for every $(v,u) \in E$ also $(u,v) \in E$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively, as well as $l_G$ to denote the label function of $G$. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) := \{u \mid (u, v) \in E(G)\}$.
+A graph $G$ is a 3-tuple $G\coloneqq (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all finite graphs. Note, that our definition of the label function allows for graphs with labels either only on the nodes, only on the edges, or on both nodes and edges. Sometimes the values assigned by $l$ are called features, but this is usually only the case when $\Sigma$ is multidimensional, which we do not cover in this thesis. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_1: V(G) \rightarrow \{1\}$. Further, $G$ can be either directed or undirected, depending on the definition of $E$, where $E \subseteq \{(v,u) \mid v,u \in V\}$ defines a directed and $E \subseteq \{(v, u), (u,v) \mid v,u \in V, v\neq u\}$ such that for every $(v,u) \in E$ also $(u,v) \in E$ defines an undirected graph. Additionally, we will use the notation $V(G)$ and $E(G)$ to denote the set of nodes of $G$ and the set of edges of $G$ respectively, as well as $l_G$ to denote the label function of $G$. With $\mathcal{N}(v)$ for $v \in V(G)$ we denote the set of neighbors of $v$ with $\mathcal{N}(v) \coloneqq \{u \mid (u, v) \in E(G)\}$.
 
-A coloring of a Graph $G$ is a function $C: V(G) \rightarrow \mathbb{N}$ that assigns each node in the graph a color (here a positive integer). Further, a coloring $C$ induces a partition $P$ on the set of nodes, for which we define $C^{-1}$ being the function that maps each color $c \in \mathbb{N}$ to its class of nodes with $C^{-1}(c) = \{ v\in V(G) \mid C(v) = c\}$. In addition, we define $h_{G, C}$ as the histogram of graph $G$ with coloring $C$, that maps every color in the image of $C$ under $V(G)$ to the number of occurrences. In detail, $\forall c \in \mathbb{N}: h_{G, C}(c) := | \{ v \in V(G) \mid C(v) = c  \} | = | C^{-1}(c) |$
+A coloring of a Graph $G$ is a function $C: V(G) \rightarrow \mathbb{N}$ that assigns each node in the graph a color (here a positive integer). Further, a coloring $C$ induces a partition $P$ on the set of nodes, for which we define $C^{-1}$ being the function that maps each color $c \in \mathbb{N}$ to its class of nodes with $C^{-1}(c) = \{ v\in V(G) \mid C(v) = c\}$. In addition, we define $h_{G, C}$ as the histogram of graph $G$ with coloring $C$, that maps every color in the image of $C$ under $V(G)$ to the number of occurrences. In detail, $\forall c \in \mathbb{N}: h_{G, C}(c) \coloneqq | \{ v \in V(G) \mid C(v) = c  \} | = | C^{-1}(c) |$
 
 \subsubsection{Permutation-invariance and -equivariance}
-We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 0$. $S_n$ consists of all permutations over these elements. Let $G$ be a graph with $V(G) = [n]$, applying a permutation $\pi \in S_n$ on $G$, is defined as $G_\pi := \pi \cdot G$ where $V(G_\pi) = \{\pi(1), \ldots, \pi(n) \}$ and $E(G_\pi) = \{ (\pi(v), \pi(u)) \mid (v,u) \in E(G)\}$. We will now introduce two key concepts for classifying functions on graphs.
+We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n > 0$. $S_n$ consists of all permutations over these elements. Let $G$ be a graph with $V(G) = [n]$, applying a permutation $\pi \in S_n$ on $G$, is defined as $G_\pi \coloneqq \pi \cdot G$ where $V(G_\pi) = \{\pi(1), \ldots, \pi(n) \}$ and $E(G_\pi) = \{ (\pi(v), \pi(u)) \mid (v,u) \in E(G)\}$. We will now introduce two key concepts for classifying functions on graphs.
 
 \begin{definition}[Permutation Invariant]
-    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permutation-invariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = f(\pi \cdot G)$.
+    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permutation-invariant} if and only if for all $G \in \mathcal{G}$ where $n_G \coloneqq \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = f(\pi \cdot G)$.
 \end{definition}
 
 \begin{definition}[Permuation Equivariant]
-    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permuation-equivariant} if and only if for all $G \in \mathcal{G}$ where $n_G := \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = \pi^{-1} \cdot f(\pi \cdot G)$.
+    Let $f: \mathcal{G} \rightarrow \mathcal{X}$ be an arbitrary function and let $V(G) = [n]$ for some $n \in \mathbb{N}$. The function $f$ is \textit{permuation-equivariant} if and only if for all $G \in \mathcal{G}$ where $n_G \coloneqq \mid V(G) \mid$ and for every $\pi \in S_{n_G}$: $f(G) = \pi^{-1} \cdot f(\pi \cdot G)$.
 \end{definition}
 
 \subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
@@ -36,7 +36,7 @@ C_i (v) = \textsf{RELABEL}(C_{i-1}(v), \MSopen C_{i-1}(u) \mid u \in \mathcal{N}
 \begin{equation*}
 \forall v,w \in V(G):  C_i(v) = C_i(w) \iff C_{i+1}(v) = C_{i+1}(w).
 \end{equation*}
-Upon terminating we define $C_{\infty}$:= $C_i$ as the stable coloring, such that $\wl(G) := C_\infty$.
+Upon terminating we define $C_{\infty} \coloneqq C_i$ as the stable coloring, such that $\wl(G) \coloneqq C_\infty$.
 \end{definition}
 
 
@@ -108,7 +108,7 @@ Note that in the following we will restrict the definition to only consider node
     \end{align*}
     if $\mathcal{A}$ is configured for a graph task, otherwise:
     \begin{align*}
-        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto G' := (V(G), \ E(G), \ f^{(K)}),
+        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto G' \coloneqq (V(G), \ E(G), \ f^{(K)}),
     \end{align*}
     where a graph $G$ is mapped to a structurally identical graph $G'$ with the key difference being the label function is $f^{(K)}$.
 \end{definition}
@@ -128,13 +128,13 @@ where $\text{ReLU}$ is a non-linear element wise activation function, $\textsf{M
 In this section, we introduce a formal definition of multilayer perceptron as it is required in a later proof, as well as the $\wliso$ relation. Additionally, two very important properties for collections of functions.
 
 \begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp := (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp \coloneqq (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
     \begin{align*}
-        (\mlp)_{0}(v) &:= v\\
-        (\mlp)_{i+1}(v) &:= \sigma(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
+        (\mlp)_{0}(v) &\coloneqq v\\
+        (\mlp)_{i+1}(v) &\coloneqq \sigma(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
     \end{align*}
     where $\sigma$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
-    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) := (\mlp)_k(v)$.
+    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) \coloneqq (\mlp)_k(v)$.
 \end{definition}
 
 \begin{definition}[1-WL Relation]
@@ -148,7 +148,7 @@ The $\wliso$ relation can further be classified as an equivalence relation, as i
 \end{definition}
 
 \begin{definition}[$\gapp$]
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty := \sup_{G \in \mathcal{X}} |\cA(G) - h_{\cA,\epsilon}(G)| < \epsilon$
+    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty \coloneqq \sup_{G \in \mathcal{X}} |\cA(G) - h_{\cA,\epsilon}(G)| < \epsilon$
 \end{definition}
 
 \section{Theoretical Connection}
@@ -168,7 +168,7 @@ With these theorems, we showed the equivalence between both frameworks such that
 Notice that, we didn't leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves, but rather kept it general. In order to investigate the relation between both frameworks for continuous features spaces, we will first introduce an encoding of graphs that will be used throughout the proof of both the following theorems.
 
 \begin{definition}
-    Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric. For simplicity, we denote $\cX := X^{n \times n}$ throughout the next two theorems and their respective proofs.
+    Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric. For simplicity, we denote $\cX \coloneqq X^{n \times n}$ throughout the next two theorems and their respective proofs.
 \end{definition}
 
 OPEN FOR NOW: Can $\wlnn$ even be applied on continuous graphs, since the $\wl$ algorithm seems to only work with discrete color values. Two things why I still believe it is possible, first \cite{Mor+2016} developed a Weisfeiler Leman subtree kernel working on continuous graphs. Secondly, in my case, graph attributes are always drawn from a compact subset of $\Rb$, such that one can define the $\textsf{RELABEL}$ of the $\wl$ algorithm to work over $\Rb$.\todo{!}
@@ -192,7 +192,7 @@ Immediately from the last theorem follows the corollary:
 
 By putting both theorems into perspective, we can now argue that even for continuous functions $\wlnn$ and GNNs can compute almost the same functions. Each framework can approximate the other framework arbitrarily well. From this we can conclude that the ability $\wldisc$ is very powerful, so we can assume that $\wlnn$ is sufficiently expressive for the upcoming empirical part.
 
-\subsection{Proof of \autoref{theorem:1wl_in_gnn}}
+\subsection{Proof of \autoref{theorem:1wl_in_gnn}}\label{sec:proof_theorem:1wl_in_gnn}
 We will prove \autoref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \autoref{lem:wl_disc_exists} we show the existence of a collection computed by $\wlnn$ that is 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
 We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
@@ -202,12 +202,12 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \begin{proof}
 We consider the collection $\mathfrak{B}_k$ (\autoref{def:counting_encoding}) of functions from $\cX$ to $\Rb$ computed by \wlnn, where we choose $k$ as follows:
 \begin{equation*}
-    k := \max \bigl( \{ l_G(v) \mid G \in \cX, v \in V(G)\} \bigr),
+    k \coloneqq \max \bigl( \{ l_G(v) \mid G \in \cX, v \in V(G)\} \bigr),
 \end{equation*}
 the largest label of any node of any graph in $\cX$. Note that we can compute $k$, since $\cX$ is finite.
 
 Let $G_1, G_2 \in \cX$ such that the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$). Let $C_1, C_2$ be the final colorings computed by the $\wl$ algorithm when applied on $G_1, G_2$ respectively.
-Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, C_1}(c) \neq h_{G_2, C_2}(c)$. If we now consider as multilayer perceptron $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} := 1$ and $W_{1,i} := 0$ for all $i \in [K] \setminus \{c\}$ (Note, $K$ is a constant introduced by $f_\text{count}$). We can construct $\cB(\cdot) := \mlp_c \circ f_{\text{count}} \circ \wl(\cdot)$, such that $\cB \in \mathfrak{B}_k$. Then $\cB(G_i) := h_{G, C_i}(c)$ for $i \in \{1, 2\}$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$, and since $G_1,G_2$ were arbitrary chosen, we can conclude the proof.
+Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1, C_1}(c) \neq h_{G_2, C_2}(c)$. If we now consider as multilayer perceptron $\text{MLP}_c: \Nb^K \rightarrow \Rb, v \mapsto W \cdot v$ with $W \in \Nb^{1 \times K}$ such that $W_{1,c} \coloneqq 1$ and $W_{1,i} \coloneqq 0$ for all $i \in [K] \setminus \{c\}$ (Note, $K$ is a constant introduced by $f_\text{count}$). We can construct $\cB(\cdot) \coloneqq \mlp_c \circ f_{\text{count}} \circ \wl(\cdot)$, such that $\cB \in \mathfrak{B}_k$. Then $\cB(G_i) \coloneqq h_{G, C_i}(c)$ for $i \in \{1, 2\}$, such that we can conclude $\mathcal{B}(G_1) \neq \mathcal{B}(G_2)$, and since $G_1,G_2$ were arbitrary chosen, we can conclude the proof.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Equivalence]\label{lem:wl_relation_equivalence}
@@ -227,7 +227,7 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Composition]\label[lemma]{lem:composition_lemma}
-    Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cB$ composed of $\cB(\cdot) := \mlp^\bullet(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
+    Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cB$ composed of $\cB(\cdot) \coloneqq \mlp^\bullet(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
 \end{lemma}
 \begin{proof}
     Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that maps a coloring $C_\infty$ to a concatenation of the vectors obtained when applying each encoding function $f_i$ individually. Additionally, we construct a multilayer perceptron $\mlp^*$ that takes in this concatenation of vectors and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously on their respective section of the encoding vector of $f^*$, and applies afterwards the given $\mlp^\bullet$ on the concatenation of the output of all $\mlp_i$'s.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix, as this proof is very technical and not that interesting.
@@ -273,15 +273,15 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 \begin{proof}
     Assuming the above. Due to $\cX$ being finite, we can define for every graph $G^*$ the constant:
     \begin{equation*}
-        \delta_{G^*} := \frac{1}{2} \min_{G \in \cX , \  G \not\wliso G^*} |h_{G^*}(G)| > 0.
+        \delta_{G^*} \coloneqq \frac{1}{2} \min_{G \in \cX , \  G \not\wliso G^*} |h_{G^*}(G)| > 0.
     \end{equation*}
     With this constant, we can use a so-called ``bump'' function working from $\Rb$ to $\Rb$ that will be similar to the indicator function. We define this function for parameter $a \in \Rb$ with $a > 0$ as:
     \begin{equation*}
-        \psi_a(x) := \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0).
+        \psi_a(x) \coloneqq \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0).
     \end{equation*}
     The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} in the Appendix for a plot of the relevant part of this function with exemplary values for $a$.
     
-    We use these properties to define for every graph ${G^*} \in \cX$ the function $\varphi_{G^*}(\cdot) := \psi_{\delta_{G^*}} (h_{G^*}(\cdot))$. 
+    We use these properties to define for every graph ${G^*} \in \cX$ the function $\varphi_{G^*}(\cdot) \coloneqq \psi_{\delta_{G^*}} (h_{G^*}(\cdot))$. 
     We will quickly demonstrate that this function is equal to the indicator function, for this let $G^*$ be fixed and $G$, an arbitrary graph from $\cX$, the input:
     \begin{enumerate}
         \item If $G \wliso G^*$, then $h_{G^*}(G) = 0$ resulting in $\varphi_{G^*}(G) = \psi_{\delta_{G^*}}(0) = 1$.
@@ -308,10 +308,10 @@ Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,
 \end{proof}
 
 \subsection{Proof of \autoref{theorem:gnn_in_1wl}}
-In this section we will shortly prove the converse direction. However, the proof is not as interesting as the previous one, as it is mainly just a consequence of \autoref{def:gnn} of GNNs. \todo{!}
+In this section we will prove the converse direction. We start with \cref{lem:1wl_color_upper_bound}, where we introduce an upper bound that we will use in \cref{lem:gnn_1wl_disc} to show that there exists a collection of GNN-computable functions that is $\wldisc$. After that, we will prove a composition lemma similar to the one we introduced in the previous section using \cref{lem:composition_lemma_gnn}. From this point on, the proof continues as in the previous section and concludes the property to be proved in \cref{lem:decompose_gnn_as_wl}.
 
 \begin{lemma}\label{lem:1wl_color_upper_bound}
-    Let $G$ be an arbitrary graph with $n := |V(G)|$ the number of nodes and $C$ a coloring of the graph $G$. Then the total number of possible tuples of the form:
+    Let $G$ be an arbitrary graph with $n \coloneqq |V(G)|$ the number of nodes and $C$ a coloring of the graph $G$. Then the total number of possible tuples of the form:
     \begin{equation*}
         (C(v), \ \MSopen C(u) \mid u \in \cN(v) \MSclose),
     \end{equation*}
@@ -324,15 +324,15 @@ In this section we will shortly prove the converse direction. However, the proof
     Assume the above. For the first entry of the tuple, there exist at most $n$ different colors, since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that we can sum over each cardinality of a multiset over $n$ different colors. In the end, we soundly combine both results by multiplying both together.
 \end{proof}
 
-\begin{lemma}
+\begin{lemma}[GNN \wldisc]\label{lem:gnn_1wl_disc}
     There exists a collection of functions $C$ computable by GNNs, such that $C$ is \wldisc. Meaning for every $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ there exists $\cA \in C$ such that $\cA(G_1) \neq \cA(G_2)$.
 \end{lemma}
 
 \begin{proof}
-Since $\cX$ is finite, we define $n := \max \{ |V(G)| \mid G \in \cX \}$ to be the maximum number of nodes of a graph in $\cX$, and $k := \max \{ l_G(v) \mid v \in V(G), G \in \cX \}$ to be the largest label of any node of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We construct a GNN with $n$ layers working as follows for any $v \in V(G)$: 
+Since $\cX$ is finite, we define $n \coloneqq \max \{ |V(G)| \mid G \in \cX \}$ to be the maximum number of nodes of a graph in $\cX$, and $k \coloneqq \max \{ l_G(v) \mid v \in V(G), G \in \cX \}$ to be the largest label of any node of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We construct a GNN with $n$ layers working as follows for any $v \in V(G)$: 
 \begin{align*}
-    f^{(0)}(v) &:= l_G(v), \\
-    f^{(t)}(v) &:= h_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose), \quad 0 < t < n.
+    f^{(0)}(v) &\coloneqq l_G(v), \\
+    f^{(t)}(v) &\coloneqq h_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose), \quad 0 < t < n.
 \end{align*}
 Here $h_{m,t}$ is a function that maps the tuples injectively to an integer of the set:
 \begin{align*}
@@ -342,14 +342,95 @@ such that each layer uses its own coloring domain. With this, we ensure that eac
 
 We define the collection $C$ of functions computable by GNNs as 
 \begin{align*}
-C := \{ \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
+C \coloneqq \{ \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
 \end{align*}
 where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored $c$ in the coloring of $f^{(n)}$.
 \end{proof}
 
-\begin{lemma}
-    Let $C$ be a collection of function computable by GNNs, $\cA_1, \dots , \cA_n \in C$ and $\textsf{Readout}$ as suitable \textsf{READOUT} function for GNNs, then $\hat{\cA} := \textsf{Readout}(\cA_1, \cA_n)$
+Similar to the proof in the previous section, we will use \cref*{lem:composition_lemma_gnn} to introduce the ability to construct GNNs that take in as input multiple GNNs and then apply a multilayer perceptron to the combined output.
+
+
+\begin{lemma}[Composition GNN]\label{lem:composition_lemma_gnn}
+    Let $C$ be a collection of function computable by GNNs. Further, let  $\cA_1, \dots , \cA_n \in C$ and $\mlp$ as multilayer perceptron, then $\hat{\cA}(\cdot) \coloneqq \mlp(\cA_1(\cdot), \dots, \cA_n(\cdot))$ is also computable by a GNN.
 \end{lemma}
+
+\begin{proof}
+    Assume the above. Further, for the ease of readability we make the assumptions that the node features computed in each layer by each $\cA$ is one dimensional. Note that, one can easily extend this proof to work over arbitrary feature dimensions.
+
+    Further, we will for any $x \in \Rb^d$ use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we use the following notation to indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge, i}}$ and $f^{(t)}_{\text{agg, i}}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function of $\cA_i$.
+    
+    We will prove the lemma by giving a construction of $\hat{\cA}$. Let $K$ be the maximum number of layers of any $\cA_1, \dots, \cA_n$. We construct the GNN $\hat{\cA}$ with $K$ layers, with the input layer working as follows on $v \in G$:
+    \begin{align*}
+        \hat{f}^{(0)}(v) \coloneqq \begin{bmatrix}
+            f^{(0)}_1(v)\\
+            \vdots\\
+            f^{(0)}_n(v)
+        \end{bmatrix},
+    \end{align*}
+    and each other layer $0 < t \leq K$ uses the merge $\hat{f}^{(t)}_{\text{merge}}$ and aggregation $\hat{f}^{(t)}_{\text{agg}}$ functions as defined below:
+    \begin{align*}
+        \hat{f}^{(t)}_{\text{merge}} (\hat{f}^{(t-1)}(v), \ Agg) &= \begin{bmatrix}
+            f^{(t)}_{\text{merge, 1}}(\hat{f}^{(t-1)}(v)[1],\ Agg[1])\\
+            \vdots\\
+            f^{(t)}_{\text{merge, n}}(\hat{f}^{(t-1)}(v)[1],\ Agg[n])
+        \end{bmatrix}\text{, and}\\
+        \hat{f}^{(t)}_{\text{agg}}(\MSopen \hat{f}^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose ) &= \begin{bmatrix}
+            f^{(t)}_{\text{agg}, 1}(\MSopen f^{(t-1)}(w)_1 \mid w \in \mathcal{N}(v) \MSclose)\\
+            \vdots\\
+            f^{(t)}_{\text{agg}, n}(\MSopen f^{(t-1)}(w)_n \mid w \in \mathcal{N}(v) \MSclose)
+        \end{bmatrix}.
+    \end{align*}
+    Note that, not all $\cA_i$ will have $K$ layers. For these cases we define the missing functions as follows:
+    \begin{align*}
+        f^{(t)}_{\text{merge, i}}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v)\text{, and}\\
+        f^{(t)}_{\text{agg}, n}(\MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose) &\coloneqq 0.
+    \end{align*}
+    These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. For the first layer $t=0$ we will use:
+    \begin{align*}
+        \hat{f}^{(0)}(v) \coloneqq \begin{bmatrix}
+            f^{(0)}_1(v)\\
+            \vdots\\
+            f^{(0)}_n(v)
+        \end{bmatrix}
+    \end{align*}
+    
+    Finally, the \textsf{READOUT} function is constructed as follows:
+    \begin{align*}
+        \textsf{Readout}(\MSopen \hat{f}^{(t)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
+            \textsf{Readout}_i(\MSopen f^{(t)}_{\text{merge, 1}}(v) \mid v \in V(G) \MSclose)\\
+            \vdots\\
+            \textsf{Readout}_n(\MSopen f^{(t)}_{\text{merge, n}}(v) \mid v \in V(G) \MSclose)
+        \end{bmatrix}.
+    \end{align*}
+\end{proof}
+
+As a result, we are in the same starting position as at the beginning of the proof in \autoref{sec:proof_theorem:1wl_in_gnn}. That is, we have shown with \cref{lem:gnn_1wl_disc} that there is a collection of functions that can distinguish any pair of graphs distinguishable by the 1-WL algorithm, and with \cref{lem:composition_lemma_gnn} we have shown that the composition of multiple GNNs and a multilayer perceptron is still computable by a GNN. Such that we can simply apply the results of \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2} to GNNs, such that we know that for any fixed $G^* \in \cX$ the indicator function $\varphi_{G^*}$ working over $\cX$ with:
+\begin{align*}
+    \varphi_{G^*}(G) := \begin{cases}
+    1\text{, if $G \wliso G^*$}\\
+    0\text{, else}
+\end{cases},
+\end{align*}
+is computable by a GNN.
+
+\begin{lemma}\label{lem:decompose_gnn_as_wl}
+    Let $\mathcal{C}$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs so that for all $G^* \in \cX$, there exists 
+    $\varphi_{G^*} \in \cC$ satisfying $\forall G \in \cX: \varphi_{G^*}(G) = \mathds{1}_{G \wliso G^*}$, then every function computable by a $\wlnn$ is also computable by a GNN.
+\end{lemma}
+
+\begin{proof}
+    Assume the above. For any function $\cB$ computed by $\wlnn$ that works over $\cX$ to $\Rb$, we show that it can be decomposed as follows for any $G \in \cX$ as input:
+    \begin{align}\label{eq:1wl_decomposition}
+        \cB(G) &= \Bigl( \ \frac{1}{|\cX/\!{\wliso}(G)|}\sum_{G^* \in \cX} \mathds{1}_{G \wliso G^*} \Bigr) \cdot \cB(G) \nonumber \\
+        &= \frac{1}{|\cX/\!{\wliso}(G)|}\sum_{G^* \in \cX} \cB(G^*) \cdot \mathds{1}_{G \wliso G^*} \nonumber \\
+        &= \sum_{G^* \in \cX} \frac{\cB(G^*)}{|\cX/\!{\wliso}(G^*)|}  \cdot \varphi_{G^*}(G)
+    \end{align}
+    with $\cX/\!{\wliso}(G^*)$ we denote the set of all graphs $G$ over $\cX$ that are equivalent to $G^*$ according to the $\wliso$ relation. We can decompose $\cB$ as stated in \autoref{eq:1wl_decomposition} via a multilayer perceptron with $\frac{\cB(G^*)}{|\cX/\!{\wliso}(G^*)|}$ being constants and $\varphi_{G^*} \in \cC$ encoding the indicator function. Combined with the \autoref{lem:composition_lemma_gnn}, we can conclude that $\cB$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\cX/\!{\wliso}(G^*)$ well-defined for all graphs.
+\end{proof}
+
+
+
+
 
 
 \subsection{Proof of \autoref{theorem:1wl_in_gnn_approximating}}
@@ -374,7 +455,7 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
 \begin{proof}
     Let $G^* \in \cX$ be fixed and $\epsilon > 0$ be given. Since $\cC$ is 1-\!WL-Discriminating, we know that for every $G \in \cX$ with $G \not\wliso G^*$, there exists a function $h_{G, G^*} \in \cC$ such that $h_{G, G^*}(G) \neq h_{G, G^*}(G^*)$. We use this property to construct for each $G \in \cX$ with $G \not\wliso G^*$ a set $A_{G, G^*}$ as follows:
     \begin{equation*}
-        A_{G, G^*} := \{ G' \in \cX \mid h_{G, G^*}(G') \in (h_{G, G^*}(G) \pm \frac{|h_{G, G^*}(G) - h_{G, G^*}(G^*)|}{2})\},
+        A_{G, G^*} \coloneqq \{ G' \in \cX \mid h_{G, G^*}(G') \in (h_{G, G^*}(G) \pm \frac{|h_{G, G^*}(G) - h_{G, G^*}(G^*)|}{2})\},
     \end{equation*}
     where $(a \pm b)$ is the open set $(a-b, a+b)$ over $\Rb$.
     One can use \autoref{fig:continuous_proof1} below for a better understanding, when a graph $G'$ is contained in $A_{G, G^*}$ and when not. With the illustration one can easily see, that $G \in A_{G, G^*}$ and $G^* \not\in A_{G, G^*}$.
@@ -388,7 +469,7 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
 
    Furthermore, by assumption $h_{G, G^*}$ is continuous, such that $A_{G, G^*}$ is an open set. For every $G \in \cX$ with $G \wliso G^*$ we define $A_{G, G^*}$ as follows:
     \begin{equation*}
-        A_{G, G^*} := \{ G' \in \cX \mid \| G' - G \|_2 < \epsilon\},
+        A_{G, G^*} \coloneqq \{ G' \in \cX \mid \| G' - G \|_2 < \epsilon\},
     \end{equation*}
     where $\|\cdot\|_2$ is the $l_2$.
 
@@ -410,7 +491,7 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
         \item If $G \wliso G^*$, using \autoref{lem:wl_relation_equivalence} we know that $h_{G^*}(G) = h_{G^*}(G^*)$, and by definition $h_{G^*}(G^*) = 0$, such that we can conclude $h_{G^*}(G)=0$.
         \item Let $\delta_{G^*}$ be:
         \begin{equation*}
-            \delta_{G^*} := \frac{1}{2} \min_{\substack{G_0 \in \cX\\G_0 \not\wliso G^*}} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|.
+            \delta_{G^*} \coloneqq \frac{1}{2} \min_{\substack{G_0 \in \cX\\G_0 \not\wliso G^*}} |h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|.
         \end{equation*}
         Prove by contraposition: Assume that for every graph $G' \in \cX/\!{\wliso}(G)$: $\| G' - G^* \|_2 \geq \epsilon$. Hence, $G \not\in \bigcup_{G' \in \cX/\!{\wliso}(G^*)} A_{G', G^*}$ (not in the union of $l_2$ balls of size $\epsilon$ around all graphs of the equivalence class of $G^*$). However, since $\{ A_{G, G^*} \}_{G \in \cX_0}$ is a cover of $\cX$, there must exist a $G_0 \in \cX_0$ with $G_0 \not\wliso G^*$ such that $G \in A_{G_0, G^*}$. Thus, by definition of $A_{G_0, G^*}$ we know that $h_{G_0, G^*}(G) \in (h_{G_0, G^*}(G_0) \pm \frac{|h_{G_0, G^*}(G_0) - h_{G_0, G^*}(G^*)|}{2})$, which when reformulated states:
         \begin{equation}\label{eq:continuous_proof3}
@@ -466,9 +547,9 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
 \begin{proof}
     Let $\cA$ be a continuous function from $\cX$ to $\Rb$ computable by a GNN. Since $\cX$ is compact, this implies that $\cA$ is uniformaly continuous on $\cX$, which further implies that $\forall \epsilon > 0 \exists r > 0$ such that $\forall G_1, G_2 \in \cX$, if $\| G_1 - G_2 \|_2 < r$, then $|\cA(G_1) - \cA(G_2)| < \epsilon$. Further, since $\cA$ is GNN computable, we know that $\forall G_1, G_2 \in \cX$, if $G_1 \wliso G_2: \cA(G_1) = \cA(G_2)$, hence if $G' \in \cX/\!{\wliso}(G_1)$ with $\| G' - G_2 \|_2 < r$ exists, than $|\cA(G_1) - \cA(G_2)| < \epsilon$.\newline
 
-    Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$, we fix this aswell. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cX$ with the above described properties. We choose $\epsilon' := r$ for all $h_{G} \in \cC$ throughout the proof.\newline
+    Throughout the rest of the proof, let $\epsilon > 0$ be fixed. Using the property described above, we know that for this $\epsilon$ there exists a constant $r$, we fix this aswell. Further, by the assumptions of the lemma we try to prove, we know that for any $\epsilon' > 0$ there exists $h_{G} \in \cC$ for any $G \in \cX$ with the above described properties. We choose $\epsilon' \coloneqq r$ for all $h_{G} \in \cC$ throughout the proof.\newline
 
-    For any $G \in \cX$, we define the set $h_{G}^{-1}(a) := \{ G' \in \cX \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. We illustrated this set in \autoref{fig:continuous_proof2} for better understanding.
+    For any $G \in \cX$, we define the set $h_{G}^{-1}(a) \coloneqq \{ G' \in \cX \mid h_G(G') \in [0, a) \}$, as the set of graphs that are mapped into the open interval $[0, a)$ by $h_G$. We illustrated this set in \autoref{fig:continuous_proof2} for better understanding.
     
     \begin{figure}[H]
         \centering
@@ -484,11 +565,11 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
     \end{equation*}
     Since $h_G$ is continuous by definition, $h_{G}^{-1}(\delta_G)$ is an open set. Hence, $\{ h_{G}^{-1}(\delta_G) \}_{G \in \cX}$ is an open cover of $\cX$, and further as $\cX$ is compact, there exists a finite subset $\cX_0 \subseteq \cX$ such that $\{ h_{G_0}^{-1}(\delta_{G_0}) \}_{G_0 \in \cX_0}$ is also a cover of $\cX$. For each $G_0 \in \cX_0$, we construct the function $\varphi_{G_0}$ from $\cX$ to $\Rb$ as follows:
     \begin{equation*}
-        \varphi_{G_0} (\cdot) := \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
+        \varphi_{G_0} (\cdot) \coloneqq \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
     \end{equation*}
     The function has two important properties, for once it is non-negative and for any $G \in \cX: \varphi_{G_0}(G) > 0$, if and only if $G \in h_{G_0}^{-1}(\delta_{G_0})$, thereby acting as a sort of weak indicator function. Building up on this property, we construct for each $G_0 \in \cX_0$ the function $\psi_{G_0}$ from $\cX$ to $\Rb$ as follows:
     \begin{equation*}
-        \psi_{G_0}(\cdot) := \frac{\varphi_{G_0(\cdot)}}{\sum_{G' \in G_0} \varphi_{G'}(\cdot)},
+        \psi_{G_0}(\cdot) \coloneqq \frac{\varphi_{G_0(\cdot)}}{\sum_{G' \in G_0} \varphi_{G'}(\cdot)},
     \end{equation*}
     which is well-defined, because $\{ h_{G_0}^{-1}(\delta_{G_0}) \}_{G_0 \in \cX_0}$ is a cover of $\cX$, such that we can conclude that for any input graph $G$ on $\psi_{G_0}(\cdot)$ there exists a set $h_{G_0}^{-1}(\delta_{G_0})$ with $G \in h_{G_0}^{-1}(\delta_{G_0})$ implying $\varphi_{G_0}(G) > 0$, thus making the denominator not $0$. The function $\psi_{G_0}$ has two important properties, for once it is non-negative, because $\varphi_{G}$ for all $G \in \cX$ is non-negative, and for any $G \in \cX: \psi_{G_0}(G) > 0$, if and only if $G \in h_{G_0}^{-1}(\delta_{G_0})$.
 
@@ -527,7 +608,7 @@ One can interpret this function $h_{G^*}$ as a kind of loss function that measur
     \begin{eqnarray*}
         \hat{\cA}(\cdot) = \sum_{G_0 \in \cX_0} \cA(G_0) \cdot \frac{1}{\sum_{G' \in \cX_0} \max(\delta_{G'} -  h_{G'}(\cdot), \ 0)} \cdot \max(\delta_{G_0} -  h_{G_0}(\cdot), \ 0).
     \end{eqnarray*}
-    We construct a multilayer perceptron $\mlp_{\hat{\cA}}$ that takes in as input a vector of the output of the finite set of functions $\{ h_{G_0} \}_{G_0 \in \cX_0}$ applied on the input graph. In the first layer we compute each $\max(\delta_{G_0} -  h_{G_0}(\cdot))$ term, where $\delta_{G_0}$ is a constant, in particular the bias, and the $\max$ operator is replaced by the activation function ReLU. In the second layer, we compute the sum of the denominator of the fraction, to which we apply the activation function $f(x) := \frac{1}{x}$. In the last layer we compute the overall sum where $\cA(G_0)$ is a constant.
+    We construct a multilayer perceptron $\mlp_{\hat{\cA}}$ that takes in as input a vector of the output of the finite set of functions $\{ h_{G_0} \}_{G_0 \in \cX_0}$ applied on the input graph. In the first layer we compute each $\max(\delta_{G_0} -  h_{G_0}(\cdot))$ term, where $\delta_{G_0}$ is a constant, in particular the bias, and the $\max$ operator is replaced by the activation function ReLU. In the second layer, we compute the sum of the denominator of the fraction, to which we apply the activation function $f(x) \coloneqq \frac{1}{x}$. In the last layer we compute the overall sum where $\cA(G_0)$ is a constant.
 \end{proof}
 
 \subsection{Proof of \autoref{theorem:gnn_approximating_in_1wl}}
@@ -538,7 +619,7 @@ In this section we will shortly prove that GNN-Approximating implies $\wldisc$. 
     \begin{equation*}
         h_{G_1, G_2}(G) = \min_{\pi \in S_n} \|\pi^T G \pi - G_1\|_2,
     \end{equation*} where $\|\cdot\|_2$ is the $l_2$ norm. Note that, $h_{G_1, G_2}$ is computable as the number of permutations $\pi$ in $S_n$ are finite. Since $h_{G_1, G_2}$ is permutation invariant, we can construct a GNN with $0$ layers and $h_{G_1, G_2}$ as its $\textsf{READOUT}$ function, thereby constructing a GNN computing $h_{G_1, G_2}$ and consequently showing that the function is GNN computable.
-    We choose $\epsilon := \frac{1}{2} \cdot h_{G_1, G_2}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $h_{G_1, G_2}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
+    We choose $\epsilon \coloneqq \frac{1}{2} \cdot h_{G_1, G_2}(G_2) > 0$, then there exists a function $h_\epsilon \in \cC$ approximating $h_{G_1, G_2}$ within $\epsilon$ accuracy. With this, we have a function $h_\epsilon \in \cC$ that can distinguish $G_1$ and $G_2$, since:
     \begin{align*}
         | h_\epsilon(G_1) - h_\epsilon(G_2)| &> | (h_{G_1, G_2}(G_1) - \epsilon) - (h_{G_1, G_2}(G_2) + \epsilon)|\\
         &= |h_{G_1, G_2}(G_2) -2 \cdot \epsilon| \quad&\text{by definition $h_{G_1, G_2}(G_1) = 0$}\\
