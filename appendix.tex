@@ -15,25 +15,25 @@
 \begin{proof}[Proof of \cref{lem:composition_lemma}]
     Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \cX$:
     \begin{equation*}
-        \mlp^\bullet(h_1(G), \dots ,h_n(G)) = \mlp^* \circ f^* \circ \wl(G)
+        \mlp^\bullet(h_1(G), \dots ,h_n(G)) = \mlp^* \circ f^* (\MSopen \wl(G)(v) \mid v \in V(G) \MSclose)
     \end{equation*}
     with which we can conclude that the composition of multiple functions computable by $\wlnn$, is in fact also $\wlnn$ computable. 
 
-    We define the new encoding function $f^*$ to work as follows on input $C_\infty$:
+    We define the new encoding function $f^*$ to work as follows on an arbitrary input multiset $M$:
     \begin{equation*}
-        f^*(C_\infty) := \textsf{concat}(
+        f^*(M) := \textsf{concat}(
             \begin{bmatrix}
-                f_1(C_\infty)\\
+                f_1(M)\\
                 \vdots\\
-                f_n(C_\infty)
+                f_n(M)
             \end{bmatrix}),
     \end{equation*}
     where $\textsf{conccat}$ is the concatenation function, concatenating all encoding vectors to one single vector.
 
-    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ for $i \in [n]$ at layer $j > 0$ as follows: $(\mlp_i)_{j}(v) := \sigma(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
+    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ for $i \in [n]$ at layer $j > 0$ as follows: $(\mlp_i)_{j}(v) := \sigma_{i,t}(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:\todo{the activation function might not be the same everywhere}
     \begin{align*}
         &(\mlp^*)_{0}(v) := v\\
-        &(\mlp^*)_{j+1}(v) := \sigma(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
+        &(\mlp^*)_{j+1}(v) := \sigma^*_j(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
             \begin{bmatrix}
                 b^1_j\\
                 \vdots\\
@@ -50,7 +50,19 @@
             0 & \hdots & 0 & W^n_j
         \end{bmatrix},
     \end{align*}
-    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$.
+    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$. And we define the overall activation function $\sigma^*_j$ as following:
+    \begin{equation*}
+        \sigma^*_j(v) := \begin{bmatrix}
+            \sigma_{1,j}(v[1])\\
+            \vdots\\
+            \sigma_{1,j}(v[d_1])\\
+            \vdots\\
+            \sigma_{n,j}(v[d_1 + \dots + d_{n-1} + 1])\\
+            \vdots\\
+            \sigma_{n,j}(v[d_1 + \dots + d_n])\\
+        \end{bmatrix},
+    \end{equation*}
+    where $d_i$ is the dimension of the output of $\mlp_i$ at layer $j$, and for the ease of readability we denote the $i$.th component of vector $v$ here with $v[i]$. Thereby, we construct an activation function that applies each respective activation function of the $\mlp_i$'s individually to their respective computation.
 \end{proof}
 
 

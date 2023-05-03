@@ -218,7 +218,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \begin{proof}
     We define $f_c$  for $c \in \Nb$ as the encoding functions that returns the number of nodes colored as $c$. With this we can construct the collection of functions $C$ as follows:
     \begin{align*}
-        C := \{ \cB_c: \cX \rightarrow \Rb, \ G \mapsto \mlp_\text{id} \circ f_c \MSopen \wl(G)(c) \mid v \in V(G) \MSclose \mid c \in \Nb\},
+        C := \{ \cB_c: \cX \rightarrow \Rb, \ G \mapsto \mlp_\text{id} \circ f_c (\MSopen \wl(G)(v) \mid v \in V(G) \MSclose) \mid c \in \Nb\},
     \end{align*}
     where $\mlp_\text{id}$ is a dummy multilayer perceptron that just returns its input. Since every function $\cB_c \in C$ is composed of the $\wl$ algorithm, an encoding function and a multilayer perceptron, each function is computable by $\wlnn$, and consequently also the whole collection.
 
@@ -231,7 +231,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \end{lemma}
 
 \begin{proof}
-    Let $\cB$ be an arbitrary function over $\cX$ computable by $\wlnn$, then $\cB$ is composed as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \circ \wl(\cdot)$. Further, let $G_1, G_2 \in \cX$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediately.
+    Let $\cB$ be an arbitrary function over $\cX$ computable by $\wlnn$, then $\cB$ is composed as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \MSopen \wl(\cdot)(v) \mid v \in V(G) \MSclose$. Further, let $G_1, G_2 \in \cX$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediately.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Permuation Invariance]\label{lem:wlnn_permutation_invariance}
