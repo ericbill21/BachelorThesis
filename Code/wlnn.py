@@ -20,18 +20,25 @@ class WLNN():
     def get_total_number_of_colors(self):
         return len(self.wl.hashmap)
     
-    def init_training(self, train_dataset, test_dataset):
+    
+    
+    def init_training(self, train_dataset, test_dataset, encode_dim):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
 
         self.wl.reset_parameters()
 
-        # Initialize the wl kernel
+        self.new_dataset = torch.zeros((train_dataset.len() + test_dataset.len(), encode_dim), dtype=torch.long)
+
+        count = 0
         for graph in train_dataset + test_dataset:
-            # We run the wl kernel on the graph
-            out = graph.x.squeeze()
-            for i in range(graph.num_nodes):
-                out = self.wl.forward(out, graph.edge_index)
+
+            coloring = wl_algorithm(graph)
+
+            # We encode the node features
+            self.new_dataset[count] = self.encoding(coloring)
+            count += 1
+            
         
     def forward(self, x, edge_index, batch_size, batch_ptr):
         # We run the wl kernel on the graph
@@ -57,6 +64,24 @@ def constant_and_id_transformer(data):
         data.x = torch.zeros(data.edge_index.shape[1], dtype=torch.long).unsqueeze(-1)
     
     return data
+
+def wl_algorithm(wl, graph, total_iterations = -1):
+        old_coloring = graph.x.squeeze()
+        new_coloring = wl.forward(old_coloring, graph.edge_index)
+
+        iteration = 0
+        is_converged = (torch.sort(wl.histogram(old_coloring))[0] == torch.sort(wl.histogram(new_coloring))[0]).all()
+        while not is_converged and iteration < total_iterations:
+            # Calculate the new coloring
+            old_coloring = new_coloring
+            new_coloring = wl.forward(old_coloring, graph.edge_index)
+
+            # Check if the coloring has converged
+            iteration += 1
+            is_converged = (torch.sort(wl.histogram(old_coloring))[0] == torch.sort(wl.histogram(new_coloring))[0]).all()
+
+        return old_coloring
+
 
     
         

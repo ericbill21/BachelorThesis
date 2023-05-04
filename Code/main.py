@@ -19,6 +19,9 @@ from torch_geometric.transforms.constant import Constant
 
 from torch_geometric.loader import DataLoader
 
+EPOCHS = 100
+BATCH_SIZE = 32
+
 def main():
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
@@ -30,11 +33,12 @@ def main():
     split = int(fraction * dataset.len())
     train_dataset = dataset[:split]
     test_dataset = dataset[split:]
-
+    
     wlnn_model = WLNN()
-    wlnn_model.init_training(train_dataset, test_dataset)
 
-    total_colors = wlnn_model.get_total_number_of_colors()
+    # Initialize and set the counting encoding function
+    f_enc = create_counting_encoding()
+    wlnn_model.set_encoding(f_enc)
 
     # Initialize and set a simple MLP
     mlp = nn.Sequential(
@@ -48,18 +52,18 @@ def main():
     
     wlnn_model.set_mlp(mlp)
 
-    # Initialize and set the counting encoding function
-    f_enc = create_counting_encoding(total_colors)
-    wlnn_model.set_encoding(f_enc)
+    wlnn_model.init_training(train_dataset, test_dataset)
+
 
     # Train the model
     optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01)
     loss_fn = nn.CrossEntropyLoss()
 
-    for epoch in range(20):
+    # TODO: just transform the dataset to wl_colors
+    for epoch in range(EPOCHS):
         train_dataset_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-        for i in range(10):
+        for i in range(train_dataset.len() // BATCH_SIZE):
             batch = next(iter(train_dataset_loader))
 
             optimizer.zero_grad()
@@ -78,7 +82,27 @@ def main():
     print('Hey')
 
 
-def create_counting_encoding(n):
+def create_counting_encoding(dataset):
+
+    wl = wl_conv()
+    dataset_loader = DataLoader(dataset, batch_size=dataset.len(), shuffle=False)
+    graph = next(iter(dataset_loader))
+
+    max = torch.max(graph.ptr)
+
+    out = graph.x.squeeze()
+
+    is_converged = False
+    iteration = 0
+    while not is_converged and iteration < graph.num_nodes:
+        new_out = wl.forward(out, graph.edge_index)
+
+        is_converged = (wl.histogram(new_out) == wl.histogram(out)).all()
+        out = new_out
+
+        iteration += 1
+    
+    n = len(wl.hashmap)
 
     def counting_encoding(x):
         out = torch.zeros(n)
@@ -94,3 +118,8 @@ def create_counting_encoding(n):
 
 if __name__ == '__main__':
     main()
+
+
+# TODO: 1. Write a encoding function class that has an attribute for its output dimension
+#       2. Check for better WL implementations
+#       3. Get inspired by code online
