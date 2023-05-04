@@ -2,6 +2,8 @@
 \appendix
 \section{Appendix}
 \subsection{Figures and graphs}
+
+\subsubsection{The ``Bump'' Function}\label{app:bump_function}
 \begin{figure}[H]
     \centering
     \input{Figures/plot1}
@@ -11,7 +13,7 @@
 
 \subsection{Proofs}
 
-\subsubsection{\cref{lem:composition_lemma}: Composition Lemma for $\wlnn$}
+\subsubsection{\cref{lem:composition_lemma}: Composition Lemma for $\wlnn$}\label{app:composition_proof}
 \begin{proof}[Proof of \cref{lem:composition_lemma}]
     Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \cX$:
     \begin{equation*}
@@ -30,7 +32,7 @@
     \end{equation*}
     where $\textsf{conccat}$ is the concatenation function, concatenating all encoding vectors to one single vector.
 
-§    Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ for $i \in [n]$ at layer $j > 0$ as follows: $(\mlp_i)_{j}(v) := \sigma_{i,t}(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:\todo{the activation function might not be the same everywhere}
+   Using the decomposition introduced in \cref{def:mlp}, we can decompose each $\mlp_i$ for $i \in [n]$ at layer $j > 0$ as follows: $(\mlp_i)_{j}(v) := \sigma_{i,t}(W^{i}_{j} \cdot (\mlp_i)_{j-1}(v) + b^i_j)$. Using this notation we construct $\mlp^*$ as follows:
     \begin{align*}
         &(\mlp^*)_{0}(v) := v\\
         &(\mlp^*)_{j+1}(v) := \sigma^*_j(W^*_j \cdot (\mlp^*)_{j} (v) + \textsf{concact}(
@@ -41,7 +43,7 @@
             \end{bmatrix})) &,\forall j \in [k]\\
         &(\mlp^*)_{j+k+1}(v) := (\mlp^\bullet)_{j+1}(v) &,\forall j \in [k^\bullet - 1]
     \end{align*}
-    where $k$ is the maximum number of layers of the set of $\mlp_i$'s, $k^\bullet$ is the number of layers of the given $\mlp^\bullet$ and $\sigma$ an element wise activation function. Thereby, we define in the first equation line, that the start of the sequence is the input, with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last equation line, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
+    where $k$ is the maximum number of layers of the set of $\mlp_i$'s, and $k^\bullet$ is the number of layers of the given $\mlp^\bullet$. Thereby, we define in the first equation line, that the start of the sequence is the input, with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last equation line, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
     \begin{align*}
         W^*_j &:= \begin{bmatrix}
             W^1_j & 0 & \hdots & 0\\
@@ -50,7 +52,7 @@
             0 & \hdots & 0 & W^n_j
         \end{bmatrix},
     \end{align*}
-    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with $0$, zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$. And we define the overall activation function $\sigma^*_j$ as following:
+    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with ``$0$'' zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$. And finally, we define the overall activation function $\sigma^*_j$ as following:
     \begin{equation*}
         \sigma^*_j(v) := \begin{bmatrix}
             \sigma_{1,j}(v[1])\\
@@ -59,6 +61,7 @@
             \vdots\\
             \sigma_{n,j}(v[d_1 + \dots + d_{n-1} + 1])\\
             \vdots\\
+            \sigma_{n,j}(v[d_1 + \dots + d_{n}])
         \end{bmatrix},
     \end{equation*}
     where $d_i$ is the dimension of the output of $\mlp_i$ at layer $j$, and for the ease of readability we denote the $i$.th component of vector $v$ here with $v[i]$. Thereby, we construct an activation function that applies each respective activation function of the $\mlp_i$'s individually to their respective computation.

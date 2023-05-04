@@ -166,9 +166,9 @@ The $\wliso$ relation can further be classified as an equivalence relation, as i
 \end{definition}
 
 \section{Theoretical Connection}
-This section is the main part of our theoretical investigation of the two frameworks. We will present 4 intriguing theorems, which will be proven separately afterwards. These results will form the basis for the empirical part that follows. The first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. The last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.\todo{add that graph wise classification implies node classification!!!}
+This section is the main part of our theoretical investigation of the two frameworks. We will present 4 intriguing theorems, which will be proven separately afterwards. These results will form the basis for the empirical part that follows. The first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. The last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.
 
-Throughout the first two theorems we will concentrate on a finite collection of graphs which we will denote with $\cX \subset \cG$.
+All the results we will now present focus on graph task functions, since this is the more complex problem, as any node or edge task function can be adapted to a graph task. In the first two theorems, we focus on a finite collection of graphs, which we denote by $\cX \subset \cG$.
 
 \begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs, then $\cC$ is also computable by $\wlnn$.
@@ -179,11 +179,11 @@ Throughout the first two theorems we will concentrate on a finite collection of 
 \end{theorem}
 With these theorems, we showed the equivalence between both frameworks. Specifically, every function computed by $\wlnn$ is also computable by a GNN, and vice versa. Notice that, we did not leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves, but rather kept it general. 
 
-Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of $\wldisc$ by investigating a connection between the two frameworks for continuous feature spaces and continuous functions. However, since the graph isomorphism problem is an inherently discrete problem, the $\wl$ algorithm is only defined as a discrete function operating on discrete colors, such that extending the definition of the $\wl$ algorithm to continuous functions is not very trivial and, to our knowledge, has not yet been widely investigated. We therefore assume in the proofs and the following theorems that there exists a continuous version of the $\wl$ algorithm. 
+Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of $\wldisc$ by investigating a connection between the two frameworks for continuous feature spaces and continuous functions. However, since the graph isomorphism problem is an inherently discrete problem, the $\wl$ algorithm is only defined as a discrete and discontinuous function operating on discrete colors, such that extending the definition of the $\wl$ algorithm to a continuous function working over continuous values is not very trivial and, to our knowledge, has not yet been widely investigated. We therefore assume in the proofs and the following theorems that there exists a continuous version of the $\wl$ algorithm. 
 
 We define the set of graphs with continuous features using the following definition:
 \begin{definition}
-    Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. We say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Further, if $G$ encodes an undirected graph, $G$ is symmetric. For simplicity, we denote $\cX \coloneqq X^{n \times n}$ throughout the next two theorems and their respective proofs.
+    Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. Furthermore, we say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Additionally, if $G$ encodes an undirected graph, $G$ is a symmetric matrix. For simplicity, we denote $\cX \coloneqq X^{n \times n}$ throughout the next two theorems and their respective proofs.
 \end{definition}
 
 \begin{theorem}[Continuous Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn_approximating}
@@ -194,7 +194,7 @@ We define the set of graphs with continuous features using the following definit
     Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ that is GNN-Approximating, then $\cC$ is also $\wldisc$.
 \end{theorem}
 
-Since we only wanted to show the expressive power of $\wldisc$ and made the major assumption of the existence of a continuous $\wl$ algorithm, we have included the proofs of each theorem in the Appendix in \autoref{app:gnn_in_wlnn}.
+Since we only wanted to show the expressive power of $\wldisc$ and made the major assumption of the existence of a continuous $\wl$ algorithm, we have included the proofs of \cref{theorem:1wl_in_gnn_approximating,theorem:gnn_approximating_in_1wl} in the Appendix in \autoref{app:gnn_in_wlnn}.
 
 Immediately from the last theorem follows the corollary:
 \begin{corollary}
@@ -202,7 +202,7 @@ Immediately from the last theorem follows the corollary:
 \end{corollary}
 
 \begin{proof}
-    The collection of all functions computable by GNNs is trivially GNN-Approximating, such that we can use \autoref{theorem:gnn_approximating_in_1wl} which concludes the proof.
+    The collection of all functions from $\cX$ to $\Rb$ computable by GNNs is trivially GNN-Approximating, such that we can apply \autoref{theorem:gnn_approximating_in_1wl} with which the proof concludes.
 \end{proof}
 
 By putting both theorems into perspective, we can now argue that even for continuous functions $\wlnn$ and GNNs can compute almost the same functions. Each framework can approximate the other framework arbitrarily well. From this we can conclude that the ability $\wldisc$ is very powerful, so we can assume that $\wlnn$ is sufficiently expressive for the upcoming empirical part.
@@ -246,17 +246,16 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
     Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cB$ composed of $\cB(\cdot) \coloneqq \mlp^\bullet(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
 \end{lemma}
 \begin{proof}
-    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that maps a coloring $C_\infty$ to a concatenation of the vectors obtained when applying each encoding function $f_i$ individually. Additionally, we construct a multilayer perceptron $\mlp^*$ that takes in this concatenation of vectors and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously on their respective section of the encoding vector of $f^*$, and applies afterwards the given $\mlp^\bullet$ on the concatenation of the output of all $\mlp_i$'s.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix, as this proof is very technical and not that interesting.
+    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that duplicates its input and applies each encoding function $f_i$ individually, and we construct a multilayer perceptron $\mlp^*$ that takes in this output and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously. Afterwards, the given $\mlp^\bullet$ will be applied on the concatenation of the output of all $\mlp_i$'s.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix in \autoref{app:composition_proof}, as this proof is very technical and not that interesting.
 
     \begin{figure}[H]
         \centering
         \input{Figures/proof1.tex}
-        \caption{Proof idea for \autoref{lem:composition_lemma}, how the constructed functions $f^*$ and $\mlp^*$ will work on input $G$. Here we denote with $C_\infty$ the final coloring computed by the $\wl$ algorithm when applied on $G$. Further, we let $o_i$ be the output computed by $\mlp_i$ on input $f_i(C_\infty)$.}
+        \caption{Proof idea for \autoref{lem:composition_lemma}, how the constructed functions $f^*$ and $\mlp^*$ will work on input $G$. Here we denote with $M_G$ the multiset of colors of the nodes of $G$ after the $\wl$ algorithm has been applied. More formally $M_G := \MSopen \wl(G)(v) \mid v \in V(G) \MSclose$. Further, we let $o_i$ be the output computed by $\mlp_i$ on input $f_i(M_G)$.}
         \label{fig:proof_idea_parallelism}
     \end{figure}
 \end{proof}
     
-
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func1}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is $\wldisc$. Then for all $G^* \in \cX$, there exists a function $h_{G^*}$ from $\cX$ to $\Rb$ computable by $\wlnn$, such that for all $G \in \cX: h_{G^*}(G) = 0$ if and only if $G \wliso G^*$.
@@ -264,23 +263,23 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 
 \begin{proof}
     Assume the above. For any $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ let $h_{G_1, G_2} \in \cC$ be the function distinguishing them, with $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$. We define the function $\overline{h}_{G_1,G_2}$ working over $\cX$ as follows:
-    \begin{align}\label{eq:lem:encoding-indicator-func2}
-        \overline{h}_{G_1, G_2}(\cdot) &= |h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)| \nonumber \nonumber\\
-        &= \max(h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)) + \max(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(\cdot))
+    \begin{align}\label{eq:lemma_inidcator_function_1}
+        \overline{h}_{G_1, G_2}(\cdot) &= |h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)| \nonumber\\
+        &= \max(h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1), \ 0) + \max(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(\cdot), \ 0) \nonumber\\
+        &= \text{ReLU}(h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)) + \text{ReLU}(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(\cdot))
     \end{align}
-    Note, that in the formula above ``$h_{G_1, G_2}(G_1)$'' is a fixed constant and the resulting function $\overline{h}_{G_1, G_2}$ is non-negative.
+    Note, that in the equations above ``$h_{G_1, G_2}(G_1)$'' is a fixed constant and the resulting function $\overline{h}_{G_1, G_2}$ is non-negative.
     Let $G_1 \in \cX$ now be fixed, we will construct the function $h_{G_1}$ with the desired properties as follows:
-    \begin{align*}
+    \begin{align}\label{eq:lemma_inidcator_function_2}
         h_{G_1}(x) = \sum_{G_2 \in \cX, \ G_1 \not\wliso G_2} \overline{h}_{G_1, G_2}(x).
-    \end{align*}
+    \end{align}
     Since $\cX$ is finite, the sum is finite and therefore well-defined. Next, we will prove that for a fixed graph $G_1 \in \cX$, the function $h_{G_1}$ is correct on input $G \in \cX$:
     \begin{enumerate}
         \item If $G_1 \wliso G$, then for every function $\overline{h}_{G_1, G_2}$ of the sum with $G_1 \not\wliso G_2$, we know, using \autoref{lem:wl_relation_equivalence}, that $\overline{h}_{G_1, G_2}(G)$ is equal to $\overline{h}_{G_1, G_2}(G_1)$ which is by definition $0$, such that $h_{G_1}(G) = 0$.
         \item If $G_1 \not\wliso G$, then $\overline{h}_{G_1, G}(G)$ is a summand of the overall sum, and since $\overline{h}_{G_1, G}(G) > 0$, 
         we can conclude $h_{G_1}(G) > 0$ due to the non-negativity of each function $\overline{h}_{G_1, G_2}$.
     \end{enumerate}
-
-    This function can be encoded via a multilayer perceptron by replacing the $\max$ operator in \autoref{eq:lem:encoding-indicator-func2} by the activation function ReLU. Therefore, we can conclude with \autoref{lem:composition_lemma} that for every graph $G$, $h_G$ is also $\wlnn$ computable.
+    We can encode \autoref{eq:lemma_inidcator_function_1} via a multilayer perceptron where ``$h_{G_1, G_2}(G_1)$'' is just a constant, and consequently can encode \autoref{eq:lemma_inidcator_function_2} aswell. Therefore, we can conclude with \autoref{lem:composition_lemma} that for every graph $G$, $h_G$ is also $\wlnn$ computable.
 \end{proof}
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func2}
@@ -291,11 +290,12 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
     \begin{equation*}
         \delta_{G^*} \coloneqq \frac{1}{2} \min_{G \in \cX , \  G \not\wliso G^*} |h_{G^*}(G)| > 0.
     \end{equation*}
-    With this constant, we can use a so-called ``bump'' function working from $\Rb$ to $\Rb$ that will be similar to the indicator function. We define this function for parameter $a \in \Rb$ with $a > 0$ as:
-    \begin{equation*}
-        \psi_a(x) \coloneqq \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0).
-    \end{equation*}
-    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} in the Appendix for a plot of the relevant part of this function with exemplary values for $a$.
+    With this constant, we can use a so-called ``bump'' function working from $\Rb$ to $\Rb$ that is similar to the indicator function. We define this function for parameter $a \in \Rb$ with $a > 0$ as:
+    \begin{align}\label{eq:lemma_encoding_indicator_func2}
+        \psi_a(x) &\coloneqq \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0) \nonumber\\
+        &= \text{ReLU}(\frac{x}{a} -1) + \text{ReLU}(\frac{x}{a}+1) - 2 \cdot \text{ReLU}(\frac{x}{a})
+    \end{align}
+    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} in the Appendix in \autoref{app:bump_function} for a plot of the relevant part of this function with exemplary values for $a$.
     
     We use these properties to define for every graph ${G^*} \in \cX$ the function $\varphi_{G^*}(\cdot) \coloneqq \psi_{\delta_{G^*}} (h_{G^*}(\cdot))$. 
     We will quickly demonstrate that this function is equal to the indicator function, for this let $G^*$ be fixed and $G$, an arbitrary graph from $\cX$, the input:
@@ -303,7 +303,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
         \item If $G \wliso G^*$, then $h_{G^*}(G) = 0$ resulting in $\varphi_{G^*}(G) = \psi_{\delta_{G^*}}(0) = 1$.
         \item If $G \not\wliso G^*$ then $h_{G^*}(G) \neq 0$, such that $|h_{G^*}(G)|> \delta_{G^*}$ so that $h_{G^*}(G) \not\in (-\delta_{G^*}, \delta_{G^*}) $ resulting in $\varphi_{G^*}(G) = 0$.
     \end{enumerate}
-    Note that we can encode $\varphi_{G^*}$ via a multilayer perceptron with a single layer, where $\delta_{G^*}$ is a constant and the $\max$ operator is replaced by the non-linear activation function ReLU. With \autoref{lem:composition_lemma} we can therefore conclude that $\varphi_{G^*}$ is computable by $\wlnn$ for every graph ${G^*} \in \cX$.
+    Note that we can encode $\varphi_{G^*}$ using \autoref{eq:lemma_encoding_indicator_func2} via a multilayer perceptron, where $\delta_{G^*}$ is a constant. With \autoref{lem:composition_lemma} we can therefore conclude that $\varphi_{G^*}$ is computable by $\wlnn$ for every graph ${G^*} \in \cX$.
 \end{proof}
 
 \begin{lemma}\label{lem:decompose_gnn_as_wl}
@@ -374,7 +374,7 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
 \begin{proof}
     Assume the above. Further, for the ease of readability we make the assumptions that the node features computed in each layer by each $\cA_i$ is one dimensional. Note that, one can easily extend this proof to work over arbitrary feature dimensions.
 
-    Further, we will for any $x \in \Rb^d$ use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we use the following notation to indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function of $\cA_i$.
+    Further, we will for any $x \in \Rb^d$ use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Also, we use the following notation to indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function and $f^{(0)}_i$ the input function of $\cA_i$.
     
     We will prove the lemma by giving a construction of $\hat{\cA}$. Let $K$ be the maximum number of layers of all $\cA_1, \dots, \cA_n$. We construct the GNN $\hat{\cA}$ with $K$ layers, with the input layer working as follows on $v \in G$:
     \begin{align*}
@@ -386,12 +386,12 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
     \end{align*}
     and each other layer $0 < t \leq K$ uses the merge $\hat{f}^{(t)}_{\text{merge}}$ and aggregation $\hat{f}^{(t)}_{\text{agg}}$ functions as defined below:
     \begin{align*}
-        \hat{f}^{(t)}_{\text{merge}} (\hat{f}^{(t-1)}(v), \ Agg) &= \begin{bmatrix}
+        \hat{f}^{(t)}_{\text{merge}} (\hat{f}^{(t-1)}(v), \ Agg) &:= \begin{bmatrix}
             f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v)[1],\ Agg[1])\\
             \vdots\\
             f^{(t)}_{\text{merge}, n}(\hat{f}^{(t-1)}(v)[n],\ Agg[n])
         \end{bmatrix}\text{, and}\\
-        \hat{f}^{(t)}_{\text{agg}}(\MSopen \hat{f}^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose ) &= \begin{bmatrix}
+        \hat{f}^{(t)}_{\text{agg}}(\MSopen \hat{f}^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose ) &:= \begin{bmatrix}
             f^{(t)}_{\text{agg}, 1}(\MSopen f^{(t-1)}(w)[1] \mid w \in \mathcal{N}(v) \MSclose)\\
             \vdots\\
             f^{(t)}_{\text{agg}, n}(\MSopen f^{(t-1)}(w)[n] \mid w \in \mathcal{N}(v) \MSclose)
@@ -412,9 +412,9 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
     \end{align*}
 \end{proof}
 
-As a result, we are in the same starting position as at the beginning of the proof in \autoref{sec:proof_theorem:1wl_in_gnn}. That is, we have shown with \cref{lem:gnn_1wl_disc} that there is a collection of functions that can distinguish any pair of graphs distinguishable by the 1-WL algorithm, and with \cref{lem:composition_lemma_gnn} we have shown that the composition of multiple GNNs and a multilayer perceptron is still computable by a GNN. Such that we can simply apply the results of \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2} to GNNs, such that we know that for any fixed $G^* \in \cX$ the indicator function $\varphi_{G^*}$ working over $\cX$ with:
+As a result, we are in the same starting position as at the beginning of the proof in \autoref{sec:proof_theorem:1wl_in_gnn}. That is, we have shown with \cref{lem:gnn_1wl_disc} that there is a collection of functions that can distinguish any pair of graphs distinguishable by the 1-WL algorithm, and with \cref{lem:composition_lemma_gnn} we have shown that the composition of multiple GNNs and a multilayer perceptron is still computable by a GNN. Such that we can simply apply the results of \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2} to GNNs aswell and thereby concluding that for any fixed $G^* \in \cX$ the indicator function $\varphi_{G^*}$ working over $\cX$ with:
 \begin{align*}
-    \varphi_{G^*}(G) := \begin{cases}
+    \forall G \in \cX: \varphi_{G^*}(G) := \begin{cases}
     1, \quad \text{if $G \wliso G^*$}\\
     0, \quad \text{else}
 \end{cases},

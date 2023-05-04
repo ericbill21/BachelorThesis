@@ -5,14 +5,14 @@
     \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
     
     \node (inputG) {$G$};
-    \node (coloring) [right =of inputG] {$C_\infty$};
+    \node (coloring) [right =of inputG] {$M_G$};
     \node (firstV) [right =of coloring] {$\begin{bmatrix*}
-        f_1(C_\infty)\\
+        f_1(M_G)\\
         \vdots\\
-        f_n(C_\infty)
+        f_n(M_G)
     \end{bmatrix*}$};
-    \node (inp1) [above right =of firstV] {$f_1(C_\infty)$};
-    \node (inp2) [below right =of firstV] {$f_n(C_\infty)$};
+    \node (inp1) [above right =of firstV] {$f_1(M_G)$};
+    \node (inp2) [below right =of firstV] {$f_n(M_G)$};
     \node (out1) [right =of inp1] {$o_1$};
     \node (out2) [right =of inp2] {$o_n$};
     \node (out) [below right =of out1, above right =of out2] {$\begin{bmatrix*}
@@ -51,7 +51,7 @@
 
     %\draw [|-latex] (-0.6,0) -- node [text width=2.5cm,midway,above,align=center ] {1-WL} (1.0,0);
 
-    %\draw (1.6, 0.0) node {$(C_\infty)_G$};
+    %\draw (1.6, 0.0) node {$(M_G)_G$};
 
     %\draw [|-latex] (2.4, 0.0) -- node [text width=2.5cm,midway,above,align=center ] {$f$} (3.25, 0.0);
     
