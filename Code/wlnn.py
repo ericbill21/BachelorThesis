@@ -28,7 +28,7 @@ class WLNN():
 
         # Initialize the wl kernel
         for graph in train_dataset + test_dataset:
-            # We run the wl kernel on the graph, save the result in the color_map and tag the graph with an unique id
+            # We run the wl kernel on the graph
             out = graph.x.squeeze()
             for i in range(graph.num_nodes):
                 out = self.wl.forward(out, graph.edge_index)
