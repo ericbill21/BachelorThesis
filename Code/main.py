@@ -79,24 +79,16 @@ def main():
     train_dataset = dataset[:split]
     test_dataset = dataset[split:]
 
-    # Initialize and set the counting encoding function
+    # Initialize the wlnn model
     total_number_of_colors = len(wl.hashmap) + 1 # We add 1 for safety reasons as the number of colors used by the wl algorihtm fluctuates by 1
-    embedding = nn.Embedding(total_number_of_colors, 10)
-    f_enc = Mean_Encoding(embedding)
-
-    # Initialize and set a simple MLP
-    mlp = nn.Sequential(
-            nn.Linear(f_enc.out_dim, 60),
-            nn.ReLU(),
-            nn.Linear(60, 40),
-            nn.ReLU(),
-            nn.Linear(40, 20),
-            nn.ReLU(),
-            nn.Linear(20, dataset.num_classes),
-            nn.Softmax(dim=1))
     
-    # Initialize the WLNN model
-    wlnn_model = WLNN(f_enc=f_enc, mlp=mlp)
+    wlnn_model = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                    (nn.Embedding(total_number_of_colors, 10), 'x -> x'),
+                    (torch.squeeze, 'x -> x'),
+                    (global_mean_pool, 'x, batch -> x'),
+                    (MLP([10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (nn.Softmax(dim=1), 'x -> x')
+                ])
 
     # Initialize the GNN model
     gnn_model = torch_geometric.nn.Sequential('x, edge_index, batch', [
@@ -108,7 +100,7 @@ def main():
                     (nn.Softmax(dim=1), 'x -> x')
                 ])
 
-    model = gnn_model
+    model = wlnn_model
 
 
     # Initialize the optimizer and loss function
