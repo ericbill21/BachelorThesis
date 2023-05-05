@@ -11,115 +11,131 @@ from torch_geometric.nn.pool import global_add_pool
 from torch_geometric.datasets import TUDataset
 
 from wlnn import WLNN
-from wlnn import constant_and_id_transformer
+from wlnn import create_transformer
+from wlnn import wl_algorithm
+
+from encoding import *
 
 from torch_geometric.nn.conv import wl_conv
 
 from torch_geometric.transforms.constant import Constant
 
-from torch_geometric.loader import DataLoader
+from torch_geometric.loader import DataLoader as PyGDataLoader
+from torch.utils.data import DataLoader as TorchDataLoader
 
-EPOCHS = 100
+from torch.utils.data import Dataset
+
+import time
+import numpy as np
+
+from torch.nn import functional
+
+from tabulate import tabulate
+
+TRAINING_FRACTION = 0.9
+EPOCHS = 3000
 BATCH_SIZE = 32
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+def train(model, loader, optimizer, loss_func):
+    model.train()
+    loss_all = 0
+
+    for data in loader:
+        data = data.to(DEVICE)
+        optimizer.zero_grad()
+        loss = loss_func(model(data), data.y)
+        loss.backward()
+        optimizer.step()
+        loss_all += data.num_graphs * loss.item()
+    return loss_all / len(loader.dataset)
+
+
+def val(model, loader, loss_func):
+    model.eval()
+    loss_all = 0
+
+    for data in loader:
+        data = data.to(DEVICE)
+        loss_all += loss_func(model(data), data.y).item()
+    return loss_all / len(loader.dataset)
+
+
+def test(model, loader):
+    model.eval()
+    correct = 0
+
+    for data in loader:
+        data = data.to(DEVICE)
+        pred = model(data).max(1)[1]
+        correct += (pred == data.y).sum().item()
+    return correct / len(loader.dataset)
 
 def main():
+    # Global wl convolution
+    wl = wl_conv.WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root='/tmp/IMDB-MULTI', name='IMDB-MULTI', transform=constant_and_id_transformer)
+    dataset = TUDataset(root='Code/datasets/IMDB-MULTI', name='IMDB-MULTI', transform=create_transformer(wl))
     dataset = dataset.shuffle()
 
+    # Ugly hack such that the 1-wl algorithm have seen all graphs
+    for data in dataset:
+        pass
+
     # Split dataset into training and test set
-    fraction  = 0.9
-    split = int(fraction * dataset.len())
+    split = int(TRAINING_FRACTION * dataset.len())
     train_dataset = dataset[:split]
     test_dataset = dataset[split:]
-    
-    wlnn_model = WLNN()
 
     # Initialize and set the counting encoding function
-    f_enc = create_counting_encoding()
-    wlnn_model.set_encoding(f_enc)
+    total_number_of_colors = len(wl.hashmap) + 1 # We add 1 for safety reasons as the number of colors used by the wl algorihtm fluctuates by 1
+    embedding = nn.Embedding(total_number_of_colors, 25)
+
+    f_enc = Mean_Encoding(embedding)
 
     # Initialize and set a simple MLP
     mlp = nn.Sequential(
-            nn.Linear(total_colors, 60),
+            nn.Linear(f_enc.out_dim, 60),
             nn.ReLU(),
             nn.Linear(60, 40),
             nn.ReLU(),
             nn.Linear(40, 20),
-            nn.Softmax(),
-            nn.Linear(20, train_dataset.num_classes))
+            nn.ReLU(),
+            nn.Linear(20, train_dataset.num_classes),
+            nn.Softmax(dim=1))
     
-    wlnn_model.set_mlp(mlp)
+    # Initialize the WLNN model
+    wlnn_model = WLNN(f_enc=f_enc, mlp=mlp)
 
-    wlnn_model.init_training(train_dataset, test_dataset)
+    # Initialize the optimizer and loss function
+    params = list(wlnn_model.parameters()) + list(mlp.parameters()) + list(embedding.parameters())
+    optimizer = torch.optim.Adam(params, lr=0.01, weight_decay=5e-4)
+    loss_func = nn.CrossEntropyLoss()
 
+    # Initialize the data loaders
+    train_loader = PyGDataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = PyGDataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    # Train the model
-    optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01)
-    loss_fn = nn.CrossEntropyLoss()
+    # Training Loop
+    runtime = []
+    for epoch in range(1, EPOCHS):
+        start = time.time()
 
-    # TODO: just transform the dataset to wl_colors
-    for epoch in range(EPOCHS):
-        train_dataset_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+        # Train and validate the model
+        train_loss = train(wlnn_model, train_loader, optimizer, loss_func)
+        val_loss = val(wlnn_model, val_loader, loss_func)
 
-        for i in range(train_dataset.len() // BATCH_SIZE):
-            batch = next(iter(train_dataset_loader))
+        if epoch % 25 == 0:
+            # Test the accuracy of the model
+            acc = test(wlnn_model, val_loader)
 
-            optimizer.zero_grad()
-            out = wlnn_model.forward(batch.x, batch.edge_index, batch.num_graphs, batch.ptr)
-
-            # We need to convert the labels to one-hot encoding of the probabilities we expect
-            # Example: graph.y = [2] -> y = torch.tensor([0.0, 0.0, 1.0])
-            y = nn.functional.one_hot(batch.y, train_dataset.num_classes).float().squeeze(0)
-
-            loss = loss_fn(out, y)
-            loss.backward()
-            optimizer.step()
-
-            print(f'Epoch:\t {epoch}, Batch:\t {i}, Loss:\t {loss}')
+            print(f'Epoch: {round(epoch, 3)},\t Train Loss: {round(train_loss, 5)},\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(acc, 2)}')
         
-    print('Hey')
-
-
-def create_counting_encoding(dataset):
-
-    wl = wl_conv()
-    dataset_loader = DataLoader(dataset, batch_size=dataset.len(), shuffle=False)
-    graph = next(iter(dataset_loader))
-
-    max = torch.max(graph.ptr)
-
-    out = graph.x.squeeze()
-
-    is_converged = False
-    iteration = 0
-    while not is_converged and iteration < graph.num_nodes:
-        new_out = wl.forward(out, graph.edge_index)
-
-        is_converged = (wl.histogram(new_out) == wl.histogram(out)).all()
-        out = new_out
-
-        iteration += 1
+        runtime.append(time.time()-start)
     
-    n = len(wl.hashmap)
-
-    def counting_encoding(x):
-        out = torch.zeros(n)
-        for i in range(n):
-            out[i] = torch.sum(x == i)
-        
-        return out
-
-    return counting_encoding
-    
-
+    print(f'Avg runtime per epoch: {np.mean(runtime)}')
 
 
 if __name__ == '__main__':
     main()
-
-
-# TODO: 1. Write a encoding function class that has an attribute for its output dimension
-#       2. Check for better WL implementations
-#       3. Get inspired by code online
