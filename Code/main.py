@@ -1,41 +1,23 @@
+# TODO: Beutify the imports
 import torch
 import torch.nn as nn
-from torch.nn import Linear, Parameter
-from torch_geometric.nn import MessagePassing
-from torch_geometric.utils import add_self_loops, degree
-from matplotlib import pyplot as plt
-import networkx as nx
-from torch_geometric import utils
-from torch_geometric.data import Data
-from torch_geometric.nn.pool import global_add_pool
 from torch_geometric.datasets import TUDataset
-
 from wlnn import WLNN
-from wlnn import create_transformer
+from wlnn import create_1wl_transformer
 from wlnn import wl_algorithm
-
 from encoding import *
-
 from torch_geometric.nn.conv import wl_conv
-
-from torch_geometric.transforms.constant import Constant
-
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
-
-from torch.utils.data import Dataset
-
 import time
 import numpy as np
 
-from torch.nn import functional
-
-from tabulate import tabulate
-
+# GLOBAL PARAMETERS
 TRAINING_FRACTION = 0.9
-EPOCHS = 3000
+EPOCHS = 100
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+DATASET_NAME = 'IMDB-BINARY'
 
 def train(model, loader, optimizer, loss_func):
     model.train()
@@ -50,7 +32,6 @@ def train(model, loader, optimizer, loss_func):
         loss_all += data.num_graphs * loss.item()
     return loss_all / len(loader.dataset)
 
-
 def val(model, loader, loss_func):
     model.eval()
     loss_all = 0
@@ -59,7 +40,6 @@ def val(model, loader, loss_func):
         data = data.to(DEVICE)
         loss_all += loss_func(model(data), data.y).item()
     return loss_all / len(loader.dataset)
-
 
 def test(model, loader):
     model.eval()
@@ -76,7 +56,7 @@ def main():
     wl = wl_conv.WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root='Code/datasets/IMDB-MULTI', name='IMDB-MULTI', transform=create_transformer(wl))
+    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', transform=create_1wl_transformer(wl))
     dataset = dataset.shuffle()
 
     # Ugly hack such that the 1-wl algorithm have seen all graphs
@@ -90,8 +70,7 @@ def main():
 
     # Initialize and set the counting encoding function
     total_number_of_colors = len(wl.hashmap) + 1 # We add 1 for safety reasons as the number of colors used by the wl algorihtm fluctuates by 1
-    embedding = nn.Embedding(total_number_of_colors, 25)
-
+    embedding = nn.Embedding(total_number_of_colors, 10)
     f_enc = Mean_Encoding(embedding)
 
     # Initialize and set a simple MLP
@@ -109,9 +88,8 @@ def main():
     wlnn_model = WLNN(f_enc=f_enc, mlp=mlp)
 
     # Initialize the optimizer and loss function
-    params = list(wlnn_model.parameters()) + list(mlp.parameters()) + list(embedding.parameters())
-    optimizer = torch.optim.Adam(params, lr=0.01, weight_decay=5e-4)
-    loss_func = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(wlnn_model.parameters(), lr=0.01, weight_decay=5e-4)
+    loss_func = nn.functional.nll_loss #nn.CrossEntropyLoss()
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -126,7 +104,7 @@ def main():
         train_loss = train(wlnn_model, train_loader, optimizer, loss_func)
         val_loss = val(wlnn_model, val_loader, loss_func)
 
-        if epoch % 25 == 0:
+        if epoch % 5 == 0:
             # Test the accuracy of the model
             acc = test(wlnn_model, val_loader)
 

@@ -47,8 +47,9 @@ class WLNN(nn.Module):
 
     #     return torch.utils.data.TensorDataset(new_dataset, new_targets)
     
-def create_transformer(wl):
-    def constant_and_id_transformer(data):
+def create_1wl_transformer(wl):
+
+    def transformer(data):
         # If there are no node features, we create a constant feature vector
         if data.x is None:
             data.x = torch.zeros((data.edge_index.shape[1], 1), dtype=torch.long)
@@ -58,7 +59,7 @@ def create_transformer(wl):
         
         return data
     
-    return constant_and_id_transformer
+    return transformer
 
 def wl_algorithm(wl, graph, total_iterations = -1):
         if total_iterations == -1:
