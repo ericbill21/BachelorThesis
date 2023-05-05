@@ -11,6 +11,12 @@ from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
 import time
 import numpy as np
+from torch_geometric.nn.models import GIN, basic_gnn
+from torch_geometric.nn import global_mean_pool
+import torch_geometric
+
+from torch_geometric.nn.conv import GINConv
+from torch_geometric.nn.models import MLP
 
 # GLOBAL PARAMETERS
 TRAINING_FRACTION = 0.9
@@ -26,7 +32,9 @@ def train(model, loader, optimizer, loss_func):
     for data in loader:
         data = data.to(DEVICE)
         optimizer.zero_grad()
-        loss = loss_func(model(data), data.y)
+
+        loss = loss_func(model(data.x, data.edge_index, data.batch), data.y)
+
         loss.backward()
         optimizer.step()
         loss_all += data.num_graphs * loss.item()
@@ -38,7 +46,8 @@ def val(model, loader, loss_func):
 
     for data in loader:
         data = data.to(DEVICE)
-        loss_all += loss_func(model(data), data.y).item()
+        loss_all += loss_func(model(data.x, data.edge_index, data.batch), data.y).item()
+
     return loss_all / len(loader.dataset)
 
 def test(model, loader):
@@ -47,7 +56,7 @@ def test(model, loader):
 
     for data in loader:
         data = data.to(DEVICE)
-        pred = model(data).max(1)[1]
+        pred = model(data.x, data.edge_index, data.batch).max(1)[1]
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
 
@@ -55,8 +64,10 @@ def main():
     # Global wl convolution
     wl = wl_conv.WLConv()
 
+    transformer = create_1wl_transformer(wl)
+
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', transform=create_1wl_transformer(wl))
+    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', transform=transformer)
     dataset = dataset.shuffle()
 
     # Ugly hack such that the 1-wl algorithm have seen all graphs
@@ -81,14 +92,27 @@ def main():
             nn.ReLU(),
             nn.Linear(40, 20),
             nn.ReLU(),
-            nn.Linear(20, train_dataset.num_classes),
+            nn.Linear(20, dataset.num_classes),
             nn.Softmax(dim=1))
     
     # Initialize the WLNN model
     wlnn_model = WLNN(f_enc=f_enc, mlp=mlp)
 
+    # Initialize the GNN model
+    gnn_model = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                    (GINConv(MLP([dataset.num_features, 5, 10])), 'x, edge_index -> x'),
+                    (GINConv(MLP([10, 10, 10])), 'x, edge_index -> x'),
+                    (GINConv(MLP([10, 5, 3])), 'x, edge_index -> x'),
+                    (global_mean_pool, 'x, batch -> x'),
+                    (MLP([3, dataset.num_classes]), 'x -> x'),
+                    (nn.Softmax(dim=1), 'x -> x')
+                ])
+
+    model = gnn_model
+
+
     # Initialize the optimizer and loss function
-    optimizer = torch.optim.AdamW(wlnn_model.parameters(), lr=0.01, weight_decay=5e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.01, weight_decay=5e-4)
     loss_func = nn.functional.nll_loss #nn.CrossEntropyLoss()
 
     # Initialize the data loaders
@@ -101,12 +125,12 @@ def main():
         start = time.time()
 
         # Train and validate the model
-        train_loss = train(wlnn_model, train_loader, optimizer, loss_func)
-        val_loss = val(wlnn_model, val_loader, loss_func)
+        train_loss = train(model, train_loader, optimizer, loss_func)
+        val_loss = val(model, val_loader, loss_func)
 
         if epoch % 5 == 0:
             # Test the accuracy of the model
-            acc = test(wlnn_model, val_loader)
+            acc = test(model, val_loader)
 
             print(f'Epoch: {round(epoch, 3)},\t Train Loss: {round(train_loss, 5)},\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(acc, 2)}')
         

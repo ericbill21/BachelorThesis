@@ -52,7 +52,7 @@ def create_1wl_transformer(wl):
     def transformer(data):
         # If there are no node features, we create a constant feature vector
         if data.x is None:
-            data.x = torch.zeros((data.edge_index.shape[1], 1), dtype=torch.long)
+            data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
         
         # Replace the graph features directly with the WL coloring
         data.x = wl_algorithm(wl, data).unsqueeze(-1)
