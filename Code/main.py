@@ -2,8 +2,7 @@
 import torch
 import torch.nn as nn
 from torch_geometric.datasets import TUDataset
-from wlnn import create_1wl_transformer, Constant_Long
-from encoding import *
+from utils import create_1wl_transformer, Constant_Long
 from torch_geometric.nn.conv import wl_conv
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
@@ -20,7 +19,7 @@ from visualization import plot_loss
 
 # GLOBAL PARAMETERS
 TRAINING_FRACTION = 0.8
-EPOCHS = 100
+EPOCHS = 500
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 DATASET_NAME = 'IMDB-BINARY'
@@ -120,7 +119,7 @@ def main():
                     (MLP([10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (nn.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
-    #list_of_models['1WL+NN: sum'] = wlnn_model_sum
+    list_of_models['1WL+NN: sum'] = wlnn_model_sum
 
     # 1WL+NN model with Embedding and Max as its encoding function
     wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
@@ -165,6 +164,7 @@ def main():
     for model_name, model in list_of_models.items():
         print(f'#'*50 + f'\nTraining: {model_name}')
 
+        # TODO: make it better: Maybe check if first entry of model is gnn?
         if model_name == 'gin':
             train_dataset.transform = c_transformer
             test_dataset.transform = c_transformer

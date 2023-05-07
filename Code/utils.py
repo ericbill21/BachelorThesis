@@ -60,37 +60,6 @@ class Constant_Long(BaseTransform):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(value={self.value})'
-
-class WLNN(nn.Module):
-
-    def __init__(self, f_enc = None, mlp = None) -> None:
-        super().__init__()
-        self.encoding = f_enc
-        self.mlp = mlp
-
-    def forward(self, data):
-        data = self.encoding.forward(data)
-        data = self.mlp(data)
-        return data
-
-
-    # def wl_transformation(self, dataset):
-    #     self.wl.reset_parameters()
-
-    #     new_dataset = torch.zeros((len(dataset), self.encoding.out_dim), dtype=torch.long)
-    #     new_targets = torch.zeros((len(dataset)), dtype=torch.long)
-
-    #     count = 0
-    #     for graph in dataset:
-
-    #         coloring = wl_algorithm(self.wl, graph)
-
-    #         # We encode the node features
-    #         new_dataset[count] = self.encoding.call(coloring)
-    #         new_targets[count] = graph.y
-    #         count += 1
-
-    #     return torch.utils.data.TensorDataset(new_dataset, new_targets)
     
 def create_1wl_transformer(wl):
 
@@ -113,18 +82,26 @@ def wl_algorithm(wl, graph, total_iterations = -1):
         old_coloring = graph.x.squeeze()
         new_coloring = wl.forward(old_coloring, graph.edge_index)
 
-        iteration = 0
-        is_converged = (torch.sort(wl.histogram(old_coloring))[0] == torch.sort(wl.histogram(new_coloring))[0]).all()
-        while not is_converged and iteration < total_iterations:
+        iteration = 0        
+        while not check_wl_convergence(old_coloring, new_coloring) and iteration < total_iterations:
             # Calculate the new coloring
             old_coloring = new_coloring
             new_coloring = wl.forward(old_coloring, graph.edge_index)
 
-            # Check if the coloring has converged
             iteration += 1
-            is_converged = (torch.sort(wl.histogram(old_coloring))[0] == torch.sort(wl.histogram(new_coloring))[0]).all()
 
         return old_coloring
+
+def check_wl_convergence(old_coloring, new_coloring):
+    mapping = {}
+
+    for c in zip(old_coloring, new_coloring):
+        if not c[0].item() in mapping:
+            mapping[c[0].item()] = c[1].item()
+        elif mapping[c[0].item()] != c[1].item():
+            return False
+        
+    return True
 
 
     
