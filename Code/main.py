@@ -164,7 +164,7 @@ def main():
     for model_name, model in list_of_models.items():
         print(f'#'*50 + f'\nTraining: {model_name}')
 
-        # TODO: make it better: Maybe check if first entry of model is gnn?
+        # TODO: make it better: Maybe check if first entry of model is gnn? Better not
         if model_name == 'gin':
             train_dataset.transform = c_transformer
             test_dataset.transform = c_transformer
