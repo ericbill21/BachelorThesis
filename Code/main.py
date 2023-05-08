@@ -7,7 +7,7 @@ import torch_geometric
 import torch.nn as TorchNN
 from torch_geometric.datasets import TUDataset
 from utils import Constant_Long, WL_Transformer
-from torch_geometric.transforms import OneHotDegree
+from torch_geometric.transforms import OneHotDegree, ToDevice
 from torch_geometric.nn.conv.wl_conv import WLConv
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
@@ -15,15 +15,17 @@ from torch.utils.data import DataLoader as TorchDataLoader
 from torch_geometric.nn.models import GIN, MLP
 from torch_geometric.nn import pool as PyGPool
 
+from sklearn.model_selection import KFold, StratifiedKFold
+
 from visualization import plot_loss
 
 # GLOBAL PARAMETERS
-TRAINING_FRACTION = 0.8
-EPOCHS = 50
+EPOCHS = 500
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 DATASET_NAME = 'IMDB-BINARY'
 LOG_INTERVAL = 10
+K_FOLD = 5
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func):
@@ -91,8 +93,7 @@ def main():
     wl = WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}')
-    dataset = dataset.shuffle()
+    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', pre_transform=ToDevice(DEVICE))
     
     # Initialize dataset transformer
     wl_transformer = WL_Transformer(wl)
@@ -106,10 +107,8 @@ def main():
     for data in dataset:
         pass
 
-    # Split dataset into training and test set
-    split = int(TRAINING_FRACTION * dataset.len())
-    train_dataset = dataset[:split]
-    test_dataset = dataset[split:]
+    # Split dataset into K_FOLD folds
+    splits  = list(KFold(n_splits=K_FOLD, shuffle=True, random_state=42).split(dataset))
 
     # Initialize all models to be tested
     list_of_models = {}
@@ -140,7 +139,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_max.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: max'] = wlnn_model_max
+    #list_of_models['1WL+NN: max'] = wlnn_model_max
 
     # 1WL+NN model with Embedding and Mean as its encoding function
     dataset.transform = wl_transformer
@@ -152,7 +151,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: mean'] = wlnn_model_mean
+    #list_of_models['1WL+NN: mean'] = wlnn_model_mean
 
     # Initialize the GNN models
     # Note that data transformer can be set to anything
@@ -169,7 +168,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_zero.dataset_transformer = dataset.transform
-    list_of_models['GIN: zero transformer'] = gnn_model_gin_zero
+    #list_of_models['GIN: zero transformer'] = gnn_model_gin_zero
 
     # GNN model using the GIN construction with the transformer 'one_hot_degree_transformer'
     dataset.transform = one_hot_degree_transformer
@@ -183,7 +182,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_degree.dataset_transformer = dataset.transform
-    list_of_models['GIN: one hot degree'] = gnn_model_gin_degree
+    #list_of_models['GIN: one hot degree'] = gnn_model_gin_degree
 
     # Initialize the lists for storing the results
     all_train_losses = {}
@@ -193,55 +192,77 @@ def main():
 
     # TRAINING LOOP
     for model_name, model in list_of_models.items():
-        print(f'#'*50 + f'\nTraining: {model_name}')
+        print(f'#'*100 + f'\nTraining: {model_name}')
 
         # Setting the data transformer
-        train_dataset.transform = model.dataset_transformer
-        test_dataset.transform = model.dataset_transformer
+        dataset.transform = model.dataset_transformer
 
         # Initialize the optimizer and loss function
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.01, weight_decay=5e-4)
         loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
 
-        # Initialize the data loaders
-        train_loader = PyGDataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-        val_loader = PyGDataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
-
         # Initialize the lists for storing the results
-        train_losses = []
-        train_accuracies = []
-        val_losses = []
-        val_accuracies = []
+        train_losses = [[] for _ in range(EPOCHS)]
+        train_accuracies = [[] for _ in range(EPOCHS)]
+        val_losses = [[] for _ in range(EPOCHS)]
+        val_accuracies = [[] for _ in range(EPOCHS)]
 
         # Training Loop
         runtime = []
-        for epoch in range(1, EPOCHS):
-            start = time.time()
 
-            # Train, validate and test the model
-            train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
-            val_loss, val_acc = val(model, val_loader, loss_func)
+        # Loop over the K_FOLD splits
+        for i_split, split in enumerate(splits):
+            print(f'Cross-Validation Split {i_split+1}/{K_FOLD}:')
 
-            # Save the results
-            train_losses.append(train_loss)
-            train_accuracies.append(train_acc)
-            val_losses.append(val_loss)
-            val_accuracies.append(val_acc)
+            # Reset the model parameters
+            model.reset_parameters()
 
-            # Print current status
-            if epoch % LOG_INTERVAL == 0:
-                print(f'Epoch: {round(epoch, 3)},\t Train Loss: {round(train_loss, 5)},\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(val_acc, 1)}%')
+            # Initialize the data loaders
+            train_loader = PyGDataLoader(dataset[split[0]], batch_size=BATCH_SIZE, shuffle=True)
+            val_loader = PyGDataLoader(dataset[split[1]], batch_size=BATCH_SIZE, shuffle=False)
+
+            # Train the model
+            for epoch in range(EPOCHS):
+                start = time.time()
+
+                # Train, validate and test the model
+                train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
+                val_loss, val_acc = val(model, val_loader, loss_func)
+
+                # Save the results
+                train_losses[epoch].append(train_loss)
+                train_accuracies[epoch].append(train_acc)
+                val_losses[epoch].append(val_loss)
+                val_accuracies[epoch].append(val_acc)
+
+                # Print current status
+                if epoch % LOG_INTERVAL == 0:
+                    print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(val_acc, 1)}%')
+                
+                runtime.append(time.time()-start)
             
-            runtime.append(time.time()-start)
-        
         print(f'Avg runtime per epoch: {np.mean(runtime)}')
-    
+
         # Save the results
         all_train_losses[model_name] = train_losses
         all_train_accuraies[model_name] = train_accuracies
         all_val_losses[model_name] = val_losses
         all_val_accuracies[model_name] = val_accuracies
     
+    # POST PROCESSING
+
+    # Transform the data into tensors
+    for model_name, model in list_of_models.items():
+        all_train_losses[model_name] = torch.tensor(all_train_losses[model_name])
+        all_train_accuraies[model_name] = torch.tensor(all_train_accuraies[model_name])
+        all_val_losses[model_name] = torch.tensor(all_val_losses[model_name])
+        all_val_accuracies[model_name] = torch.tensor(all_val_accuracies[model_name])
+
+    # Print the results
+    print(f'#'*100 + f'\nResults:')
+    for model_name in list_of_models.keys():
+        print(f'{model_name}: {round(all_val_accuracies[model_name][-1].mean().item(), 1)} ± {round(all_val_accuracies[model_name][-1].std().item(), 1)}%')
+
     # Plot the results
     plot_loss(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
 

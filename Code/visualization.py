@@ -30,10 +30,10 @@ def plot_loss(all_train_losses, all_train_accuracies,all_val_losses, all_val_acc
     for model_name in model_names:
         color_map[model_name] = next(colors)
 
-        axs[0, 0].plot(all_train_losses[model_name], label=model_name, c=color_map[model_name])
-        axs[0, 1].plot(all_val_losses[model_name], label=model_name, c=color_map[model_name])
-        axs[1, 0].plot(all_train_accuracies[model_name], label=model_name, c=color_map[model_name])
-        axs[1, 1].plot(all_val_accuracies[model_name], label=model_name, c=color_map[model_name])
+        axs[0, 0].plot(all_train_losses[model_name].mean(dim=1), label=model_name, c=color_map[model_name])
+        axs[0, 1].plot(all_val_losses[model_name].mean(dim=1), label=model_name, c=color_map[model_name])
+        axs[1, 0].plot(all_train_accuracies[model_name].mean(dim=1), label=model_name, c=color_map[model_name])
+        axs[1, 1].plot(all_val_accuracies[model_name].mean(dim=1), label=model_name, c=color_map[model_name])
     
     handles, labels = axs[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper right')
