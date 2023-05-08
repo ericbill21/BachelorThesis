@@ -19,12 +19,13 @@ from sklearn.model_selection import KFold, StratifiedKFold
 
 from visualization import plot_loss
 
+import pandas as pd
+
 # GLOBAL PARAMETERS
 EPOCHS = 500
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-DATASET_NAME = 'IMDB-BINARY'
-LOG_INTERVAL = 10
+LOG_INTERVAL = 100
 K_FOLD = 5
 
 # Simple training loop
@@ -88,12 +89,12 @@ def test(model, loader):
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
 
-def main():
+def test_dataset(dataset_name):
     # Global wl convolution
     wl = WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', pre_transform=ToDevice(DEVICE))
+    dataset = TUDataset(root=f'Code/datasets/{dataset_name}', name=f'{dataset_name}', pre_transform=ToDevice(DEVICE))
     
     # Initialize dataset transformer
     wl_transformer = WL_Transformer(wl)
@@ -139,7 +140,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_max.dataset_transformer = dataset.transform
-    #list_of_models['1WL+NN: max'] = wlnn_model_max
+    list_of_models['1WL+NN: max'] = wlnn_model_max
 
     # 1WL+NN model with Embedding and Mean as its encoding function
     dataset.transform = wl_transformer
@@ -151,7 +152,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    #list_of_models['1WL+NN: mean'] = wlnn_model_mean
+    list_of_models['1WL+NN: mean'] = wlnn_model_mean
 
     # Initialize the GNN models
     # Note that data transformer can be set to anything
@@ -159,7 +160,7 @@ def main():
     # GNN model using the GIN construction with the transformer 'zero_transformer'
     dataset.transform = zero_transformer
     gin = GIN(dataset.num_features, 32, 5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    gin.lin = TorchNN.Identity() # Remove the last linear layer that would otherwise remove all jk information
+    delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     gnn_model_gin_zero = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (gin, 'x, edge_index -> x'),
@@ -168,12 +169,12 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_zero.dataset_transformer = dataset.transform
-    #list_of_models['GIN: zero transformer'] = gnn_model_gin_zero
+    list_of_models['GIN: zero_transformer'] = gnn_model_gin_zero
 
     # GNN model using the GIN construction with the transformer 'one_hot_degree_transformer'
     dataset.transform = one_hot_degree_transformer
     gin = GIN(dataset.num_features, 32, 5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    gin.lin = TorchNN.Identity() # Remove the last linear layer that would otherwise remove all jk information
+    delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (gin, 'x, edge_index -> x'),
@@ -182,7 +183,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_degree.dataset_transformer = dataset.transform
-    #list_of_models['GIN: one hot degree'] = gnn_model_gin_degree
+    list_of_models['GIN: one_hot_degree'] = gnn_model_gin_degree
 
     # Initialize the lists for storing the results
     all_train_losses = {}
@@ -236,7 +237,7 @@ def main():
                 val_accuracies[epoch].append(val_acc)
 
                 # Print current status
-                if epoch % LOG_INTERVAL == 0:
+                if (epoch + 1) % LOG_INTERVAL == 0:
                     print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(val_acc, 1)}%')
                 
                 runtime.append(time.time()-start)
@@ -258,14 +259,30 @@ def main():
         all_val_losses[model_name] = torch.tensor(all_val_losses[model_name])
         all_val_accuracies[model_name] = torch.tensor(all_val_accuracies[model_name])
 
-    # Print the results
-    print(f'#'*100 + f'\nResults:')
-    for model_name in list_of_models.keys():
-        print(f'{model_name}: {round(all_val_accuracies[model_name][-1].mean().item(), 1)} ± {round(all_val_accuracies[model_name][-1].std().item(), 1)}%')
-
     # Plot the results
-    plot_loss(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
+    #plot_loss(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
 
+    results = {}
+    for model_name in list_of_models.keys():
+        results[model_name] = f'{round(all_val_accuracies[model_name][-1].mean().item(), 1)}±{round(all_val_accuracies[model_name][-1].std().item(), 1)}%'
+
+    return results
 
 if __name__ == '__main__':
-    main()
+    # Datasets to be tested
+    datasets = ['IMDB-BINARY', 'IMDB-MULTI']
+
+    # Run the experiments
+    results = {}
+    models = []
+    for dataset in datasets:
+        print(f'\nRunning experiment for dataset: {dataset}')
+        results[dataset] = test_dataset(dataset)
+
+        if models == []:
+            models = list(results[dataset].keys())
+
+    print(f'\n\n' + f'#'*100 + f'\nResults:')
+    print(''.join([f'{"Model:" : <30}'] + [f'{dataset : ^20}' for dataset in datasets]))
+    for model in models:
+        print(''.join([f'{model : <30}'] + [f'{results[dataset][model] : ^20}' for dataset in datasets]))
