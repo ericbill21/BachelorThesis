@@ -60,20 +60,33 @@ class Constant_Long(BaseTransform):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(value={self.value})'
-    
-def create_1wl_transformer(wl):
 
-    def transformer(data):
+@functional_transform('wl_alogorithm')
+class WL_Transformer(BaseTransform):
+
+    def __init__(
+        self,
+        wl_conv,
+    ):
+        self.wl_conv = wl_conv
+
+    def __call__(
+        self,
+        data: Union[Data, HeteroData],
+    ) -> Union[Data, HeteroData]:
+
         # If there are no node features, we create a constant feature vector
         if data.x is None:
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
         
         # Replace the graph features directly with the WL coloring
-        data.x = wl_algorithm(wl, data).unsqueeze(-1)
+        data.x = wl_algorithm(self.wl_conv, data).unsqueeze(-1)
         
         return data
-    
-    return transformer
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}'
+
 
 def wl_algorithm(wl, graph, total_iterations = -1):
         if total_iterations == -1:
