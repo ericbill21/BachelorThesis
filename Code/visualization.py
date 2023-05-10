@@ -4,10 +4,12 @@ from datetime import datetime
 # Disable interactive mode for matplotlib
 plt.ioff()
 
-def plot_loss_and_accuracy(all_train_losses, all_train_accuracies,all_val_losses, all_val_accuracies):
+def plot_loss_and_accuracy(dataset_name, all_train_losses, all_train_accuracies,all_val_losses, all_val_accuracies):
     model_names = list(all_train_losses.keys())
 
     fig, axs = plt.subplots(2, 2, figsize=(24, 18))
+
+    fig.suptitle(f'Loss and accuracy for {dataset_name}')
 
     axs[0, 0].set_title('Training loss')
     axs[0, 1].set_title('Validation loss')

@@ -1,5 +1,7 @@
 import time
 import numpy as np
+import pandas as pd
+import utils
 
 import torch
 import torch_geometric
@@ -20,17 +22,17 @@ from sklearn.model_selection import KFold, StratifiedKFold
 
 import visualization
 
-import pandas as pd
 
 # GLOBAL PARAMETERS
-EPOCHS = 10
+EPOCHS = 500
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 LOG_INTERVAL = 25
-K_FOLD = 2
-DATASET_NAME = 'IMDB-BINARY'
+K_FOLD = 10
+DATASET_NAME = 'PROTEINS' #'IMDB-MULTI' # 'MUTAG' # 'PROTEINS' # 'IMDB-BINARY' # 'IMDB-MULTI' # 'NCI1' # 'NCI109' # 'DD' # 'COLLAB' # 'ENZYMES' # 'REDDIT-BINARY' # 'REDDIT-MULTI-5K' # 'REDDIT-MULTI-12K' # 'PTC_MR' # 'COX2' # 'DHFR'
 PLOT_RESULTS = True
 NUM_EPOCHS_TO_BE_PRINTED = 5
+SEED = 42
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func):
@@ -94,15 +96,19 @@ def test(model, loader):
     return correct / len(loader.dataset)
 
 def main():
+    # Set seed for reproducibility
+    utils.seed_everything(SEED)
+
     # Global wl convolution
     wl = WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
     dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
                         pre_transform=ToDevice(DEVICE))
+    dataset = dataset.shuffle()
     
     # Initialize dataset transformer
-    wl_transformer = WL_Transformer(wl)
+    wl_transformer = WL_Transformer(wl, use_node_attr=True)
     zero_transformer = Constant_Long(0)
 
     max_degree = max([data.num_nodes for data in dataset])
@@ -114,7 +120,7 @@ def main():
         pass
 
     # Split dataset into K_FOLD folds
-    splits  = list(StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=42).split(dataset, dataset.y))
+    splits  = list(StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED).split(dataset, dataset.y))
 
     # Initialize all models to be tested
     list_of_models = {}
@@ -145,7 +151,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_max.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: max'] = wlnn_model_max
+    #list_of_models['1WL+NN: max'] = wlnn_model_max
 
     # 1WL+NN model with Embedding and Mean as its encoding function
     dataset.transform = wl_transformer
@@ -157,7 +163,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: mean'] = wlnn_model_mean
+    #list_of_models['1WL+NN: mean'] = wlnn_model_mean
 
     # 1WL+NN model with Embedding and set2set as its encoding function
     dataset.transform = wl_transformer
@@ -169,7 +175,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: set2set'] = wlnn_model_mean
+    #list_of_models['1WL+NN: set2set'] = wlnn_model_mean
 
 
     # Initialize the GNN models
@@ -201,7 +207,8 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_degree.dataset_transformer = dataset.transform
-    list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
+    #list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
+
 
     # Initialize the lists for storing the results
     all_train_losses = {}
@@ -281,17 +288,16 @@ def main():
 
     # Plot the results
     if PLOT_RESULTS:
-        visualization.plot_loss_and_accuracy(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
-
+        visualization.plot_loss_and_accuracy(DATASET_NAME, all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
 
     # Printing the final results
-    epochs = [EPOCHS // NUM_EPOCHS_TO_BE_PRINTED * i for i in range(NUM_EPOCHS_TO_BE_PRINTED)]
+    epochs = [0] + [i-1 for i in range(EPOCHS // NUM_EPOCHS_TO_BE_PRINTED, EPOCHS + EPOCHS // NUM_EPOCHS_TO_BE_PRINTED, EPOCHS // NUM_EPOCHS_TO_BE_PRINTED)]
 
     print(f'\nFinal validation accuracies:')
-    print(f'{"Epoch:" : <30} {"".join([f"{e : ^15}" for e in epochs])}')
+    print(f'{"Epoch:" : <30} {"".join([f"{e + 1 : ^15}" for e in epochs])}')
     for model_name in list_of_models.keys():
         res = ''.join([f"{f'{round(all_val_accuracies[model_name][e].mean().item(), 1)}±{round(all_val_accuracies[model_name][e].std().item(), 1)}%' : ^15}" for e in epochs])
-        print(f'{model_name : <30} {res}') 
+        print(f'{model_name : <30} {res}')
 
 if __name__ == '__main__':
     main()

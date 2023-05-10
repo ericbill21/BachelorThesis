@@ -12,6 +12,20 @@ from torch_geometric.data import Data, HeteroData
 from torch_geometric.data.datapipes import functional_transform
 from torch_geometric.transforms import BaseTransform
 
+import random, os
+import numpy as np
+import torch
+
+def seed_everything(seed: int):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.mps.manual_seed(seed)
+
 
 @functional_transform('constant_long')
 class Constant_Long(BaseTransform):
@@ -66,17 +80,25 @@ class WL_Transformer(BaseTransform):
 
     def __init__(
         self,
-        wl_conv,
+        wl_conv: torch.nn.Module,
+        use_node_attr: bool = True,
     ):
         self.wl_conv = wl_conv
+        self.use_node_attr = use_node_attr
 
     def __call__(
         self,
         data: Union[Data, HeteroData],
     ) -> Union[Data, HeteroData]:
+        
+        # Check if the node features are one-hot encoded
+        if data.x.dim() > 1:
+            assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
+            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.
+        assert data.x.dtype == torch.long
 
         # If there are no node features, we create a constant feature vector
-        if data.x is None:
+        if data.x is None or not self.use_node_attr:
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
         
         # Replace the graph features directly with the WL coloring
