@@ -14,19 +14,23 @@ from torch.utils.data import DataLoader as TorchDataLoader
 
 from torch_geometric.nn.models import GIN, MLP
 from torch_geometric.nn import pool as PyGPool
+from torch_geometric.nn import aggr as PyGAggr
 
 from sklearn.model_selection import KFold, StratifiedKFold
 
-from visualization import plot_loss
+import visualization
 
 import pandas as pd
 
 # GLOBAL PARAMETERS
-EPOCHS = 500
+EPOCHS = 10
 BATCH_SIZE = 32
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-LOG_INTERVAL = 100
-K_FOLD = 5
+LOG_INTERVAL = 25
+K_FOLD = 2
+DATASET_NAME = 'IMDB-BINARY'
+PLOT_RESULTS = True
+NUM_EPOCHS_TO_BE_PRINTED = 5
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func):
@@ -89,12 +93,13 @@ def test(model, loader):
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
 
-def test_dataset(dataset_name):
+def main():
     # Global wl convolution
     wl = WLConv()
 
     # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root=f'Code/datasets/{dataset_name}', name=f'{dataset_name}', pre_transform=ToDevice(DEVICE))
+    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
+                        pre_transform=ToDevice(DEVICE))
     
     # Initialize dataset transformer
     wl_transformer = WL_Transformer(wl)
@@ -109,7 +114,7 @@ def test_dataset(dataset_name):
         pass
 
     # Split dataset into K_FOLD folds
-    splits  = list(KFold(n_splits=K_FOLD, shuffle=True, random_state=42).split(dataset))
+    splits  = list(StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=42).split(dataset, dataset.y))
 
     # Initialize all models to be tested
     list_of_models = {}
@@ -121,10 +126,10 @@ def test_dataset(dataset_name):
     # 1WL+NN model with Embedding and Summation as its encoding function
     dataset.transform = wl_transformer
     wlnn_model_sum = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(total_number_of_colors, 10), 'x -> x'),
+                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
                     (torch.squeeze, 'x -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (MLP([10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_sum.dataset_transformer = dataset.transform
@@ -133,10 +138,10 @@ def test_dataset(dataset_name):
     # 1WL+NN model with Embedding and Max as its encoding function
     dataset.transform = wl_transformer
     wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(total_number_of_colors, 10), 'x -> x'),
+                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
                     (torch.squeeze, 'x -> x'),
                     (PyGPool.global_max_pool, 'x, batch -> x'),
-                    (MLP([10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_max.dataset_transformer = dataset.transform
@@ -145,45 +150,58 @@ def test_dataset(dataset_name):
     # 1WL+NN model with Embedding and Mean as its encoding function
     dataset.transform = wl_transformer
     wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(total_number_of_colors, 10), 'x -> x'),
+                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
                     (torch.squeeze, 'x -> x'),
                     (PyGPool.global_mean_pool, 'x, batch -> x'),
-                    (MLP([10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
     list_of_models['1WL+NN: mean'] = wlnn_model_mean
+
+    # 1WL+NN model with Embedding and set2set as its encoding function
+    dataset.transform = wl_transformer
+    wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+                    (torch.squeeze, 'x -> x'),
+                    (PyGAggr.Set2Set(in_channels=10, processing_steps=3), 'x, batch -> x'),
+                    (MLP(channel_list=[10*2, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (TorchNN.Softmax(dim=1), 'x -> x')
+                ]).to(DEVICE)
+    wlnn_model_mean.dataset_transformer = dataset.transform
+    list_of_models['1WL+NN: set2set'] = wlnn_model_mean
+
 
     # Initialize the GNN models
     # Note that data transformer can be set to anything
 
     # GNN model using the GIN construction with the transformer 'zero_transformer'
     dataset.transform = zero_transformer
-    gin = GIN(dataset.num_features, 32, 5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
     delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     gnn_model_gin_zero = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (gin, 'x, edge_index -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (MLP([gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_zero.dataset_transformer = dataset.transform
-    list_of_models['GIN: zero_transformer'] = gnn_model_gin_zero
+    #list_of_models['GIN: sum & zero_transformer'] = gnn_model_gin_zero
 
     # GNN model using the GIN construction with the transformer 'one_hot_degree_transformer'
     dataset.transform = one_hot_degree_transformer
-    gin = GIN(dataset.num_features, 32, 5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
     delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (gin, 'x, edge_index -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (MLP([gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ])
     gnn_model_gin_degree.dataset_transformer = dataset.transform
-    list_of_models['GIN: one_hot_degree'] = gnn_model_gin_degree
+    list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
 
     # Initialize the lists for storing the results
     all_train_losses = {}
@@ -238,7 +256,9 @@ def test_dataset(dataset_name):
 
                 # Print current status
                 if (epoch + 1) % LOG_INTERVAL == 0:
-                    print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},\t Val Acc: {round(val_acc, 1)}%')
+                    print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
+                          f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
+                          f'\t Val Acc: {round(val_acc, 1)}%')
                 
                 runtime.append(time.time()-start)
             
@@ -253,36 +273,25 @@ def test_dataset(dataset_name):
     # POST PROCESSING
 
     # Transform the data into tensors
-    for model_name, model in list_of_models.items():
+    for model_name in list_of_models.keys():
         all_train_losses[model_name] = torch.tensor(all_train_losses[model_name])
         all_train_accuraies[model_name] = torch.tensor(all_train_accuraies[model_name])
         all_val_losses[model_name] = torch.tensor(all_val_losses[model_name])
         all_val_accuracies[model_name] = torch.tensor(all_val_accuracies[model_name])
 
     # Plot the results
-    #plot_loss(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
+    if PLOT_RESULTS:
+        visualization.plot_loss_and_accuracy(all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
 
-    results = {}
+
+    # Printing the final results
+    epochs = [EPOCHS // NUM_EPOCHS_TO_BE_PRINTED * i for i in range(NUM_EPOCHS_TO_BE_PRINTED)]
+
+    print(f'\nFinal validation accuracies:')
+    print(f'{"Epoch:" : <30} {"".join([f"{e : ^15}" for e in epochs])}')
     for model_name in list_of_models.keys():
-        results[model_name] = f'{round(all_val_accuracies[model_name][-1].mean().item(), 1)}±{round(all_val_accuracies[model_name][-1].std().item(), 1)}%'
-
-    return results
+        res = ''.join([f"{f'{round(all_val_accuracies[model_name][e].mean().item(), 1)}±{round(all_val_accuracies[model_name][e].std().item(), 1)}%' : ^15}" for e in epochs])
+        print(f'{model_name : <30} {res}') 
 
 if __name__ == '__main__':
-    # Datasets to be tested
-    datasets = ['IMDB-BINARY', 'IMDB-MULTI']
-
-    # Run the experiments
-    results = {}
-    models = []
-    for dataset in datasets:
-        print(f'\nRunning experiment for dataset: {dataset}')
-        results[dataset] = test_dataset(dataset)
-
-        if models == []:
-            models = list(results[dataset].keys())
-
-    print(f'\n\n' + f'#'*100 + f'\nResults:')
-    print(''.join([f'{"Model:" : <30}'] + [f'{dataset : ^20}' for dataset in datasets]))
-    for model in models:
-        print(''.join([f'{model : <30}'] + [f'{results[dataset][model] : ^20}' for dataset in datasets]))
+    main()

@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
+from datetime import datetime
 
+# Disable interactive mode for matplotlib
+plt.ioff()
 
-def plot_loss(all_train_losses, all_train_accuracies,all_val_losses, all_val_accuracies):
+def plot_loss_and_accuracy(all_train_losses, all_train_accuracies,all_val_losses, all_val_accuracies):
     model_names = list(all_train_losses.keys())
 
-    fig, axs = plt.subplots(2, 2)
+    fig, axs = plt.subplots(2, 2, figsize=(24, 18))
 
     axs[0, 0].set_title('Training loss')
     axs[0, 1].set_title('Validation loss')
@@ -16,8 +19,8 @@ def plot_loss(all_train_losses, all_train_accuracies,all_val_losses, all_val_acc
 
     axs[0, 0].set_ylabel('Loss')
     axs[0, 1].set_ylabel('Loss')
-    axs[1, 0].set_ylabel('Accuracy')
-    axs[1, 1].set_ylabel('Accuracy')
+    axs[1, 0].set_ylabel('Accuracy[%]')
+    axs[1, 1].set_ylabel('Accuracy[%]')
 
     axs[0, 0].grid(True)
     axs[0, 1].grid(True)
@@ -36,5 +39,9 @@ def plot_loss(all_train_losses, all_train_accuracies,all_val_losses, all_val_acc
         axs[1, 1].plot(all_val_accuracies[model_name].mean(dim=1), label=model_name, c=color_map[model_name])
     
     handles, labels = axs[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper right')
-    plt.show()
+    fig.legend(handles, labels, loc='center right')
+
+    time_string = datetime.now().strftime("%m:%d:%Y-%H:%M:%S")
+    fig.savefig(f'Code/Figures/loss_accuracy_{time_string}.pdf', bbox_inches='tight')
+
+    plt.close(fig)
