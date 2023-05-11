@@ -151,7 +151,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_max.dataset_transformer = dataset.transform
-    #list_of_models['1WL+NN: max'] = wlnn_model_max
+    list_of_models['1WL+NN: max'] = wlnn_model_max
 
     # 1WL+NN model with Embedding and Mean as its encoding function
     dataset.transform = wl_transformer
@@ -163,7 +163,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    #list_of_models['1WL+NN: mean'] = wlnn_model_mean
+    list_of_models['1WL+NN: mean'] = wlnn_model_mean
 
     # 1WL+NN model with Embedding and set2set as its encoding function
     dataset.transform = wl_transformer
@@ -175,7 +175,7 @@ def main():
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
     wlnn_model_mean.dataset_transformer = dataset.transform
-    #list_of_models['1WL+NN: set2set'] = wlnn_model_mean
+    list_of_models['1WL+NN: set2set'] = wlnn_model_mean
 
 
     # Initialize the GNN models
@@ -208,6 +208,20 @@ def main():
                 ])
     gnn_model_gin_degree.dataset_transformer = dataset.transform
     #list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
+
+    # GNN model using the GIN construction with no transformer
+    dataset.transform = None
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+    delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+    
+    gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                    (gin, 'x, edge_index -> x'),
+                    (PyGPool.global_add_pool, 'x, batch -> x'),
+                    (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (TorchNN.Softmax(dim=1), 'x -> x')
+                ])
+    gnn_model_gin_degree.dataset_transformer = dataset.transform
+    list_of_models['GIN: sum'] = gnn_model_gin_degree
 
 
     # Initialize the lists for storing the results
