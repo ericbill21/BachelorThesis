@@ -91,16 +91,16 @@ class WL_Transformer(BaseTransform):
         data: Union[Data, HeteroData],
     ) -> Union[Data, HeteroData]:
         
-        # Check if the node features are one-hot encoded
-        if data.x.dim() > 1:
-            assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
-            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.
-        assert data.x.dtype == torch.long
-
         # If there are no node features, we create a constant feature vector
         if data.x is None or not self.use_node_attr:
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
         
+        # Check if the node features are one-hot encoded
+        elif data.x.dim() > 1:
+            assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
+            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.
+        assert data.x.dtype == torch.long
+    
         # Replace the graph features directly with the WL coloring
         data.x = wl_algorithm(self.wl_conv, data).unsqueeze(-1)
         
