@@ -1,0 +1,126 @@
+# 1WL+NN model with Embedding and Summation as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_sum = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+                (torch.squeeze, 'x -> x'),
+                (PyGPool.global_add_pool, 'x, batch -> x'),
+                (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'), # Powers of two
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_sum.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: sum & embedding'] = wlnn_model_sum
+
+# 1WL+NN model with Embedding and Max as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+                (torch.squeeze, 'x -> x'),
+                (PyGPool.global_max_pool, 'x, batch -> x'),
+                (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_max.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: max & embedding'] = wlnn_model_max
+
+# 1WL+NN model with Embedding and Mean as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+                (torch.squeeze, 'x -> x'),
+                (PyGPool.global_mean_pool, 'x, batch -> x'),
+                (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_mean.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: mean & embedding'] = wlnn_model_mean
+
+# 1WL+NN model with Embedding and Summation as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_sum = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (PyGPool.global_add_pool, 'x, batch -> x'),
+                (torch.Tensor.float, 'x -> x'),
+                (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_sum.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: sum'] = wlnn_model_sum
+
+# 1WL+NN model with Embedding and Max as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (PyGPool.global_max_pool, 'x, batch -> x'),
+                (torch.Tensor.float, 'x -> x'),
+                (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_max.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: max'] = wlnn_model_max
+
+# 1WL+NN model with Embedding and Mean as its encoding function
+dataset.transform = wl_transformer
+wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                (PyGPool.global_mean_pool, 'x, batch -> x'),
+                (torch.Tensor.float, 'x -> x'),
+                (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                (TorchNN.Softmax(dim=1), 'x -> x')
+            ]).to(DEVICE)
+wlnn_model_mean.dataset_transformer = dataset.transform
+list_of_models['1WL+NN: mean'] = wlnn_model_mean
+
+# # 1WL+NN model with Embedding and set2set as its encoding function
+# dataset.transform = wl_transformer
+# wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
+#                 (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+#                 (torch.squeeze, 'x -> x'),
+#                 (PyGAggr.Set2Set(in_channels=10, processing_steps=3), 'x, batch -> x'),
+#                 (MLP(channel_list=[10*2, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+#                 (TorchNN.Softmax(dim=1), 'x -> x')
+#             ]).to(DEVICE)
+# wlnn_model_mean.dataset_transformer = dataset.transform
+# list_of_models['1WL+NN: set2set'] = wlnn_model_mean
+
+
+# Initialize the GNN models
+# Note that data transformer can be set to anything
+
+# # GNN model using the GIN construction with the transformer 'zero_transformer'
+# dataset.transform = zero_transformer
+# gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+# delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+
+# gnn_model_gin_zero = torch_geometric.nn.Sequential('x, edge_index, batch', [
+#                 (gin, 'x, edge_index -> x'),
+#                 (PyGPool.global_add_pool, 'x, batch -> x'),
+#                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+#                 (TorchNN.Softmax(dim=1), 'x -> x')
+#             ])
+# gnn_model_gin_zero.dataset_transformer = dataset.transform
+#list_of_models['GIN: sum & zero_transformer'] = gnn_model_gin_zero
+
+# # GNN model using the GIN construction with the transformer 'one_hot_degree_transformer'
+# dataset.transform = one_hot_degree_transformer
+# gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+# delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+
+# gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
+#                 (gin, 'x, edge_index -> x'),
+#                 (PyGPool.global_add_pool, 'x, batch -> x'),
+#                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+#                 (TorchNN.Softmax(dim=1), 'x -> x')
+#             ])
+# gnn_model_gin_degree.dataset_transformer = dataset.transform
+#list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
+
+# GNN model using the GIN construction with no transformer
+# dataset.transform = None
+# gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+# delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+
+# gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
+#                 (gin, 'x, edge_index -> x'),
+#                 (PyGPool.global_add_pool, 'x, batch -> x'),
+#                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+#                 (TorchNN.Softmax(dim=1), 'x -> x')
+#             ])
+# gnn_model_gin_degree.dataset_transformer = dataset.transform
+# list_of_models['GIN: sum'] = gnn_model_gin_degree

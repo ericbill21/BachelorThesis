@@ -1,0 +1,34 @@
+{
+    "os": "macOS-13.2.1-arm64-arm-64bit",
+    "python": "3.10.9",
+    "heartbeatAt": "2023-05-14T15:39:32.483411",
+    "startedAt": "2023-05-14T15:39:30.501038",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/ericbill/LOCAL/Bachelor Arbeit LaTex/Code/wadnb.py",
+    "codePath": "Code/wadnb.py",
+    "git": {
+        "remote": "https://github.com/ericbill21/BachelorThesis.git",
+        "commit": "24d60f87586cb781591f45b9062c4b1c89cf334c"
+    },
+    "email": null,
+    "root": "/Users/ericbill/LOCAL/Bachelor Arbeit LaTex",
+    "host": "Erics-MacBook-Air.local",
+    "username": "ericbill",
+    "executable": "/Users/ericbill/.pyenv/versions/3.10.9/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "total": 228.27386474609375,
+        "used": 11.932403564453125
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

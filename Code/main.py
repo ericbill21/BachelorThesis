@@ -2,6 +2,9 @@ import time
 import numpy as np
 import pandas as pd
 import utils
+import argparse
+
+import wandb
 
 import torch
 import torch_geometric
@@ -22,17 +25,58 @@ from sklearn.model_selection import KFold, StratifiedKFold
 
 import visualization
 
+# Parse arguments
+parser = argparse.ArgumentParser(description='PyTorch GNN')
+parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
+parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
+parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
+parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
+parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
+parser.add_argument('--seed', type=int, default=42, help='Random seed.')
+parser.add_argument('--k_wl', type=int, default=1, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
+parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
+args = parser.parse_args()
+
 
 # GLOBAL PARAMETERS
-EPOCHS = 100
-BATCH_SIZE = 32
+EPOCHS = args.epochs
+BATCH_SIZE = args.batch_size
+K_FOLD = args.k_fold
+LEARNING_RATE = args.lr
+DATASET_NAME = args.dataset
+SEED = args.seed
+K_WL = args.k_wl
+MODEL_NAME = args.model
+
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-LOG_INTERVAL = 25
-K_FOLD = 10
-DATASET_NAME = 'IMDB-MULTI' #'IMDB-MULTI' # 'MUTAG' # 'PROTEINS' # 'IMDB-BINARY' # 'IMDB-MULTI' # 'NCI1' # 'NCI109' # 'DD' # 'COLLAB' # 'ENZYMES' # 'REDDIT-BINARY' # 'REDDIT-MULTI-5K' # 'REDDIT-MULTI-12K' # 'PTC_MR' # 'COX2' # 'DHFR'
+LOG_INTERVAL = 5
 PLOT_RESULTS = True
 NUM_EPOCHS_TO_BE_PRINTED = 5
-SEED = 42
+
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="BachelorThesis",
+
+    name=f"{MODEL_NAME}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
+    
+    # track hyperparameters and run metadata
+    config={
+    "Epochs": EPOCHS,
+    "Batch size": BATCH_SIZE,
+    "Device": DEVICE,
+    "k-fold": K_FOLD,
+    "Dataset": DATASET_NAME,
+    "learning_rate": LEARNING_RATE,
+    "seed": SEED,
+    "k_wl": K_WL,
+    }
+)
+
+wandb.define_metric("epoch")
+wandb.define_metric("train accuracy: fold*", summary="max", step_metric="epoch")
+wandb.define_metric("val accuracy: fold*", summary="max", step_metric="epoch")
+wandb.define_metric("train loss: fold*", summary="min", step_metric="epoch")
+wandb.define_metric("val loss: fold*", summary="min", step_metric="epoch")
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func):
@@ -95,256 +139,96 @@ def test(model, loader):
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
 
-def main():
-    # Set seed for reproducibility
-    utils.seed_everything(SEED)
+# Set seed for reproducibility
+utils.seed_everything(SEED)
 
-    # Global wl convolution
-    wl = WLConv()
+# Global wl convolution
+wl = WLConv()
 
-    # Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
-                        pre_transform=ToDevice(DEVICE))
-    dataset = dataset.shuffle()
-    
-    # Initialize dataset transformer
-    wl_transformer = WL_Transformer(wl, use_node_attr=True)
-    zero_transformer = Constant_Long(0)
+# Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
+                    pre_transform=ToDevice(DEVICE))
+dataset = dataset.shuffle()
 
-    max_degree = max([data.num_nodes for data in dataset])
-    one_hot_degree_transformer = OneHotDegree(max_degree=max_degree)
+# Initialize dataset transformer #TODO: check that
+max_degree = max([data.num_nodes for data in dataset])
+one_hot_degree_transformer = OneHotDegree(max_degree=max_degree)
 
-    # Ugly hack such that the 1-wl algorithm have seen all graphs
-    dataset.transform = wl_transformer
+# Split dataset into K_FOLD folds
+cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
+
+# Initialize the model
+if MODEL_NAME == "1WL+NN:Embedding-Sum":
+    # TODO: make it more elegant
+    dataset.transform = WL_Transformer(wl, use_node_attr=True)
     for data in dataset:
         pass
+    largest_color = len(wl.hashmap)
 
-    # Split dataset into K_FOLD folds
-    splits  = list(StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED).split(dataset, dataset.y))
-
-    # Initialize all models to be tested
-    list_of_models = {}
-
-    # Initialize the 1WL+NN models
-    # Important: for the 1WL+NN models, the dataset transformer must be set to the wl_transformer!
-    total_number_of_colors = len(wl.hashmap)
+    # Check how many iterations the WL algorithm will run
+    # If K_WL is -1, it will run until convergence, otherwise it will run K_WL iterations
+    if K_WL == -1:
+        dataset.transform = WL_Transformer(wl, use_node_attr=True)
+        wl_conv_layers = []
+    else:
+        dataset.transform = Constant_Long(0) 
+        wl_conv_layers = [(wl, 'x, edge_index -> x') for _ in range(K_WL)]
     
-    # 1WL+NN model with Embedding and Summation as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_sum = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
+    # Initialize the model
+    model = torch_geometric.nn.Sequential('x, edge_index, batch', wl_conv_layers + [
+                    (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                     (torch.squeeze, 'x -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
                 ]).to(DEVICE)
-    wlnn_model_sum.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: sum & embedding'] = wlnn_model_sum
 
-    # 1WL+NN model with Embedding and Max as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
-                    (torch.squeeze, 'x -> x'),
-                    (PyGPool.global_max_pool, 'x, batch -> x'),
-                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
-    wlnn_model_max.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: max & embedding'] = wlnn_model_max
+else :
+    raise ValueError("Invalid model name")
 
-    # 1WL+NN model with Embedding and Mean as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
-                    (torch.squeeze, 'x -> x'),
-                    (PyGPool.global_mean_pool, 'x, batch -> x'),
-                    (MLP(channel_list=[10, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
-    wlnn_model_mean.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: mean & embedding'] = wlnn_model_mean
+# Log the model to wandb
+wandb.watch(model, log="all")
 
-    # 1WL+NN model with Embedding and Summation as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_sum = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (torch.Tensor.float, 'x -> x'),
-                    (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
-    wlnn_model_sum.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: sum'] = wlnn_model_sum
+# TRAINING LOOP
+# Initialize the optimizer and loss function
+optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
 
-    # 1WL+NN model with Embedding and Max as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_max = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (PyGPool.global_max_pool, 'x, batch -> x'),
-                    (torch.Tensor.float, 'x -> x'),
-                    (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
-    wlnn_model_max.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: max'] = wlnn_model_max
+# Training Loop
+runtime = []
 
-    # 1WL+NN model with Embedding and Mean as its encoding function
-    dataset.transform = wl_transformer
-    wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (PyGPool.global_mean_pool, 'x, batch -> x'),
-                    (torch.Tensor.float, 'x -> x'),
-                    (MLP(channel_list=[1, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
-    wlnn_model_mean.dataset_transformer = dataset.transform
-    list_of_models['1WL+NN: mean'] = wlnn_model_mean
+# Loop over the K_FOLD splits
+for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
+    print(f'Cross-Validation Split {fold+1}/{K_FOLD}:')
 
-    # # 1WL+NN model with Embedding and set2set as its encoding function
-    # dataset.transform = wl_transformer
-    # wlnn_model_mean = torch_geometric.nn.Sequential('x, edge_index, batch', [
-    #                 (TorchNN.Embedding(num_embeddings=total_number_of_colors, embedding_dim=10), 'x -> x'),
-    #                 (torch.squeeze, 'x -> x'),
-    #                 (PyGAggr.Set2Set(in_channels=10, processing_steps=3), 'x, batch -> x'),
-    #                 (MLP(channel_list=[10*2, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-    #                 (TorchNN.Softmax(dim=1), 'x -> x')
-    #             ]).to(DEVICE)
-    # wlnn_model_mean.dataset_transformer = dataset.transform
-    # list_of_models['1WL+NN: set2set'] = wlnn_model_mean
+    # Reset the model parameters
+    model.reset_parameters()
 
+    # Initialize the data loaders
+    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False)
 
-    # Initialize the GNN models
-    # Note that data transformer can be set to anything
+    # Train the model
+    for epoch in range(EPOCHS):
+        start = time.time()
 
-    # # GNN model using the GIN construction with the transformer 'zero_transformer'
-    # dataset.transform = zero_transformer
-    # gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    # delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+        # Train, validate and test the model
+        train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
+        val_loss, val_acc = val(model, val_loader, loss_func)
+
+        # Log the results to wandb
+        wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc,
+                  f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
+
+        # Print current status
+        if (epoch + 1) % LOG_INTERVAL == 0:
+            print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
+                    f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
+                    f'\t Val Acc: {round(val_acc, 1)}%')
+        
+        runtime.append(time.time()-start)
     
-    # gnn_model_gin_zero = torch_geometric.nn.Sequential('x, edge_index, batch', [
-    #                 (gin, 'x, edge_index -> x'),
-    #                 (PyGPool.global_add_pool, 'x, batch -> x'),
-    #                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-    #                 (TorchNN.Softmax(dim=1), 'x -> x')
-    #             ])
-    # gnn_model_gin_zero.dataset_transformer = dataset.transform
-    #list_of_models['GIN: sum & zero_transformer'] = gnn_model_gin_zero
-
-    # # GNN model using the GIN construction with the transformer 'one_hot_degree_transformer'
-    # dataset.transform = one_hot_degree_transformer
-    # gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    # delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
-    
-    # gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
-    #                 (gin, 'x, edge_index -> x'),
-    #                 (PyGPool.global_add_pool, 'x, batch -> x'),
-    #                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-    #                 (TorchNN.Softmax(dim=1), 'x -> x')
-    #             ])
-    # gnn_model_gin_degree.dataset_transformer = dataset.transform
-    #list_of_models['GIN: sum & one_hot_degree'] = gnn_model_gin_degree
-
-    # GNN model using the GIN construction with no transformer
-    # dataset.transform = None
-    # gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    # delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
-    
-    # gnn_model_gin_degree = torch_geometric.nn.Sequential('x, edge_index, batch', [
-    #                 (gin, 'x, edge_index -> x'),
-    #                 (PyGPool.global_add_pool, 'x, batch -> x'),
-    #                 (MLP(channel_list=[gin.out_channels * gin.num_layers, 60, 40, 20, dataset.num_classes]), 'x -> x'),
-    #                 (TorchNN.Softmax(dim=1), 'x -> x')
-    #             ])
-    # gnn_model_gin_degree.dataset_transformer = dataset.transform
-    # list_of_models['GIN: sum'] = gnn_model_gin_degree
+print(f'Avg runtime per epoch: {np.mean(runtime)}')
 
 
-    # Initialize the lists for storing the results
-    all_train_losses = {}
-    all_train_accuraies = {}
-    all_val_losses = {}
-    all_val_accuracies = {}
-
-    # TRAINING LOOP
-    for model_name, model in list_of_models.items():
-        print(f'#'*100 + f'\nTraining: {model_name}')
-
-        # Setting the data transformer
-        dataset.transform = model.dataset_transformer
-
-        # Initialize the optimizer and loss function
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.01, weight_decay=5e-4)
-        loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
-
-        # Initialize the lists for storing the results
-        train_losses = [[] for _ in range(EPOCHS)]
-        train_accuracies = [[] for _ in range(EPOCHS)]
-        val_losses = [[] for _ in range(EPOCHS)]
-        val_accuracies = [[] for _ in range(EPOCHS)]
-
-        # Training Loop
-        runtime = []
-
-        # Loop over the K_FOLD splits
-        for i_split, split in enumerate(splits):
-            print(f'Cross-Validation Split {i_split+1}/{K_FOLD}:')
-
-            # Reset the model parameters
-            model.reset_parameters()
-
-            # Initialize the data loaders
-            train_loader = PyGDataLoader(dataset[split[0]], batch_size=BATCH_SIZE, shuffle=True)
-            val_loader = PyGDataLoader(dataset[split[1]], batch_size=BATCH_SIZE, shuffle=False)
-
-            # Train the model
-            for epoch in range(EPOCHS):
-                start = time.time()
-
-                # Train, validate and test the model
-                train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
-                val_loss, val_acc = val(model, val_loader, loss_func)
-
-                # Save the results
-                train_losses[epoch].append(train_loss)
-                train_accuracies[epoch].append(train_acc)
-                val_losses[epoch].append(val_loss)
-                val_accuracies[epoch].append(val_acc)
-
-                # Print current status
-                if (epoch + 1) % LOG_INTERVAL == 0:
-                    print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
-                          f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
-                          f'\t Val Acc: {round(val_acc, 1)}%')
-                
-                runtime.append(time.time()-start)
-            
-        print(f'Avg runtime per epoch: {np.mean(runtime)}')
-
-        # Save the results
-        all_train_losses[model_name] = train_losses
-        all_train_accuraies[model_name] = train_accuracies
-        all_val_losses[model_name] = val_losses
-        all_val_accuracies[model_name] = val_accuracies
-    
-    # POST PROCESSING
-
-    # Transform the data into tensors
-    for model_name in list_of_models.keys():
-        all_train_losses[model_name] = torch.tensor(all_train_losses[model_name])
-        all_train_accuraies[model_name] = torch.tensor(all_train_accuraies[model_name])
-        all_val_losses[model_name] = torch.tensor(all_val_losses[model_name])
-        all_val_accuracies[model_name] = torch.tensor(all_val_accuracies[model_name])
-
-    # Plot the results
-    if PLOT_RESULTS:
-        visualization.plot_loss_and_accuracy(DATASET_NAME, all_train_losses, all_train_accuraies, all_val_losses, all_val_accuracies)
-
-    # Printing the final results
-    epochs = [0] + [i-1 for i in range(EPOCHS // NUM_EPOCHS_TO_BE_PRINTED, EPOCHS + EPOCHS // NUM_EPOCHS_TO_BE_PRINTED, EPOCHS // NUM_EPOCHS_TO_BE_PRINTED)]
-
-    print(f'\nFinal validation accuracies:')
-    print(f'{"Epoch:" : <30} {"".join([f"{e + 1 : ^15}" for e in epochs])}')
-    for model_name in list_of_models.keys():
-        res = ''.join([f"{f'{round(all_val_accuracies[model_name][e].mean().item(), 1)}±{round(all_val_accuracies[model_name][e].std().item(), 1)}%' : ^15}" for e in epochs])
-        print(f'{model_name : <30} {res}')
-
-if __name__ == '__main__':
-    main()
+wandb.finish()
