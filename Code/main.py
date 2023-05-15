@@ -141,64 +141,72 @@ def test(model, loader):
 # Set seed for reproducibility
 utils.seed_everything(SEED)
 
-# Global wl convolution
-wl = WLConv()
-
-# Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+# Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
 dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
                     pre_transform=ToDevice(DEVICE))
 dataset = dataset.shuffle()
 
-# Initialize dataset transformer #TODO: check that
-max_degree = max([data.num_nodes for data in dataset])
-one_hot_degree_transformer = OneHotDegree(max_degree=max_degree)
-
 # Split dataset into K_FOLD folds
 cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 
-K_WL = 10 #TODO: remove this
-
 # Initialize the model
-if MODEL_NAME == "1WL+NN:Embedding-Sum":
-   
-    # Initialize dataset transformer
-    dataset.transform = WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL)
-    wl_conv_layers = []
+# First check if the model is a WL model
+if MODEL_NAME.startswith("1WL+NN"):
+    # Global wl convolution
+    wl = WLConv()
 
-    for data in dataset:
-        pass
+    # Pre_transform the dataset such that the wl algorithm already has been applied to all graphs
+    dataset.pre_transform = WL_Transformer(wl, use_node_attr=False, max_iterations=K_WL) #TODO: check why it does not work with node attributes
+    dataset.process()
 
     largest_color = len(wl.hashmap)
 
-    # Initialize the model
+    if MODEL_NAME == "1WL+NN:Embedding-Sum":
+        model = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                        (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
+                        (torch.squeeze, 'x -> x'),
+                        (PyGPool.global_add_pool, 'x, batch -> x'),
+                        (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
+                        (TorchNN.Softmax(dim=1), 'x -> x')
+                    ]).to(DEVICE)
+        
+    elif MODEL_NAME == "1WL+NN:Embedding-Max":
+        model = torch_geometric.nn.Sequential('x, edge_index, batch', [
+                        (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
+                        (torch.squeeze, 'x -> x'),
+                        (PyGPool.global_max_pool, 'x, batch -> x'),
+                        (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
+                        (TorchNN.Softmax(dim=1), 'x -> x')
+                    ]).to(DEVICE)
+        
+elif MODEL_NAME == "GIN:Zero":
+    dataset.transform = Constant_Long(0)
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+    delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
+    
     model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
-                    (torch.squeeze, 'x -> x'),
+                    (gin, 'x, edge_index -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
-                    (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
+                    (MLP(channel_list=[gin.out_channels * gin.num_layers, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                     (TorchNN.Softmax(dim=1), 'x -> x')
-                ]).to(DEVICE)
+                ])
 
-else :
+else:
     raise ValueError("Invalid model name")
 
 # Log the model to wandb
 wandb.watch(model, log="all")
 
-# TRAINING LOOP
-# Initialize the optimizer and loss function
-optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
-
-# Training Loop
-runtime = []
-
-# Loop over the K_FOLD splits
+# TRAINING LOOP: Loop over the K_FOLD splits
 for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
     print(f'Cross-Validation Split {fold+1}/{K_FOLD}:')
 
     # Reset the model parameters
     model.reset_parameters()
+
+    # Initialize the optimizer and loss function
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+    loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
@@ -217,16 +225,9 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
                   f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
 
         # Print current status
-
-
         if (epoch + 1) % LOG_INTERVAL == 0:
             print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
                     f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
-                    f'\t Val Acc: {round(val_acc, 1)}%')
-        
-        runtime.append(time.time()-start)
-    
-print(f'Avg runtime per epoch: {np.mean(runtime)}')
-
+                    f'\t Val Acc: {round(val_acc, 1)}%')       
 
 wandb.finish()

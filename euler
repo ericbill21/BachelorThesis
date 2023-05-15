@@ -1,0 +1,2 @@
+source eric_env/bin/activate
+module load gcc/6.3.0 python/3.8.5
