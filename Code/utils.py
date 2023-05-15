@@ -16,6 +16,12 @@ import random, os
 import numpy as np
 import torch
 
+import os, shutil
+
+from torch_geometric.datasets import TUDataset
+from torch_geometric.io import read_tu_data
+from typing import Callable, List, Optional
+
 def seed_everything(seed: int):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -92,19 +98,19 @@ class WL_Transformer(BaseTransform):
         self,
         data: Union[Data, HeteroData],
     ) -> Union[Data, HeteroData]:
-        
+            
         # If there are no node features, we create a constant feature vector
         if data.x is None or not self.use_node_attr:
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
-        
-        # Check if the node features are one-hot encoded
+
         elif data.x.dim() > 1:
+            data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
+
             assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
-            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.
-        assert data.x.dtype == torch.long
-    
+            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
+        
         # Replace the graph features directly with the WL coloring
-        data.x = wl_algorithm(self.wl_conv, data, self.max_iterations).unsqueeze(-1)
+        data.x = wl_algorithm(self.wl_conv, data.x, data.edge_index, self.max_iterations).unsqueeze(-1)
         
         return data
 
@@ -112,18 +118,18 @@ class WL_Transformer(BaseTransform):
         return f'{self.__class__.__name__}'
 
 
-def wl_algorithm(wl, graph, total_iterations = -1):
+def wl_algorithm(wl, x, edge_index, num_nodes, total_iterations = -1):
         if total_iterations == -1:
-            total_iterations = graph.num_nodes
+            total_iterations = num_nodes
 
-        old_coloring = graph.x.squeeze()
-        new_coloring = wl.forward(old_coloring, graph.edge_index)
+        old_coloring = x.squeeze()
+        new_coloring = wl.forward(old_coloring, edge_index)
 
         iteration = 0        
         while not check_wl_convergence(old_coloring, new_coloring) and iteration < total_iterations:
             # Calculate the new coloring
             old_coloring = new_coloring
-            new_coloring = wl.forward(old_coloring, graph.edge_index)
+            new_coloring = wl.forward(old_coloring, edge_index)
 
             iteration += 1
 
@@ -140,6 +146,47 @@ def check_wl_convergence(old_coloring, new_coloring):
         
     return True
 
-
-    
+class Wrapper_TUDataset(TUDataset):
+    def __init__(self, root: str, name: str,
+                 transform: Optional[Callable] = None,
+                 pre_transform: Optional[Callable] = None,
+                 pre_filter: Optional[Callable] = None,
+                 use_node_attr: bool = False, use_edge_attr: bool = False,
+                 cleaned: bool = False,
+                 pre_shuffle: bool = False):
         
+        # Remove the processed folder if it exists
+        if os.path.isdir(root + '/' + name + '/processed'):
+            shutil.rmtree(root + '/' + name + '/processed')
+        
+        self.pre_shuffle = pre_shuffle
+        super().__init__(root, name, transform, pre_transform,
+                                        pre_filter, use_node_attr,
+                                        use_edge_attr, cleaned)
+    
+    def process(self):
+        self.data, self.slices, sizes = read_tu_data(self.raw_dir, self.name)
+
+        if self.pre_filter is not None or self.pre_transform is not None or self.pre_shuffle is not None:
+            # Apply permutation to all attributes
+            if self.pre_shuffle:
+                data_list = [self.get(idx) for idx in torch.randperm(len(self))]
+                
+            # Create a list of Data objects
+            else:
+                data_list = [self.get(idx) for idx in range(len(self))]
+            
+            # Apply pre_filter
+            if self.pre_filter is not None:
+                data_list = [d for d in data_list if self.pre_filter(d)]
+
+            # Apply pre_transform
+            if self.pre_transform is not None:
+                data_list = [self.pre_transform(d) for d in data_list]
+
+            # Collate the list of Data objects into a single Data object
+            self.data, self.slices = self.collate(data_list)
+        
+        sizes['num_node_labels'] = 1 # Hardcoded for now, TODO: make it more dynamic
+
+        torch.save((self._data, self.slices, sizes), self.processed_paths[0])

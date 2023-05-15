@@ -8,21 +8,18 @@ import wandb
 import torch
 import torch_geometric
 
-import torch.nn as TorchNN
+import torch.nn
 from torch_geometric.datasets import TUDataset
 from utils import Constant_Long, WL_Transformer
 from torch_geometric.transforms import OneHotDegree, ToDevice
 from torch_geometric.nn.conv.wl_conv import WLConv
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
-
 from torch_geometric.nn.models import GIN, MLP
-from torch_geometric.nn import pool as PyGPool
-from torch_geometric.nn import aggr as PyGAggr
 
-from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 
-import visualization
+from utils import Wrapper_TUDataset
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
@@ -35,7 +32,6 @@ parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--k_wl', type=int, default=1, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
 args = parser.parse_args()
-
 
 # GLOBAL PARAMETERS
 EPOCHS = args.epochs
@@ -141,54 +137,49 @@ def test(model, loader):
 # Set seed for reproducibility
 utils.seed_everything(SEED)
 
-# Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-dataset = TUDataset(root=f'Code/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', 
-                    pre_transform=ToDevice(DEVICE))
-dataset = dataset.shuffle()
-
-# Split dataset into K_FOLD folds
-cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
-
 # Initialize the model
 # First check if the model is a WL model
 if MODEL_NAME.startswith("1WL+NN"):
     # Global wl convolution
     wl = WLConv()
 
-    # Pre_transform the dataset such that the wl algorithm already has been applied to all graphs
-    dataset.pre_transform = WL_Transformer(wl, use_node_attr=False, max_iterations=K_WL) #TODO: check why it does not work with node attributes
-    dataset.process()
+    # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+    dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
+                        pre_transform=WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL), pre_shuffle=True)
 
     largest_color = len(wl.hashmap)
 
     if MODEL_NAME == "1WL+NN:Embedding-Sum":
         model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                        (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
+                        (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                         (torch.squeeze, 'x -> x'),
-                        (PyGPool.global_add_pool, 'x, batch -> x'),
+                        (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
                         (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                        (TorchNN.Softmax(dim=1), 'x -> x')
+                        (torch.nn.Softmax(dim=1), 'x -> x')
                     ]).to(DEVICE)
         
     elif MODEL_NAME == "1WL+NN:Embedding-Max":
         model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                        (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
+                        (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                         (torch.squeeze, 'x -> x'),
-                        (PyGPool.global_max_pool, 'x, batch -> x'),
+                        (torch_geometric.nn.pool.global_max_pool, 'x, batch -> x'),
                         (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                        (TorchNN.Softmax(dim=1), 'x -> x')
+                        (torch.nn.Softmax(dim=1), 'x -> x')
                     ]).to(DEVICE)
         
-elif MODEL_NAME == "GIN:Zero":
-    dataset.transform = Constant_Long(0)
+elif MODEL_NAME == "GIN:Zero-Sum":
+    # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+    dataset = Wrapper_TUDataset(root=f'tmp2/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', use_node_attr=True,
+                        pre_transform=Constant_Long(0), pre_shuffle=True)
+
     gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
     delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     model = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (gin, 'x, edge_index -> x'),
-                    (PyGPool.global_add_pool, 'x, batch -> x'),
+                    (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
                     (MLP(channel_list=[gin.out_channels * gin.num_layers, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                    (TorchNN.Softmax(dim=1), 'x -> x')
+                    (torch.nn.Softmax(dim=1), 'x -> x')
                 ])
 
 else:
@@ -196,6 +187,9 @@ else:
 
 # Log the model to wandb
 wandb.watch(model, log="all")
+
+# Split dataset into K_FOLD folds
+cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 
 # TRAINING LOOP: Loop over the K_FOLD splits
 for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
@@ -206,7 +200,7 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
 
     # Initialize the optimizer and loss function
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-    loss_func = lambda pred, true: TorchNN.CrossEntropyLoss()(pred, true).log()
+    loss_func = lambda pred, true: torch.nn.CrossEntropyLoss()(pred, true).log()
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
