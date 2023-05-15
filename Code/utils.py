@@ -89,10 +89,12 @@ class WL_Transformer(BaseTransform):
         wl_conv: torch.nn.Module,
         use_node_attr: bool = True,
         max_iterations: int = -1,
+        check_convergence: bool = False,
     ):
         self.wl_conv = wl_conv
         self.use_node_attr = use_node_attr
         self.max_iterations = max_iterations
+        self.check_convergence = check_convergence
 
     def __call__(
         self,
@@ -110,30 +112,26 @@ class WL_Transformer(BaseTransform):
             data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
         
         # Replace the graph features directly with the WL coloring
-        data.x = wl_algorithm(self.wl_conv, data.x, data.edge_index, self.max_iterations).unsqueeze(-1)
-        
+        if self.max_iterations == -1:
+            self.max_iterations = data.num_nodes
+
+        old_coloring = data.x.squeeze()
+        new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
+
+        iteration = 0        
+        while ((not self.check_convergence) or (not check_wl_convergence(old_coloring, new_coloring))) and iteration < self.max_iterations:
+            # Calculate the new coloring
+            old_coloring = new_coloring
+            new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
+
+            iteration += 1
+
+        data.x = old_coloring.unsqueeze(-1)
+
         return data
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}'
-
-
-def wl_algorithm(wl, x, edge_index, num_nodes, total_iterations = -1):
-        if total_iterations == -1:
-            total_iterations = num_nodes
-
-        old_coloring = x.squeeze()
-        new_coloring = wl.forward(old_coloring, edge_index)
-
-        iteration = 0        
-        while not check_wl_convergence(old_coloring, new_coloring) and iteration < total_iterations:
-            # Calculate the new coloring
-            old_coloring = new_coloring
-            new_coloring = wl.forward(old_coloring, edge_index)
-
-            iteration += 1
-
-        return old_coloring
 
 def check_wl_convergence(old_coloring, new_coloring):
     mapping = {}

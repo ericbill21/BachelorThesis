@@ -29,8 +29,9 @@ parser.add_argument('--batch_size', type=int, default=32, help='Number of sample
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
 parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-parser.add_argument('--k_wl', type=int, default=1, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
+parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
+parser.add_argument('--wl_convergence', type=bool, default=False, action=argparse.BooleanOptionalAction, help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
 args = parser.parse_args()
 
 # GLOBAL PARAMETERS
@@ -42,6 +43,7 @@ DATASET_NAME = args.dataset
 SEED = args.seed
 K_WL = args.k_wl
 MODEL_NAME = args.model
+WL_CONVERGENCE = args.wl_convergence
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 LOG_INTERVAL = 5
@@ -64,6 +66,8 @@ wandb.init(
     "learning_rate": LEARNING_RATE,
     "seed": SEED,
     "k_wl": K_WL,
+    "model": MODEL_NAME,
+    "wl_convergence": WL_CONVERGENCE
     }
 )
 
@@ -145,7 +149,7 @@ if MODEL_NAME.startswith("1WL+NN"):
 
     # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
     dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
-                        pre_transform=WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL), pre_shuffle=True)
+                        pre_transform=WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE), pre_shuffle=True)
 
     largest_color = len(wl.hashmap)
 
