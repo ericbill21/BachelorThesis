@@ -82,9 +82,11 @@ class WL_Transformer(BaseTransform):
         self,
         wl_conv: torch.nn.Module,
         use_node_attr: bool = True,
+        max_iterations: int = -1,
     ):
         self.wl_conv = wl_conv
         self.use_node_attr = use_node_attr
+        self.max_iterations = max_iterations
 
     def __call__(
         self,
@@ -102,7 +104,7 @@ class WL_Transformer(BaseTransform):
         assert data.x.dtype == torch.long
     
         # Replace the graph features directly with the WL coloring
-        data.x = wl_algorithm(self.wl_conv, data).unsqueeze(-1)
+        data.x = wl_algorithm(self.wl_conv, data, self.max_iterations).unsqueeze(-1)
         
         return data
 

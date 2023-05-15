@@ -1,6 +1,5 @@
 import time
 import numpy as np
-import pandas as pd
 import utils
 import argparse
 
@@ -157,25 +156,22 @@ one_hot_degree_transformer = OneHotDegree(max_degree=max_degree)
 # Split dataset into K_FOLD folds
 cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 
+K_WL = 10 #TODO: remove this
+
 # Initialize the model
 if MODEL_NAME == "1WL+NN:Embedding-Sum":
-    # TODO: make it more elegant
-    dataset.transform = WL_Transformer(wl, use_node_attr=True)
+   
+    # Initialize dataset transformer
+    dataset.transform = WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL)
+    wl_conv_layers = []
+
     for data in dataset:
         pass
+
     largest_color = len(wl.hashmap)
 
-    # Check how many iterations the WL algorithm will run
-    # If K_WL is -1, it will run until convergence, otherwise it will run K_WL iterations
-    if K_WL == -1:
-        dataset.transform = WL_Transformer(wl, use_node_attr=True)
-        wl_conv_layers = []
-    else:
-        dataset.transform = Constant_Long(0) 
-        wl_conv_layers = [(wl, 'x, edge_index -> x') for _ in range(K_WL)]
-    
     # Initialize the model
-    model = torch_geometric.nn.Sequential('x, edge_index, batch', wl_conv_layers + [
+    model = torch_geometric.nn.Sequential('x, edge_index, batch', [
                     (TorchNN.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                     (torch.squeeze, 'x -> x'),
                     (PyGPool.global_add_pool, 'x, batch -> x'),
@@ -221,6 +217,8 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
                   f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
 
         # Print current status
+
+
         if (epoch + 1) % LOG_INTERVAL == 0:
             print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
                     f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
