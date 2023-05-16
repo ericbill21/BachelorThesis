@@ -22,3 +22,5 @@ python Code/main.py --epochs 250 --k_fold 10 --model 1WL+NN:Embedding-Sum --k_wl
 python Code/main.py --epochs 250 --k_fold 10 --model 1WL+NN:Embedding-Sum --k_wl 8 --dataset PROTEINS --no-wl_convergence --tags k-wl_Test;
 python Code/main.py --epochs 250 --k_fold 10 --model 1WL+NN:Embedding-Sum --k_wl 9 --dataset PROTEINS --no-wl_convergence --tags k-wl_Test;
 python Code/main.py --epochs 250 --k_fold 10 --model 1WL+NN:Embedding-Sum --k_wl 10 --dataset PROTEINS --no-wl_convergence --tags k-wl_Test;
+
+python Code/main.py --epochs 25 --k_fold 2 --model 1WL+NN:Embedding-Sum --k_wl 3 --dataset PROTEINS --no-wl_convergence

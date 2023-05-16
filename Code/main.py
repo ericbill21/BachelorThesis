@@ -49,6 +49,7 @@ WANDB_TAGS = args.tags
 
 GPU = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 CPU = torch.device("cpu")
+print(f"GPU: {GPU}, CPU: {CPU}")
 
 LOG_INTERVAL = 5
 PLOT_RESULTS = True
@@ -218,12 +219,12 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
     model.reset_parameters()
 
     # Initialize the optimizer and loss function
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE).to(GPU)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     loss_func = lambda pred, true: torch.nn.CrossEntropyLoss()(pred, true).log().to(GPU)
 
     # Initialize the data loaders
-    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True).to(GPU)
-    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False).to(GPU)
+    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False)
 
     # Train the model
     for epoch in range(EPOCHS):
@@ -232,10 +233,6 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         # Train, validate and test the model
         train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
         val_loss, val_acc = val(model, val_loader, loss_func)
-
-        # Move to CPU
-        train_loss, train_acc = train_loss.to(CPU), train_acc.to(CPU)
-        val_loss, val_acc = val_loss.to(CPU), val_acc.to(CPU)
 
         # Log the results to wandb
         wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc,
