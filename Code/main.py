@@ -24,7 +24,7 @@ from utils import Wrapper_TUDataset
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
 parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
-parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
+parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
 parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
@@ -32,6 +32,7 @@ parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
 parser.add_argument('--wl_convergence', type=bool, default=False, action=argparse.BooleanOptionalAction, help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
+parser.add_argument('--tags', nargs='+', default=[])
 args = parser.parse_args()
 
 # GLOBAL PARAMETERS
@@ -44,6 +45,7 @@ SEED = args.seed
 K_WL = args.k_wl
 MODEL_NAME = args.model
 WL_CONVERGENCE = args.wl_convergence
+WANDB_TAGS = args.tags
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 LOG_INTERVAL = 5
@@ -67,15 +69,20 @@ wandb.init(
     "seed": SEED,
     "k_wl": K_WL,
     "model": MODEL_NAME,
-    "wl_convergence": WL_CONVERGENCE
+    "wl_convergence": WL_CONVERGENCE,
+    "tags": WANDB_TAGS
     }
 )
 
 wandb.define_metric("epoch")
-wandb.define_metric("train accuracy: fold*", summary="max", step_metric="epoch")
-wandb.define_metric("val accuracy: fold*", summary="max", step_metric="epoch")
-wandb.define_metric("train loss: fold*", summary="min", step_metric="epoch")
-wandb.define_metric("val loss: fold*", summary="min", step_metric="epoch")
+wandb.define_metric("train accuracy: fold*", step_metric="epoch")
+wandb.define_metric("val accuracy: fold*", step_metric="epoch")
+wandb.define_metric("train loss: fold*", step_metric="epoch")
+wandb.define_metric("val loss: fold*", step_metric="epoch")
+wandb.define_metric("train accuracy", summary="last", step_metric="epoch")
+wandb.define_metric("val accuracy", summary="last", step_metric="epoch")
+wandb.define_metric("train loss", summary="last", step_metric="epoch")
+wandb.define_metric("val loss", summary="last", step_metric="epoch")
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func):
@@ -195,6 +202,12 @@ wandb.watch(model, log="all")
 # Split dataset into K_FOLD folds
 cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 
+# Local logging variables
+mean_train_acc = torch.zeros(EPOCHS)
+mean_val_acc = torch.zeros(EPOCHS)
+mean_train_loss = torch.zeros(EPOCHS)
+mean_val_loss = torch.zeros(EPOCHS)
+
 # TRAINING LOOP: Loop over the K_FOLD splits
 for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
     print(f'Cross-Validation Split {fold+1}/{K_FOLD}:')
@@ -221,11 +234,27 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         # Log the results to wandb
         wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc,
                   f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
+        
+        # Log the results locally
+        mean_train_acc[epoch] += train_acc
+        mean_val_acc[epoch] += val_acc
+        mean_train_loss[epoch] += train_loss
+        mean_val_loss[epoch] += val_loss
 
         # Print current status
         if (epoch + 1) % LOG_INTERVAL == 0:
             print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
                     f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
-                    f'\t Val Acc: {round(val_acc, 1)}%')       
+                    f'\t Val Acc: {round(val_acc, 1)}%')
+
+    
+# Averaging the local logging variables
+mean_train_acc /= K_FOLD
+mean_val_acc /= K_FOLD
+mean_train_loss /= K_FOLD
+mean_val_loss /= K_FOLD
+
+for epoch in range(EPOCHS):
+    wandb.log({"train accuracy": mean_train_acc[epoch], "val accuracy": mean_val_acc[epoch], "train loss": mean_train_loss[epoch], "val loss": mean_val_loss[epoch]})
 
 wandb.finish()
