@@ -17,13 +17,13 @@ from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch_geometric.nn.models import GIN, MLP
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 
 from utils import Wrapper_TUDataset
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
-parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
+parser.add_argument('--dataset', type=str, default='ZINC_val', help='Dataset name')
 parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
@@ -46,10 +46,9 @@ K_WL = args.k_wl
 MODEL_NAME = args.model
 WL_CONVERGENCE = args.wl_convergence
 WANDB_TAGS = args.tags
+IS_CLASSIFICATION = False if DATASET_NAME in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 
-GPU = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-CPU = torch.device("cpu")
-print(f"GPU: {GPU}, CPU: {CPU}")
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 LOG_INTERVAL = 5
 PLOT_RESULTS = True
@@ -65,7 +64,7 @@ wandb.init(
     config={
     "Epochs": EPOCHS,
     "Batch size": BATCH_SIZE,
-    "Device": GPU,
+    "Device": DEVICE,
     "k-fold": K_FOLD,
     "Dataset": DATASET_NAME,
     "learning_rate": LEARNING_RATE,
@@ -95,7 +94,7 @@ def train(model, loader, optimizer, loss_func):
     loss_all = 0
     correct = 0
     for data in loader:
-        data = data.to(GPU)
+        data = data.to(DEVICE)
         optimizer.zero_grad()
 
         # Make prediction
@@ -114,6 +113,7 @@ def train(model, loader, optimizer, loss_func):
         loss_all += data.num_graphs * loss.item()
 
     return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
+    
 
 # Simple validation loop
 def val(model, loader, loss_func):
@@ -123,7 +123,7 @@ def val(model, loader, loss_func):
     loss_all = 0
     correct = 0
     for data in loader:
-        data = data.to(GPU)
+        data = data.to(DEVICE)
 
         # Make prediction
         pred = model(data.x, data.edge_index, data.batch)
@@ -143,7 +143,7 @@ def test(model, loader):
 
     correct = 0
     for data in loader:
-        data = data.to(GPU)
+        data = data.to(DEVICE)
         pred = model(data.x, data.edge_index, data.batch).max(1)[1]
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
@@ -161,6 +161,10 @@ if MODEL_NAME.startswith("1WL+NN"):
     dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
                         pre_transform=WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE), pre_shuffle=True)
 
+    # Check if it is a classification task or regression task
+    if IS_CLASSIFICATION: last_layer, output_dim = [(torch.nn.Softmax(dim=1), 'x -> x')], dataset.num_classes
+    else: last_layer, output_dim = [], 1
+
     largest_color = len(wl.hashmap)
 
     if MODEL_NAME == "1WL+NN:Embedding-Sum":
@@ -168,25 +172,27 @@ if MODEL_NAME.startswith("1WL+NN"):
                         (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                         (torch.squeeze, 'x -> x'),
                         (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
-                        (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                        (torch.nn.Softmax(dim=1), 'x -> x')
-                    ]).to(GPU)
+                        (MLP(channel_list=[10, 64, 32, 16, output_dim]), 'x -> x'),
+                    ] + last_layer).to(DEVICE)
         
     elif MODEL_NAME == "1WL+NN:Embedding-Max":
         model = torch_geometric.nn.Sequential('x, edge_index, batch', [
                         (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
                         (torch.squeeze, 'x -> x'),
                         (torch_geometric.nn.pool.global_max_pool, 'x, batch -> x'),
-                        (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                        (torch.nn.Softmax(dim=1), 'x -> x')
-                    ]).to(GPU)
+                        (MLP(channel_list=[10, 64, 32, 16, output_dim]), 'x -> x'),
+                    ] + last_layer).to(DEVICE)
         
 elif MODEL_NAME == "GIN:Zero-Sum":
     # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
     dataset = Wrapper_TUDataset(root=f'tmp2/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', use_node_attr=True,
                         pre_transform=Constant_Long(0), pre_shuffle=True)
+    
+    # Check if it is a classification task or regression task
+    if IS_CLASSIFICATION: last_layer = [(torch.nn.Softmax(dim=1), 'x -> x')]
+    else: last_layer = []
 
-    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(GPU)
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
     delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     model = torch_geometric.nn.Sequential('x, edge_index, batch', [
@@ -194,7 +200,7 @@ elif MODEL_NAME == "GIN:Zero-Sum":
                     (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
                     (MLP(channel_list=[gin.out_channels * gin.num_layers, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                     (torch.nn.Softmax(dim=1), 'x -> x')
-                ]).to(GPU)
+                ] + last_layer).to(DEVICE)
 
 else:
     raise ValueError("Invalid model name")
@@ -202,8 +208,11 @@ else:
 # Log the model to wandb
 wandb.watch(model, log="all")
 
-# Split dataset into K_FOLD folds
-cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
+# Use Stratified K-Fold cross validation if it is a classification task
+if IS_CLASSIFICATION > 1:
+    cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
+else:
+    cross_validation = KFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 
 # Local logging variables
 mean_train_acc = torch.zeros(EPOCHS)
@@ -220,7 +229,7 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
 
     # Initialize the optimizer and loss function
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-    loss_func = lambda pred, true: torch.nn.CrossEntropyLoss()(pred, true).log().to(GPU)
+    loss_func = lambda pred, true: torch.nn.MSELoss()(pred.squeeze_(), true).to(DEVICE) #torch.nn.CrossEntropyLoss()(pred, true).log().to(DEVICE)
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
@@ -235,8 +244,9 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         val_loss, val_acc = val(model, val_loader, loss_func)
 
         # Log the results to wandb
-        wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc,
-                  f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
+        wandb.log({f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
+        if IS_CLASSIFICATION:
+            wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc})
         
         # Log the results locally
         mean_train_acc[epoch] += train_acc

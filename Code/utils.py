@@ -106,7 +106,8 @@ class WL_Transformer(BaseTransform):
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
 
         elif data.x.dim() > 1:
-            data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
+            if data.x[:, 0].sum() > data.x.shape[0]:
+                data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
 
             assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
             data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
