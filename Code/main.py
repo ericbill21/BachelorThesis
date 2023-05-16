@@ -11,7 +11,7 @@ import torch_geometric
 import torch.nn
 from torch_geometric.datasets import TUDataset
 from utils import Constant_Long, WL_Transformer
-from torch_geometric.transforms import OneHotDegree, ToDevice
+from torch_geometric.transforms import OneHotDegree, ToDevice, Compose
 from torch_geometric.nn.conv.wl_conv import WLConv
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
@@ -159,8 +159,10 @@ if MODEL_NAME.startswith("1WL+NN"):
     wl = WLConv()
 
     # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+    transformer = Compose([ToDevice(DEVICE),
+                        WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE)])
     dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
-                        pre_transform=WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE), pre_shuffle=True)
+                        pre_transform=transformer, pre_shuffle=True)
 
     # Check if it is a classification task or regression task
     if IS_CLASSIFICATION: last_layer, output_dim = [(torch.nn.Softmax(dim=1), 'x -> x')], dataset.num_classes
@@ -210,10 +212,12 @@ else:
 wandb.watch(model, log="all")
 
 # Use Stratified K-Fold cross validation if it is a classification task
-if IS_CLASSIFICATION > 1:
+if IS_CLASSIFICATION > 1 and K_FOLD > 1:
     cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
-else:
+elif K_FOLD > 1:
     cross_validation = KFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
+else:
+    raise ValueError("K_FOLD must be greater than 1")
 
 # Local logging variables
 mean_train_acc = torch.zeros(EPOCHS)
@@ -230,7 +234,7 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
 
     # Initialize the optimizer and loss function
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-    loss_func = lambda pred, true: torch.nn.MSELoss()(pred.squeeze_(), true).to(DEVICE) #torch.nn.CrossEntropyLoss()(pred, true).log().to(DEVICE)
+    loss_func = lambda pred, true: torch.nn.MSELoss()(pred.squeeze_(), true) #torch.nn.CrossEntropyLoss()(pred, true).log().to(DEVICE)
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)

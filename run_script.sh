@@ -23,10 +23,17 @@
 #SBATCH --gres=gpu:volta:1
 
 ### if needed: switch to your working directory (where you saved your program)
-#cd $HOME/subfolder/
+#cd /home/cc147794/BachelorThesis/
 
 ### Load modules
 module load cuDNN/8.6.0.163-CUDA-11.8.0
+
+### Activate python environment
+# Insert this AFTER the #SLURM argument section of your job script
+export CONDA_ROOT=$HOME/miniconda3
+. $CONDA_ROOT/etc/profile.d/conda.sh
+export PATH="$CONDA_ROOT/bin:$PATH"
+conda activate base
 
 ### Begin of executable commands
 python Code/main.py --epochs 250 --k_fold 5 --model 1WL+NN:Embedding-Sum --k_wl 3 --dataset ZINC_full --no-wl_convergence --batch_size 128
