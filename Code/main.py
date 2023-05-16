@@ -49,6 +49,7 @@ WANDB_TAGS = args.tags
 IS_CLASSIFICATION = False if DATASET_NAME in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+print(f"Using device: {DEVICE}")
 
 LOG_INTERVAL = 5
 PLOT_RESULTS = True
