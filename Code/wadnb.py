@@ -1,24 +1,29 @@
 import wandb
 import torch
-api = wandb.Api()
+import utils
+from torch_geometric.datasets import TUDataset
+from torch_geometric.nn.conv import WLConv
 
-run = api.run("eric-bill/BachelorThesis/9qkb8bbi")
+wl_conv = WLConv()
 
-k_fold = run.config['k-fold']
-epochs = run.config['Epochs']
-history = run.scan_history()
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="BachelorThesis",
+    name=f"WL_Iterations",
+)
 
-mean_train_acc = torch.tensor([[row[f'train accuracy: fold {fold+1}'] for row in history] for fold in range(k_fold)], dtype=torch.float32).mean(dim=0)
-mean_train_loss = torch.tensor([[row[f'train loss: fold {fold+1}'] for row in history] for fold in range(k_fold)], dtype=torch.float32).mean(dim=0)
-mean_val_acc = torch.tensor([[row[f'val accuracy: fold {fold+1}'] for row in history] for fold in range(k_fold)], dtype=torch.float32).mean(dim=0)
-mean_val_loss = torch.tensor([[row[f'val loss: fold {fold+1}'] for row in history] for fold in range(k_fold)], dtype=torch.float32).mean(dim=0)
+wandb.define_metric("WL_iterations")
+wandb.define_metric("WL_Count", steps_metric="WL_iterations")
 
-wandb.define_metric("train accuracy", summary="last", step_metric="epoch")
-wandb.define_metric("val accuracy", summary="last", step_metric="epoch")
-wandb.define_metric("train loss", summary="last", step_metric="epoch")
-wandb.define_metric("val loss", summary="last", step_metric="epoch")
+dataset = TUDataset(root='tmp', name='PROTEINS')
 
-for i in range(epochs):
-    wandb.log({"epoch": i+1, "train accuracy": mean_train_acc[i], "val accuracy": mean_val_acc[i], "train loss": mean_train_loss[i], "val loss": mean_val_loss[i]})
+wl_trans = utils.WL_Transformer(wl_conv, use_node_attr=True, max_iterations=-1, check_convergence=True)
 
-run.update()
+res = torch.zeros(dataset.len())
+for idx, data in enumerate(dataset):
+    res[idx] = wl_trans(data)
+
+res = res.unique(return_counts=True)
+for iter, count in zip(res[0], res[1]):
+    wandb.log({"WL_iterations": iter, "WL_Count": 100 * count / dataset.len()})
+    print(iter, 100* count / dataset.len())

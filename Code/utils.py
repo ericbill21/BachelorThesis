@@ -106,7 +106,7 @@ class WL_Transformer(BaseTransform):
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
 
         elif data.x.dim() > 1:
-            data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
+            # data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
 
             assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
             data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
@@ -118,7 +118,7 @@ class WL_Transformer(BaseTransform):
         old_coloring = data.x.squeeze()
         new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
 
-        iteration = 0        
+        iteration = 0     
         while ((not self.check_convergence) or (not check_wl_convergence(old_coloring, new_coloring))) and iteration < self.max_iterations:
             # Calculate the new coloring
             old_coloring = new_coloring
@@ -128,7 +128,8 @@ class WL_Transformer(BaseTransform):
 
         data.x = old_coloring.unsqueeze(-1)
 
-        return data
+        # TODO: remove this
+        return iteration
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}'

@@ -24,7 +24,7 @@ from utils import Wrapper_TUDataset
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
 parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
-parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train.')
+parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
 parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
@@ -47,7 +47,9 @@ MODEL_NAME = args.model
 WL_CONVERGENCE = args.wl_convergence
 WANDB_TAGS = args.tags
 
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+GPU = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+CPU = torch.device("cpu")
+
 LOG_INTERVAL = 5
 PLOT_RESULTS = True
 NUM_EPOCHS_TO_BE_PRINTED = 5
@@ -62,7 +64,7 @@ wandb.init(
     config={
     "Epochs": EPOCHS,
     "Batch size": BATCH_SIZE,
-    "Device": DEVICE,
+    "Device": GPU,
     "k-fold": K_FOLD,
     "Dataset": DATASET_NAME,
     "learning_rate": LEARNING_RATE,
@@ -92,7 +94,7 @@ def train(model, loader, optimizer, loss_func):
     loss_all = 0
     correct = 0
     for data in loader:
-        data = data.to(DEVICE)
+        data = data.to(GPU)
         optimizer.zero_grad()
 
         # Make prediction
@@ -120,7 +122,7 @@ def val(model, loader, loss_func):
     loss_all = 0
     correct = 0
     for data in loader:
-        data = data.to(DEVICE)
+        data = data.to(GPU)
 
         # Make prediction
         pred = model(data.x, data.edge_index, data.batch)
@@ -140,7 +142,7 @@ def test(model, loader):
 
     correct = 0
     for data in loader:
-        data = data.to(DEVICE)
+        data = data.to(GPU)
         pred = model(data.x, data.edge_index, data.batch).max(1)[1]
         correct += (pred == data.y).sum().item()
     return correct / len(loader.dataset)
@@ -167,7 +169,7 @@ if MODEL_NAME.startswith("1WL+NN"):
                         (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
                         (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                         (torch.nn.Softmax(dim=1), 'x -> x')
-                    ]).to(DEVICE)
+                    ]).to(GPU)
         
     elif MODEL_NAME == "1WL+NN:Embedding-Max":
         model = torch_geometric.nn.Sequential('x, edge_index, batch', [
@@ -176,14 +178,14 @@ if MODEL_NAME.startswith("1WL+NN"):
                         (torch_geometric.nn.pool.global_max_pool, 'x, batch -> x'),
                         (MLP(channel_list=[10, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                         (torch.nn.Softmax(dim=1), 'x -> x')
-                    ]).to(DEVICE)
+                    ]).to(GPU)
         
 elif MODEL_NAME == "GIN:Zero-Sum":
     # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
     dataset = Wrapper_TUDataset(root=f'tmp2/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', use_node_attr=True,
                         pre_transform=Constant_Long(0), pre_shuffle=True)
 
-    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
+    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(GPU)
     delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
     
     model = torch_geometric.nn.Sequential('x, edge_index, batch', [
@@ -191,7 +193,7 @@ elif MODEL_NAME == "GIN:Zero-Sum":
                     (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
                     (MLP(channel_list=[gin.out_channels * gin.num_layers, 64, 32, 16, dataset.num_classes]), 'x -> x'),
                     (torch.nn.Softmax(dim=1), 'x -> x')
-                ])
+                ]).to(GPU)
 
 else:
     raise ValueError("Invalid model name")
@@ -216,12 +218,12 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
     model.reset_parameters()
 
     # Initialize the optimizer and loss function
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-    loss_func = lambda pred, true: torch.nn.CrossEntropyLoss()(pred, true).log()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE).to(GPU)
+    loss_func = lambda pred, true: torch.nn.CrossEntropyLoss()(pred, true).log().to(GPU)
 
     # Initialize the data loaders
-    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True).to(GPU)
+    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False).to(GPU)
 
     # Train the model
     for epoch in range(EPOCHS):
@@ -230,6 +232,10 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         # Train, validate and test the model
         train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
         val_loss, val_acc = val(model, val_loader, loss_func)
+
+        # Move to CPU
+        train_loss, train_acc = train_loss.to(CPU), train_acc.to(CPU)
+        val_loss, val_acc = val_loss.to(CPU), val_acc.to(CPU)
 
         # Log the results to wandb
         wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc,
