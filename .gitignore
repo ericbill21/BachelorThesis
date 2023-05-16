@@ -717,4 +717,5 @@ FodyWeavers.xsd
 **/.DS_Store
 
 # WANDB
-.wandb/*
+wandb/
+Code/datasets
