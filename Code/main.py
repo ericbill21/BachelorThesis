@@ -55,10 +55,7 @@ args.is_sweep = True if args.is_sweep == 'True' else False
 utils.seed_everything(args.seed)
 
 IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
-if args.is_sweep:
-    run = wandb.init(project=args.project)
-
-else:
+if not args.is_sweep:
     run = wandb.init(
     project="BachelorThesis",
     name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
