@@ -31,14 +31,20 @@ parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for 
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
-parser.add_argument('--wl_convergence', type=bool, default=False, action=argparse.BooleanOptionalAction, help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
+parser.add_argument('--wl_convergence', type=str, choices=['True','False'], help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
 parser.add_argument('--tags', nargs='+', default=[])
 parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use.')
 parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use.')
 parser.add_argument('--metric', nargs='+', default=[], help='Metric to use.')
 parser.add_argument('--transformer', type=str, default='None', help='Transformer to use.')
 parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer.')
+parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings.')
+parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers.')
+parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
 args = parser.parse_args()
+
+# Convert arguments
+args.wl_convergence = True if args.wl_convergence == 'True' else False
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
@@ -60,27 +66,36 @@ run = wandb.init(
     "k_wl": args.k_wl,
     "model": args.model,
     "wl_convergence": args.wl_convergence,
-    }
-)
+    "loss_func": args.loss_func,
+    "optimizer": args.optimizer,
+    "metric": args.metric,
+    "transformer": args.transformer,
+    "transformer_args": args.transformer_args,
+    "embedding_dim": args.embedding_dim,
+    "mlp_layer_size": args.mlp_layer_size,
+    "mlp_num_layers": args.mlp_num_layers
+    })
 
 # Define metrics
 wandb.define_metric("epoch")
-for standard_metric in [args.loss_func, 'Accurayc']:
-    wandb.define_metric(f"train_{standard_metric}: fold*", step_metric="epoch")
-    wandb.define_metric(f"val_{standard_metric}: fold*", step_metric="epoch")
-    wandb.define_metric(f"train_{standard_metric}", summary="last", step_metric="epoch")
-    wandb.define_metric(f"val_{standard_metric}", summary="last", step_metric="epoch")
+wandb.define_metric(f"train_loss: fold*", step_metric="epoch")
+wandb.define_metric(f"val_loss: fold*", step_metric="epoch")
+wandb.define_metric(f"train_loss", summary="max", step_metric="epoch")
+wandb.define_metric(f"val_loss", summary="max", step_metric="epoch")
+wandb.define_metric(f"train_acc: fold*", step_metric="epoch")
+wandb.define_metric(f"val_acc: fold*", step_metric="epoch")
+wandb.define_metric(f"train_acc", summary="max", step_metric="epoch")
+wandb.define_metric(f"val_acc", summary="max", step_metric="epoch")
 
 for metric in args.metric:
     wandb.define_metric(f"val_{metric}: fold*", step_metric="epoch")
-    wandb.define_metric(f"val_{metric}", summary="last", step_metric="epoch")
+    wandb.define_metric(f"val_{metric}", summary="max", step_metric="epoch")
 
 metric_func = []
-args.metric = ['f1_score', 'roc_auc_score']
 for metric_name in args.metric:
     if metric_name == "f1_score":
         metric_func.append(lambda y_true, y_pred: f1_score(y_true, y_pred, average="micro"))
-    elif metric_name == "roc_auc_score":
+    elif metric_name == "roc_auc_score": #TODO: case when not all classes are present in the dataset
         metric_func.append(lambda y_true, y_pred: roc_auc_score(y_true, y_pred, average="micro"))
     else:
         raise NotImplementedError(f"Metric {metric_name} is not implemented.")
@@ -104,8 +119,8 @@ model = load_model(model_name = args.model,
                     is_classification = True,
                     device = DEVICE,
                     largest_color = transformer[-1].get_largest_color(),
-                    embedding_dim = 8,
-                    mlp_hidden_layer_conf=[64, 32, 16, 16])
+                    embedding_dim = args.embedding_dim,
+                    mlp_hidden_layer_conf=[args.mlp_layer_size]*args.mlp_num_layers)
 
 # Load optimizer
 optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
@@ -119,7 +134,7 @@ wandb.watch(model, log="all")
 # Use Stratified K-Fold cross validation if it is a classification task
 cross_validation = StratifiedKFold(n_splits=args.k_fold, shuffle=True, random_state=args.seed)
 
-
+# Initialize local variables for local logging
 mean_train_acc = torch.zeros(args.epochs)
 mean_val_acc = torch.zeros(args.epochs)
 mean_train_loss = torch.zeros(args.epochs)
@@ -149,10 +164,10 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         val_loss, val_acc, metric_res = utils.val(model, val_loader, loss_func, DEVICE, metric_func)
 
         # Log the results to wandb
-        wandb.log({f"val_{args.loss_func}: fold{fold+1}": val_loss,
-                    f"val_Accuracy: fold{fold+1}": val_acc,
-                    f"train_{args.loss_func}: fold{fold+1}": train_loss,
-                    f"train_Accuracy: fold{fold+1}": train_acc,
+        wandb.log({f"val_loss: fold{fold+1}": val_loss,
+                    f"val_acc: fold{fold+1}": val_acc,
+                    f"train_loss: fold{fold+1}": train_loss,
+                    f"train_acc: fold{fold+1}": train_acc,
                     "epoch": epoch+1})
         
         for metric_name, res in zip(args.metric, metric_res):
@@ -184,10 +199,10 @@ for i in range(len(metric_logs)):
     metric_logs[i] /= args.k_fold
 
 for epoch in range(args.epochs):
-    wandb.log({f"val_{args.loss_func}": mean_val_loss[epoch],
-                f"val_Accuracy": mean_val_acc[epoch],
-                f"train_{args.loss_func}": mean_train_loss[epoch],
-                f"train_Accuracy": mean_train_acc[epoch],
+    wandb.log({f"val_loss": mean_val_loss[epoch],
+                f"val_acc": mean_val_acc[epoch],
+                f"train_loss": mean_train_loss[epoch],
+                f"train_acc": mean_train_acc[epoch],
                 "epoch": epoch+1})
     
     for i, metric_res in enumerate(metric_logs):

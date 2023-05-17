@@ -92,7 +92,7 @@ def val(model, loader, loss_func, DEVICE, metrics=[]):
     return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100, metric_results
 
 # Simple test loop
-def test(model, loader):
+def test(model, loader, DEVICE):
     # Set model to evaluation mode
     model.eval()
 
