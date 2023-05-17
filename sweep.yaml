@@ -1,15 +1,15 @@
 program: Code/main.py
-method: grid
+method: random
 metric:
   name: val_loss
   goal: minimize
 parameters:
   model:
-    value: "1WL+NN:Embedding-Sum"
+    values: ["1WL+NN:Embedding-Sum", "1WL+NN:Embedding-Max", "1WL+NN:Embedding-Mean"]
   dataset:
     value: "PROTEINS"
   epochs:
-    value: 100
+    value: 200
   batch_size:
     values: [4, 8, 16, 32, 64, 128]
   lr:
