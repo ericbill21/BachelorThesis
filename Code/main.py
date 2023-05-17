@@ -44,6 +44,7 @@ parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of t
 parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers.')
 parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
 parser.add_argument('--is_sweep', type=str, choices=['True','False'], help='Whether to run a sweep or not.')
+parser.add_argument('--project', type=str, default='BachelorThesis', help='Project name for wandb.')
 args = parser.parse_args()
 
 # Convert arguments
@@ -54,38 +55,34 @@ args.is_sweep = True if args.is_sweep == 'True' else False
 utils.seed_everything(args.seed)
 
 IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
-
 if args.is_sweep:
-    with open('./config.yaml') as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
-    
-    run = wandb.init(config=config)
+    run = wandb.init(project=args.project)
 
 else:
     run = wandb.init(
-        project="BachelorThesis",
-        name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
-        tags = args.tags,
-        config={
-        "Epochs": args.epochs,
-        "Batch size": args.batch_size,
-        "Device": DEVICE,
-        "k-fold": args.k_fold,
-        "Dataset": args.dataset,
-        "learning_rate": args.lr,
-        "seed": args.seed,
-        "k_wl": args.k_wl,
-        "model": args.model,
-        "wl_convergence": args.wl_convergence,
-        "loss_func": args.loss_func,
-        "optimizer": args.optimizer,
-        "metric": args.metric,
-        "transformer": args.transformer,
-        "transformer_args": args.transformer_args,
-        "embedding_dim": args.embedding_dim,
-        "mlp_layer_size": args.mlp_layer_size,
-        "mlp_num_layers": args.mlp_num_layers
-    })
+    project="BachelorThesis",
+    name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
+    tags = args.tags,
+    config={
+    "Epochs": args.epochs,
+    "Batch size": args.batch_size,
+    "Device": DEVICE,
+    "k-fold": args.k_fold,
+    "Dataset": args.dataset,
+    "learning_rate": args.lr,
+    "seed": args.seed,
+    "k_wl": args.k_wl,
+    "model": args.model,
+    "wl_convergence": args.wl_convergence,
+    "loss_func": args.loss_func,
+    "optimizer": args.optimizer,
+    "metric": args.metric,
+    "transformer": args.transformer,
+    "transformer_args": args.transformer_args,
+    "embedding_dim": args.embedding_dim,
+    "mlp_layer_size": args.mlp_layer_size,
+    "mlp_num_layers": args.mlp_num_layers
+})
 
 # Define metrics
 wandb.define_metric("epoch")
@@ -114,7 +111,7 @@ for metric_name in args.metric:
 # Prepare Pre Dataset Transformers
 transformer = [ToDevice(DEVICE)]
 if args.model.startswith("1WL+NN"):
-    transformer.append(WL_Transformer(use_node_attr=True, max_iterations=args.k_wl, check_convergence=args.wl_convergence))
+    transformer.append(WL_Transformer(use_node_attr=True, max_iterations=args.k_wl, check_convergence=args.wl_convergence, device=DEVICE))
 elif args.transformer == "OneHotDegree":
     transformer.append(OneHotDegree(max_degree=args.tramsformer_args[0]))
 elif args.transformer == "Constant_Long":

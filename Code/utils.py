@@ -160,8 +160,9 @@ class WL_Transformer(BaseTransform):
         use_node_attr: bool = True,
         max_iterations: int = -1,
         check_convergence: bool = False,
+        device: str = 'cpu',
     ):
-        self.wl_conv = WLConv()
+        self.wl_conv = WLConv().to(device)
         self.use_node_attr = use_node_attr
         self.max_iterations = max_iterations
         self.check_convergence = check_convergence
