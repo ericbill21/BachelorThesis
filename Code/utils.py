@@ -22,6 +22,8 @@ from torch_geometric.datasets import TUDataset
 from torch_geometric.io import read_tu_data
 from typing import Callable, List, Optional
 
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
 def seed_everything(seed: int):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -31,6 +33,62 @@ def seed_everything(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     torch.mps.manual_seed(seed)
+
+
+# Simple training loop
+def train(model, loader, optimizer, loss_func):
+    # Set model to training mode
+    model.train()
+
+    loss_all = 0
+    correct = 0
+    for data in loader:
+        data = data.to(DEVICE)
+        optimizer.zero_grad()
+
+        # Count the number of correct predictions and accumulate the loss
+        pred = model(data.x, data.edge_index, data.batch)
+        correct += (pred.max(1)[1] == data.y).sum().item()
+        loss = loss_func(pred, data.y)
+
+        # Update the weights
+        loss.backward()
+        optimizer.step()
+
+        loss_all += data.num_graphs * loss.item()
+
+    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
+    
+
+# Simple validation loop
+def val(model, loader, loss_func):
+    # Set model to evaluation mode
+    model.eval()
+
+    loss_all = 0
+    correct = 0
+    for data in loader:
+        data = data.to(DEVICE)
+
+        # Count the number of correct predictions and accumulate the loss
+        pred = model(data.x, data.edge_index, data.batch)
+
+        correct += (pred.max(1)[1] == data.y).sum().item()
+        loss_all += loss_func(pred, data.y).item()
+
+    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
+
+# Simple test loop
+def test(model, loader):
+    # Set model to evaluation mode
+    model.eval()
+
+    correct = 0
+    for data in loader:
+        data = data.to(DEVICE)
+        pred = model(data.x, data.edge_index, data.batch).max(1)[1]
+        correct += (pred == data.y).sum().item()
+    return correct / len(loader.dataset)
 
 
 @functional_transform('constant_long')

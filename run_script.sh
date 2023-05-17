@@ -36,4 +36,4 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-python Code/main.py --epochs 250 --k_fold 5 --model 1WL+NN:Embedding-Sum --k_wl 3 --dataset ZINC_full --no-wl_convergence --batch_size 128
+python Code/main.py --epochs 25 --k_fold 5 --model 1WL+NN:Embedding-Sum --k_wl 3 --dataset ZINC_val --no-wl_convergence --batch_size 128

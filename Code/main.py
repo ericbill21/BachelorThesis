@@ -21,6 +21,10 @@ from sklearn.model_selection import StratifiedKFold, KFold
 
 from utils import Wrapper_TUDataset
 
+import multiprocessing
+import collections
+import os
+
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
 parser.add_argument('--dataset', type=str, default='ZINC_val', help='Dataset name')
@@ -48,19 +52,22 @@ WL_CONVERGENCE = args.wl_convergence
 WANDB_TAGS = args.tags
 IS_CLASSIFICATION = False if DATASET_NAME in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-print(f"Using device: {DEVICE}")
-
 LOG_INTERVAL = 5
 PLOT_RESULTS = True
 NUM_EPOCHS_TO_BE_PRINTED = 5
 
-wandb.init(
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+utils.DEVICE = DEVICE
+print(f"Using device: {DEVICE}")
+
+run = wandb.init(
     # set the wandb project where this run will be logged
     project="BachelorThesis",
 
     name=f"{MODEL_NAME}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
-    
+
+    tags = WANDB_TAGS,
+
     # track hyperparameters and run metadata
     config={
     "Epochs": EPOCHS,
@@ -73,10 +80,8 @@ wandb.init(
     "k_wl": K_WL,
     "model": MODEL_NAME,
     "wl_convergence": WL_CONVERGENCE,
-    "tags": WANDB_TAGS
     }
 )
-
 wandb.define_metric("epoch")
 wandb.define_metric("train accuracy: fold*", step_metric="epoch")
 wandb.define_metric("val accuracy: fold*", step_metric="epoch")
@@ -87,78 +92,23 @@ wandb.define_metric("val accuracy", summary="last", step_metric="epoch")
 wandb.define_metric("train loss", summary="last", step_metric="epoch")
 wandb.define_metric("val loss", summary="last", step_metric="epoch")
 
-# Simple training loop
-def train(model, loader, optimizer, loss_func):
-    # Set model to training mode
-    model.train()
-
-    loss_all = 0
-    correct = 0
-    for data in loader:
-        data = data.to(DEVICE)
-        optimizer.zero_grad()
-
-        # Make prediction
-        pred = model(data.x, data.edge_index, data.batch)
-
-        # Count the number of correct predictions
-        correct += (pred.max(1)[1] == data.y).sum().item()
-
-        # Calculate the loss and backpropagate
-        loss = loss_func(pred, data.y)
-        loss.backward()
-
-        # Update the weights
-        optimizer.step()
-
-        loss_all += data.num_graphs * loss.item()
-
-    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
-    
-
-# Simple validation loop
-def val(model, loader, loss_func):
-    # Set model to evaluation mode
-    model.eval()
-
-    loss_all = 0
-    correct = 0
-    for data in loader:
-        data = data.to(DEVICE)
-
-        # Make prediction
-        pred = model(data.x, data.edge_index, data.batch)
-
-        # Count the number of correct predictions
-        correct += (pred.max(1)[1] == data.y).sum().item()
-
-        # Calculate the loss
-        loss_all += loss_func(pred, data.y).item()
-
-    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
-
-# Simple test loop
-def test(model, loader):
-    # Set model to evaluation mode
-    model.eval()
-
-    correct = 0
-    for data in loader:
-        data = data.to(DEVICE)
-        pred = model(data.x, data.edge_index, data.batch).max(1)[1]
-        correct += (pred == data.y).sum().item()
-    return correct / len(loader.dataset)
-
 # Set seed for reproducibility
 utils.seed_everything(SEED)
+
+# TODO: description
+Worker = collections.namedtuple("Worker", ("queue", "process"))
+WorkerInitData = collections.namedtuple(
+    "WorkerInitData", ("num", "sweep_id", "sweep_run_name", "config")
+)
+WorkerDoneData = collections.namedtuple("WorkerDoneData", ("val_accuracy"))
+
 
 # Initialize the model
 # First check if the model is a WL model
 if MODEL_NAME.startswith("1WL+NN"):
-    # Global wl convolution
-    wl = WLConv()
 
     # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+    wl = WLConv()
     transformer = Compose([ToDevice(DEVICE),
                         WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE)])
     dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
@@ -212,18 +162,13 @@ else:
 wandb.watch(model, log="all")
 
 # Use Stratified K-Fold cross validation if it is a classification task
-if IS_CLASSIFICATION > 1 and K_FOLD > 1:
+if IS_CLASSIFICATION and K_FOLD > 1:
     cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 elif K_FOLD > 1:
     cross_validation = KFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
 else:
     raise ValueError("K_FOLD must be greater than 1")
 
-# Local logging variables
-mean_train_acc = torch.zeros(EPOCHS)
-mean_val_acc = torch.zeros(EPOCHS)
-mean_train_loss = torch.zeros(EPOCHS)
-mean_val_loss = torch.zeros(EPOCHS)
 
 # TRAINING LOOP: Loop over the K_FOLD splits
 for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
@@ -245,8 +190,8 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         start = time.time()
 
         # Train, validate and test the model
-        train_loss, train_acc = train(model, train_loader, optimizer, loss_func)
-        val_loss, val_acc = val(model, val_loader, loss_func)
+        train_loss, train_acc = utils.train(model, train_loader, optimizer, loss_func)
+        val_loss, val_acc = utils.val(model, val_loader, loss_func)
 
         # Log the results to wandb
         wandb.log({f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
