@@ -12,12 +12,13 @@ from utils import Constant_Long, WL_Transformer
 from torch_geometric.transforms import OneHotDegree, ToDevice, Compose
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from sklearn.model_selection import StratifiedKFold, KFold
+import numpy as np
 
 from utils import Wrapper_TUDataset
 from models import load_model
 
 # GLOBAL VARIABLES
-LOG_INTERVAL = 5
+LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 print(f"Using device: {DEVICE}")
 
@@ -133,6 +134,7 @@ wandb.watch(model, log="all")
 
 # Use Stratified K-Fold cross validation if it is a classification task
 cross_validation = StratifiedKFold(n_splits=args.k_fold, shuffle=True, random_state=args.seed)
+splitting_indices = list(cross_validation.split(np.zeros(dataset.len()), dataset.y.clone().detach().cpu())) #Ugly workaround for CUDA
 
 # Initialize local variables for local logging
 mean_train_acc = torch.zeros(args.epochs)
@@ -145,7 +147,7 @@ for metric in args.metric:
     metric_logs.append(torch.zeros(args.epochs))
 
 # TRAINING LOOP: Loop over the args.k_fold splits
-for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
+for fold, (train_ids, test_ids) in enumerate(splitting_indices):
     print(f'Cross-Validation Split {fold+1}/{args.k_fold}:')
 
     # Reset the model parameters
