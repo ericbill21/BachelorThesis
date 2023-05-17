@@ -28,6 +28,4 @@ parameters:
     values: [8,16,32,64,128]
   mlp_num_layers:
     values: [1,2,3,4]
-  is_sweep:
-    value: True
 

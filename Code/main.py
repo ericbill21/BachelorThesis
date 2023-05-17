@@ -43,20 +43,17 @@ parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments
 parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings.')
 parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers.')
 parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
-parser.add_argument('--is_sweep', type=str, choices=['True','False'], help='Whether to run a sweep or not.')
-parser.add_argument('--project', type=str, default='BachelorThesis', help='Project name for wandb.')
 args = parser.parse_args()
 
 # Convert arguments
 args.wl_convergence = True if args.wl_convergence == 'True' else False
-args.is_sweep = True if args.is_sweep == 'True' else False
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
 
 IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
-if not args.is_sweep:
-    run = wandb.init(
+
+run = wandb.init(
     project="BachelorThesis",
     name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
     tags = args.tags,
