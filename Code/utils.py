@@ -22,7 +22,7 @@ from torch_geometric.datasets import TUDataset
 from torch_geometric.io import read_tu_data
 from typing import Callable, List, Optional
 
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+from torch_geometric.nn.conv.wl_conv import WLConv
 
 def seed_everything(seed: int):
     random.seed(seed)
@@ -36,7 +36,7 @@ def seed_everything(seed: int):
 
 
 # Simple training loop
-def train(model, loader, optimizer, loss_func):
+def train(model, loader, optimizer, loss_func, DEVICE):
     # Set model to training mode
     model.train()
 
@@ -61,10 +61,15 @@ def train(model, loader, optimizer, loss_func):
     
 
 # Simple validation loop
-def val(model, loader, loss_func):
+def val(model, loader, loss_func, DEVICE, metrics=[]):
     # Set model to evaluation mode
     model.eval()
 
+    # Variable to store all predictions and all truth labels
+    pred_cat = torch.empty(0, device=DEVICE)
+    y_cat = torch.empty(0, device=DEVICE)
+
+    # Variable to store the accumulated loss and the number of correct predictions
     loss_all = 0
     correct = 0
     for data in loader:
@@ -76,7 +81,15 @@ def val(model, loader, loss_func):
         correct += (pred.max(1)[1] == data.y).sum().item()
         loss_all += loss_func(pred, data.y).item()
 
-    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
+        pred_cat = torch.cat([pred_cat, pred.max(1)[1]], dim=0)
+        y_cat = torch.cat([y_cat, data.y], dim=0)
+
+    # Compute the metrics
+    metric_results = [[] for _ in metrics]
+    for i, m in enumerate(metrics):
+        metric_results[i].append(m(pred_cat, y_cat))
+
+    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100, metric_results
 
 # Simple test loop
 def test(model, loader):
@@ -144,12 +157,11 @@ class WL_Transformer(BaseTransform):
 
     def __init__(
         self,
-        wl_conv: torch.nn.Module,
         use_node_attr: bool = True,
         max_iterations: int = -1,
         check_convergence: bool = False,
     ):
-        self.wl_conv = wl_conv
+        self.wl_conv = WLConv()
         self.use_node_attr = use_node_attr
         self.max_iterations = max_iterations
         self.check_convergence = check_convergence
@@ -191,6 +203,9 @@ class WL_Transformer(BaseTransform):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}'
+
+    def get_largest_color(self):
+        return len(self.wl_conv.hashmap)
 
 def check_wl_convergence(old_coloring, new_coloring):
     mapping = {}

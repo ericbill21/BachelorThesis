@@ -1,5 +1,4 @@
 import time
-import numpy as np
 import utils
 import argparse
 
@@ -7,23 +6,22 @@ import wandb
 
 import torch
 import torch_geometric
+import sklearn
 
 import torch.nn
-from torch_geometric.datasets import TUDataset
 from utils import Constant_Long, WL_Transformer
 from torch_geometric.transforms import OneHotDegree, ToDevice, Compose
-from torch_geometric.nn.conv.wl_conv import WLConv
 from torch_geometric.loader import DataLoader as PyGDataLoader
-from torch.utils.data import DataLoader as TorchDataLoader
-from torch_geometric.nn.models import GIN, MLP
-
 from sklearn.model_selection import StratifiedKFold, KFold
 
 from utils import Wrapper_TUDataset
+from models import load_model
 
-import multiprocessing
-import collections
-import os
+# GLOBAL VARIABLES
+LOG_INTERVAL = 5
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+utils.DEVICE = DEVICE
+print(f"Using device: {DEVICE}")
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
@@ -37,172 +35,136 @@ parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Le
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
 parser.add_argument('--wl_convergence', type=bool, default=False, action=argparse.BooleanOptionalAction, help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
 parser.add_argument('--tags', nargs='+', default=[])
+parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use.')
+parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use.')
+parser.add_argument('--metric', nargs='+', default=[''], help='Metric to use.')
+parser.add_argument('--transformer', type=str, default='None', help='Transformer to use.')
+parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer.')
 args = parser.parse_args()
 
-# GLOBAL PARAMETERS
-EPOCHS = args.epochs
-BATCH_SIZE = args.batch_size
-K_FOLD = args.k_fold
-LEARNING_RATE = args.lr
-DATASET_NAME = args.dataset
-SEED = args.seed
-K_WL = args.k_wl
-MODEL_NAME = args.model
-WL_CONVERGENCE = args.wl_convergence
-WANDB_TAGS = args.tags
-IS_CLASSIFICATION = False if DATASET_NAME in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
+# Set seed for reproducibility
+utils.seed_everything(args.seed)
 
-LOG_INTERVAL = 5
-PLOT_RESULTS = True
-NUM_EPOCHS_TO_BE_PRINTED = 5
-
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-utils.DEVICE = DEVICE
-print(f"Using device: {DEVICE}")
+IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 
 run = wandb.init(
-    # set the wandb project where this run will be logged
     project="BachelorThesis",
-
-    name=f"{MODEL_NAME}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
-
-    tags = WANDB_TAGS,
-
-    # track hyperparameters and run metadata
+    name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
+    tags = args.tags,
     config={
-    "Epochs": EPOCHS,
-    "Batch size": BATCH_SIZE,
+    "Epochs": args.epochs,
+    "Batch size": args.batch_size,
     "Device": DEVICE,
-    "k-fold": K_FOLD,
-    "Dataset": DATASET_NAME,
-    "learning_rate": LEARNING_RATE,
-    "seed": SEED,
-    "k_wl": K_WL,
-    "model": MODEL_NAME,
-    "wl_convergence": WL_CONVERGENCE,
+    "k-fold": args.k_fold,
+    "Dataset": args.dataset,
+    "learning_rate": args.lr,
+    "seed": args.seed,
+    "k_wl": args.k_wl,
+    "model": args.model,
+    "wl_convergence": args.wl_convergence,
     }
 )
+
+# Define metrics
 wandb.define_metric("epoch")
-wandb.define_metric("train accuracy: fold*", step_metric="epoch")
-wandb.define_metric("val accuracy: fold*", step_metric="epoch")
-wandb.define_metric("train loss: fold*", step_metric="epoch")
-wandb.define_metric("val loss: fold*", step_metric="epoch")
-wandb.define_metric("train accuracy", summary="last", step_metric="epoch")
-wandb.define_metric("val accuracy", summary="last", step_metric="epoch")
-wandb.define_metric("train loss", summary="last", step_metric="epoch")
-wandb.define_metric("val loss", summary="last", step_metric="epoch")
+for standard_metric in [args.loss_func, 'Accurayc']:
+    wandb.define_metric(f"train_{standard_metric}: fold*", step_metric="epoch")
+    wandb.define_metric(f"val_{standard_metric}: fold*", step_metric="epoch")
+    wandb.define_metric(f"train_{standard_metric}", summary="last", step_metric="epoch")
+    wandb.define_metric(f"val_{standard_metric}", summary="last", step_metric="epoch")
 
-# Set seed for reproducibility
-utils.seed_everything(SEED)
+for metric in args.metric:
+    wandb.define_metric(f"val_{metric}: fold*", step_metric="epoch")
+    wandb.define_metric(f"val_{metric}", summary="last", step_metric="epoch")
 
-# TODO: description
-Worker = collections.namedtuple("Worker", ("queue", "process"))
-WorkerInitData = collections.namedtuple(
-    "WorkerInitData", ("num", "sweep_id", "sweep_run_name", "config")
-)
-WorkerDoneData = collections.namedtuple("WorkerDoneData", ("val_accuracy"))
+metric_func = []
+for metric_name in args.metric:
+    if metric_name == "f1_score":
+        metric_func.append(getattr(sklearn.metrics, metric_name))
+    else:
+        raise NotImplementedError(f"Metric {metric_name} is not implemented.")
 
+# Prepare Pre Dataset Transformers
+transformer = [ToDevice(DEVICE)]
+if args.model.startswith("1WL+NN"):
+    transformer.append(WL_Transformer(use_node_attr=True, max_iterations=args.k_wl, check_convergence=args.wl_convergence))
+elif args.transformer == "OneHotDegree":
+    transformer.append(OneHotDegree(max_degree=args.tramsformer_args[0]))
+elif args.transformer == "Constant_Long":
+    transformer.append(Constant_Long(args.transformer_args[0]))
 
-# Initialize the model
-# First check if the model is a WL model
-if MODEL_NAME.startswith("1WL+NN"):
+# Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
+dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=True,
+                    pre_transform=Compose(transformer), pre_shuffle=True)
 
-    # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    wl = WLConv()
-    transformer = Compose([ToDevice(DEVICE),
-                        WL_Transformer(wl, use_node_attr=True, max_iterations=K_WL, check_convergence=WL_CONVERGENCE)])
-    dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{DATASET_NAME}', use_node_attr=True,
-                        pre_transform=transformer, pre_shuffle=True)
+# Load model
+model = load_model(model_name = args.model,
+                    output_dim = dataset.num_classes,
+                    is_classification = True,
+                    device = DEVICE,
+                    largest_color = transformer[-1].get_largest_color(),
+                    embedding_dim = 8,
+                    mlp_hidden_layer_conf=[64, 32, 16, 16])
 
-    # Check if it is a classification task or regression task
-    if IS_CLASSIFICATION: last_layer, output_dim = [(torch.nn.Softmax(dim=1), 'x -> x')], dataset.num_classes
-    else: last_layer, output_dim = [], 1
+# Load optimizer
+optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
 
-    largest_color = len(wl.hashmap)
-
-    if MODEL_NAME == "1WL+NN:Embedding-Sum":
-        model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                        (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
-                        (torch.squeeze, 'x -> x'),
-                        (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
-                        (MLP(channel_list=[10, 64, 32, 16, output_dim]), 'x -> x'),
-                    ] + last_layer).to(DEVICE)
-        
-    elif MODEL_NAME == "1WL+NN:Embedding-Max":
-        model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                        (torch.nn.Embedding(num_embeddings=largest_color, embedding_dim=10), 'x -> x'),
-                        (torch.squeeze, 'x -> x'),
-                        (torch_geometric.nn.pool.global_max_pool, 'x, batch -> x'),
-                        (MLP(channel_list=[10, 64, 32, 16, output_dim]), 'x -> x'),
-                    ] + last_layer).to(DEVICE)
-        
-elif MODEL_NAME == "GIN:Zero-Sum":
-    # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-    dataset = Wrapper_TUDataset(root=f'tmp2/datasets/{DATASET_NAME}', name=f'{DATASET_NAME}', use_node_attr=True,
-                        pre_transform=Constant_Long(0), pre_shuffle=True)
-    
-    # Check if it is a classification task or regression task
-    if IS_CLASSIFICATION: last_layer = [(torch.nn.Softmax(dim=1), 'x -> x')]
-    else: last_layer = []
-
-    gin = GIN(in_channels=dataset.num_features, hidden_channels=32, num_layers=5, dropout=0.05, norm='batch_norm', act='relu', jk='cat').to(DEVICE)
-    delattr(gin, 'lin') # Remove the last linear layer that would otherwise remove all jk information
-    
-    model = torch_geometric.nn.Sequential('x, edge_index, batch', [
-                    (gin, 'x, edge_index -> x'),
-                    (torch_geometric.nn.pool.global_add_pool, 'x, batch -> x'),
-                    (MLP(channel_list=[gin.out_channels * gin.num_layers, 64, 32, 16, dataset.num_classes]), 'x -> x'),
-                    (torch.nn.Softmax(dim=1), 'x -> x')
-                ] + last_layer).to(DEVICE)
-
-else:
-    raise ValueError("Invalid model name")
+# Load loss function
+loss_func = getattr(torch.nn, args.loss_func)()
 
 # Log the model to wandb
 wandb.watch(model, log="all")
 
 # Use Stratified K-Fold cross validation if it is a classification task
-if IS_CLASSIFICATION and K_FOLD > 1:
-    cross_validation = StratifiedKFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
-elif K_FOLD > 1:
-    cross_validation = KFold(n_splits=K_FOLD, shuffle=True, random_state=SEED)
-else:
-    raise ValueError("K_FOLD must be greater than 1")
+cross_validation = StratifiedKFold(n_splits=args.k_fold, shuffle=True, random_state=args.seed)
 
 
-# TRAINING LOOP: Loop over the K_FOLD splits
+mean_train_acc = torch.zeros(args.epochs)
+mean_val_acc = torch.zeros(args.epochs)
+mean_train_loss = torch.zeros(args.epochs)
+mean_val_loss = torch.zeros(args.epochs)
+
+metric_logs = []
+for metric in args.metric:
+    metric_logs.append(torch.zeros(args.epochs))
+
+# TRAINING LOOP: Loop over the args.k_fold splits
 for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dataset.y)):
-    print(f'Cross-Validation Split {fold+1}/{K_FOLD}:')
+    print(f'Cross-Validation Split {fold+1}/{args.k_fold}:')
 
     # Reset the model parameters
     model.reset_parameters()
 
-    # Initialize the optimizer and loss function
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-    loss_func = lambda pred, true: torch.nn.MSELoss()(pred.squeeze_(), true) #torch.nn.CrossEntropyLoss()(pred, true).log().to(DEVICE)
-
     # Initialize the data loaders
-    train_loader = PyGDataLoader(dataset[train_ids], batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = PyGDataLoader(dataset[test_ids], batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = PyGDataLoader(dataset[train_ids], batch_size=args.batch_size, shuffle=True)
+    val_loader = PyGDataLoader(dataset[test_ids], batch_size=args.batch_size, shuffle=False)
 
     # Train the model
-    for epoch in range(EPOCHS):
+    for epoch in range(args.epochs):
         start = time.time()
 
         # Train, validate and test the model
-        train_loss, train_acc = utils.train(model, train_loader, optimizer, loss_func)
-        val_loss, val_acc = utils.val(model, val_loader, loss_func)
+        train_loss, train_acc = utils.train(model, train_loader, optimizer, loss_func, DEVICE)
+        val_loss, val_acc, metric_res = utils.val(model, val_loader, loss_func, DEVICE, metric_func)
 
         # Log the results to wandb
-        wandb.log({f"train loss: fold {fold+1}": train_loss, f"val loss: fold {fold+1}": val_loss, "epoch": epoch+1})
-        if IS_CLASSIFICATION:
-            wandb.log({f"train accuracy: fold {fold+1}": train_acc, f"val accuracy: fold {fold+1}": val_acc})
+        wandb.log({f"val_{args.loss_func}: fold{fold+1}": val_loss,
+                    f"val_Accuracy: fold{fold+1}": val_acc,
+                    f"train_{args.loss_func}: fold{fold+1}": train_loss,
+                    f"train_Accuracy: fold{fold+1}": train_acc,
+                    "epoch": epoch+1})
         
+        for metric, metric_res in zip(args.metric, metric_res):
+            wandb.log({f"val_{metric}: fold{fold+1}": metric_res})
+
         # Log the results locally
         mean_train_acc[epoch] += train_acc
         mean_val_acc[epoch] += val_acc
         mean_train_loss[epoch] += train_loss
         mean_val_loss[epoch] += val_loss
+
+        for i, metric_res in enumerate(metric_res):
+            metric_logs[i][epoch] += metric_res
 
         # Print current status
         if (epoch + 1) % LOG_INTERVAL == 0:
@@ -212,12 +174,22 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
 
     
 # Averaging the local logging variables
-mean_train_acc /= K_FOLD
-mean_val_acc /= K_FOLD
-mean_train_loss /= K_FOLD
-mean_val_loss /= K_FOLD
+mean_train_acc /= args.k_fold
+mean_val_acc /= args.k_fold
+mean_train_loss /= args.k_fold
+mean_val_loss /= args.k_fold
 
-for epoch in range(EPOCHS):
-    wandb.log({"train accuracy": mean_train_acc[epoch], "val accuracy": mean_val_acc[epoch], "train loss": mean_train_loss[epoch], "val loss": mean_val_loss[epoch]})
+for i in range(len(metric_logs)):
+    metric_logs[i] /= args.k_fold
+
+for epoch in range(args.epochs):
+    wandb.log({f"val_{args.loss_func}": mean_val_loss[epoch],
+                f"val_Accuracy": mean_val_acc[epoch],
+                f"train_{args.loss_func}": mean_train_loss[epoch],
+                f"train_Accuracy": mean_train_acc[epoch],
+                "epoch": epoch+1})
+    
+    for i, metric_res in enumerate(metric_logs):
+        wandb.log({f"val_{args.metric[i]}": metric_res[epoch]})
 
 wandb.finish()
