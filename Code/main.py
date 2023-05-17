@@ -6,8 +6,7 @@ import wandb
 
 import torch
 import torch_geometric
-import sklearn
-
+from sklearn.metrics import f1_score, roc_auc_score
 import torch.nn
 from utils import Constant_Long, WL_Transformer
 from torch_geometric.transforms import OneHotDegree, ToDevice, Compose
@@ -20,12 +19,11 @@ from models import load_model
 # GLOBAL VARIABLES
 LOG_INTERVAL = 5
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-utils.DEVICE = DEVICE
 print(f"Using device: {DEVICE}")
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
-parser.add_argument('--dataset', type=str, default='ZINC_val', help='Dataset name')
+parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
 parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
@@ -37,7 +35,7 @@ parser.add_argument('--wl_convergence', type=bool, default=False, action=argpars
 parser.add_argument('--tags', nargs='+', default=[])
 parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use.')
 parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use.')
-parser.add_argument('--metric', nargs='+', default=[''], help='Metric to use.')
+parser.add_argument('--metric', nargs='+', default=[], help='Metric to use.')
 parser.add_argument('--transformer', type=str, default='None', help='Transformer to use.')
 parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer.')
 args = parser.parse_args()
@@ -78,9 +76,12 @@ for metric in args.metric:
     wandb.define_metric(f"val_{metric}", summary="last", step_metric="epoch")
 
 metric_func = []
+args.metric = ['f1_score', 'roc_auc_score']
 for metric_name in args.metric:
     if metric_name == "f1_score":
-        metric_func.append(getattr(sklearn.metrics, metric_name))
+        metric_func.append(lambda y_true, y_pred: f1_score(y_true, y_pred, average="micro"))
+    elif metric_name == "roc_auc_score":
+        metric_func.append(lambda y_true, y_pred: roc_auc_score(y_true, y_pred, average="micro"))
     else:
         raise NotImplementedError(f"Metric {metric_name} is not implemented.")
 
@@ -154,8 +155,8 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
                     f"train_Accuracy: fold{fold+1}": train_acc,
                     "epoch": epoch+1})
         
-        for metric, metric_res in zip(args.metric, metric_res):
-            wandb.log({f"val_{metric}: fold{fold+1}": metric_res})
+        for metric_name, res in zip(args.metric, metric_res):
+            wandb.log({f"val_{metric_name}: fold{fold+1}": res, "epoch": epoch+1})
 
         # Log the results locally
         mean_train_acc[epoch] += train_acc
@@ -163,8 +164,8 @@ for fold, (train_ids, test_ids) in enumerate(cross_validation.split(dataset, dat
         mean_train_loss[epoch] += train_loss
         mean_val_loss[epoch] += val_loss
 
-        for i, metric_res in enumerate(metric_res):
-            metric_logs[i][epoch] += metric_res
+        for i, res in enumerate(metric_res):
+            metric_logs[i][epoch] += res
 
         # Print current status
         if (epoch + 1) % LOG_INTERVAL == 0:
@@ -190,6 +191,6 @@ for epoch in range(args.epochs):
                 "epoch": epoch+1})
     
     for i, metric_res in enumerate(metric_logs):
-        wandb.log({f"val_{args.metric[i]}": metric_res[epoch]})
+        wandb.log({f"val_{args.metric[i]}": metric_res[epoch], "epoch": epoch+1})
 
 wandb.finish()

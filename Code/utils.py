@@ -85,9 +85,9 @@ def val(model, loader, loss_func, DEVICE, metrics=[]):
         y_cat = torch.cat([y_cat, data.y], dim=0)
 
     # Compute the metrics
-    metric_results = [[] for _ in metrics]
-    for i, m in enumerate(metrics):
-        metric_results[i].append(m(pred_cat, y_cat))
+    metric_results = []
+    for m in metrics:
+        metric_results.append(m(pred_cat, y_cat))
 
     return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100, metric_results
 
