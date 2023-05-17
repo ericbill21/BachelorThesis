@@ -3,6 +3,7 @@ import utils
 import argparse
 
 import wandb
+import yaml
 
 import torch
 import torch_geometric
@@ -42,39 +43,48 @@ parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments
 parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings.')
 parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers.')
 parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
+parser.add_argument('--is_sweep', type=str, choices=['True','False'], help='Whether to run a sweep or not.')
 args = parser.parse_args()
 
 # Convert arguments
 args.wl_convergence = True if args.wl_convergence == 'True' else False
+args.is_sweep = True if args.is_sweep == 'True' else False
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
 
 IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 
-run = wandb.init(
-    project="BachelorThesis",
-    name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
-    tags = args.tags,
-    config={
-    "Epochs": args.epochs,
-    "Batch size": args.batch_size,
-    "Device": DEVICE,
-    "k-fold": args.k_fold,
-    "Dataset": args.dataset,
-    "learning_rate": args.lr,
-    "seed": args.seed,
-    "k_wl": args.k_wl,
-    "model": args.model,
-    "wl_convergence": args.wl_convergence,
-    "loss_func": args.loss_func,
-    "optimizer": args.optimizer,
-    "metric": args.metric,
-    "transformer": args.transformer,
-    "transformer_args": args.transformer_args,
-    "embedding_dim": args.embedding_dim,
-    "mlp_layer_size": args.mlp_layer_size,
-    "mlp_num_layers": args.mlp_num_layers
+if args.is_sweep:
+    with open('./config.yaml') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    
+    run = wandb.init(config=config)
+
+else:
+    run = wandb.init(
+        project="BachelorThesis",
+        name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
+        tags = args.tags,
+        config={
+        "Epochs": args.epochs,
+        "Batch size": args.batch_size,
+        "Device": DEVICE,
+        "k-fold": args.k_fold,
+        "Dataset": args.dataset,
+        "learning_rate": args.lr,
+        "seed": args.seed,
+        "k_wl": args.k_wl,
+        "model": args.model,
+        "wl_convergence": args.wl_convergence,
+        "loss_func": args.loss_func,
+        "optimizer": args.optimizer,
+        "metric": args.metric,
+        "transformer": args.transformer,
+        "transformer_args": args.transformer_args,
+        "embedding_dim": args.embedding_dim,
+        "mlp_layer_size": args.mlp_layer_size,
+        "mlp_num_layers": args.mlp_num_layers
     })
 
 # Define metrics
