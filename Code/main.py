@@ -112,16 +112,22 @@ elif args.transformer == "Constant_Long":
     transformer.append(Constant_Long(args.transformer_args[0]))
 
 # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-dataset = Wrapper_TUDataset(k_wl=args.k_wl, wl_convergence=args.wl_convergence,
-                            root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=True,
-                            pre_transform=Compose(transformer), pre_shuffle=True)
+transformer_list = [ToDevice(DEVICE),
+                    WL_Transformer(use_node_attr=True, max_iterations=args.k_wl,
+                                check_convergence=args.wl_convergence, device=DEVICE)
+                ]
+
+dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=False,
+                            pre_transform=transformer_list, pre_shuffle=True)
+
+#TODO: Somehow the data.x is an empty tensor :(
 
 # Load model
 model = load_model(model_name = args.model,
                     output_dim = dataset.num_classes,
                     is_classification = True,
                     device = DEVICE,
-                    largest_color = transformer[-1].get_largest_color(),
+                    largest_color = dataset.max_node_feature + 1,
                     embedding_dim = args.embedding_dim,
                     mlp_hidden_layer_conf=[args.mlp_layer_size]*args.mlp_num_layers)
 

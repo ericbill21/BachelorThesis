@@ -718,5 +718,5 @@ FodyWeavers.xsd
 
 # WANDB
 wandb/
-Code/datasets
+Code/datasets/
 output_*.txt

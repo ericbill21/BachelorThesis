@@ -25,6 +25,8 @@ from typing import Callable, List, Optional
 
 from torch_geometric.nn.conv.wl_conv import WLConv
 
+from torch_geometric.transforms import Compose
+
 def seed_everything(seed: int):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -34,7 +36,6 @@ def seed_everything(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     torch.mps.manual_seed(seed)
-
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func, DEVICE):
@@ -221,31 +222,45 @@ def check_wl_convergence(old_coloring, new_coloring):
     return True
 
 class Wrapper_TUDataset(TUDataset):
-    def __init__(self, k_wl: int,
-                 wl_convergence: bool,
-                 root: str, name: str,
+    def __init__(self, root: str, name: str,
                  transform: Optional[Callable] = None,
-                 pre_transform: Optional[Callable] = None,
+                 pre_transform: Optional[List] = None,
                  pre_filter: Optional[Callable] = None,
                  use_node_attr: bool = False, use_edge_attr: bool = False,
                  cleaned: bool = False,
                  pre_shuffle: bool = False):
         
-        root = f'{root}/{"wl_convergence_true" if wl_convergence else "wl_convergence_false"}_{k_wl}'
+        # Update root path if WL transformer is used
+        if pre_transform is not None and isinstance(pre_transform[-1], WL_Transformer):
+            self.k_wl = pre_transform[-1].max_iterations
+            self.wl_convergence =  pre_transform[-1].check_convergence
 
-        # Remove the processed folder if it exists
+            root = f'{root}/{"wl_convergence_true" if self.wl_convergence else "wl_convergence_false"}_{self.k_wl}'
+            pre_transform = Compose(pre_transform)
+    
+        # Check if the processed data that is available used the same pre_transform
         if os.path.isdir(root + '/' + name + '/processed'):
 
+            # Otherwise we have to re-process the data and remove the old one
             f = os.path.join('processed', 'pre_transform.pt')
             if os.path.exists(f) and torch.load(f) != dataset._repr(pre_transform):
                 print('Re-processing dataset. To disable this behavior, remove the previous pre-processed dataset folder.')
                 shutil.rmtree(root + '/' + name + '/processed')
         
+        # Setting new attributes and initializing the super class
         self.pre_shuffle = pre_shuffle
-        super().__init__(root, name, transform, pre_transform,
-                                        pre_filter, use_node_attr,
-                                        use_edge_attr, cleaned)
-    
+        super().__init__(root=root,
+                            name=name,
+                            transform=transform,
+                            pre_transform=pre_transform,
+                            pre_filter=pre_filter,
+                            use_node_attr=use_node_attr,
+                            use_edge_attr=use_edge_attr,
+                            cleaned=cleaned)
+
+        if hasattr(self, 'num_node_features') and self.num_node_features > 0:
+            self.max_node_feature = torch.max(self._data.x).item() 
+        
     def process(self):
         self.data, self.slices, sizes = read_tu_data(self.raw_dir, self.name)
 
@@ -253,8 +268,6 @@ class Wrapper_TUDataset(TUDataset):
             # Apply permutation to all attributes
             if self.pre_shuffle:
                 data_list = [self.get(idx) for idx in torch.randperm(len(self))]
-                
-            # Create a list of Data objects
             else:
                 data_list = [self.get(idx) for idx in range(len(self))]
             
@@ -269,6 +282,5 @@ class Wrapper_TUDataset(TUDataset):
             # Collate the list of Data objects into a single Data object
             self.data, self.slices = self.collate(data_list)
         
-        sizes['num_node_labels'] = 1 # Hardcoded for now, TODO: make it more dynamic
-
+        sizes['num_node_labels'] = 1 
         torch.save((self._data, self.slices, sizes), self.processed_paths[0])
