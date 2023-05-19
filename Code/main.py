@@ -91,7 +91,7 @@ wandb.define_metric(f"val_acc", summary="max", step_metric="epoch")
 
 for metric in args.metric:
     wandb.define_metric(f"val_{metric}: fold*", step_metric="epoch")
-    wandb.define_metric(f"val_{metric}", summary="max", step_metric="epoch")
+    wandb.define_metric(f"val_{metric}", summary="max", step_metric="epoch") #TODO:FIX MIN MAX
 
 metric_func = []
 for metric_name in args.metric:
@@ -112,8 +112,9 @@ elif args.transformer == "Constant_Long":
     transformer.append(Constant_Long(args.transformer_args[0]))
 
 # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=True,
-                    pre_transform=Compose(transformer), pre_shuffle=True)
+dataset = Wrapper_TUDataset(k_wl=args.k_wl, wl_convergence=args.wl_convergence,
+                            root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=True,
+                            pre_transform=Compose(transformer), pre_shuffle=True)
 
 # Load model
 model = load_model(model_name = args.model,

@@ -16,6 +16,7 @@ import random, os
 import numpy as np
 import torch
 
+from torch_geometric.data import dataset
 import os, shutil
 
 from torch_geometric.datasets import TUDataset
@@ -203,7 +204,7 @@ class WL_Transformer(BaseTransform):
         return data
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}'
+        return f'{self.__class__.__name__}(use_node_attr={self.use_node_attr}, max_iterations={self.max_iterations}, check_convergence={self.check_convergence})'
 
     def get_largest_color(self):
         return len(self.wl_conv.hashmap)
@@ -220,7 +221,9 @@ def check_wl_convergence(old_coloring, new_coloring):
     return True
 
 class Wrapper_TUDataset(TUDataset):
-    def __init__(self, root: str, name: str,
+    def __init__(self, k_wl: int,
+                 wl_convergence: bool,
+                 root: str, name: str,
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None,
                  pre_filter: Optional[Callable] = None,
@@ -228,9 +231,15 @@ class Wrapper_TUDataset(TUDataset):
                  cleaned: bool = False,
                  pre_shuffle: bool = False):
         
+        root = f'{root}/{"wl_convergence_true" if wl_convergence else "wl_convergence_false"}_{k_wl}'
+
         # Remove the processed folder if it exists
         if os.path.isdir(root + '/' + name + '/processed'):
-            shutil.rmtree(root + '/' + name + '/processed')
+
+            f = os.path.join('processed', 'pre_transform.pt')
+            if os.path.exists(f) and torch.load(f) != dataset._repr(pre_transform):
+                print('Re-processing dataset. To disable this behavior, remove the previous pre-processed dataset folder.')
+                shutil.rmtree(root + '/' + name + '/processed')
         
         self.pre_shuffle = pre_shuffle
         super().__init__(root, name, transform, pre_transform,
