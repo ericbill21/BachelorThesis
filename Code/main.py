@@ -1,22 +1,19 @@
-import time
-import utils
 import argparse
+import time
+import warnings
 
-import wandb
-import yaml
-
+import numpy as np
 import torch
 import torch_geometric
-from sklearn.metrics import f1_score, roc_auc_score
-import torch.nn
-from utils import Constant_Long, WL_Transformer
-from torch_geometric.transforms import OneHotDegree, ToDevice, Compose
-from torch_geometric.loader import DataLoader as PyGDataLoader
-from sklearn.model_selection import StratifiedKFold, KFold
-import numpy as np
-
-from utils import Wrapper_TUDataset
+import torchmetrics
+import utils
 from models import load_model
+from sklearn.model_selection import StratifiedKFold
+from torch_geometric.loader import DataLoader as PyGDataLoader
+from torch_geometric.transforms import OneHotDegree, ToDevice
+from utils import Constant_Long, WL_Transformer, Wrapper_TUDataset
+
+import wandb
 
 # GLOBAL VARIABLES
 LOG_INTERVAL = 50
@@ -46,90 +43,89 @@ parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP
 args = parser.parse_args()
 
 # Convert arguments
-args.wl_convergence = True if args.wl_convergence == 'True' else False
+args.wl_convergence = args.wl_convergence == "True"
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
 
-IS_CLASSIFICATION = False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
+IS_CLASSIFICATION = (
+    False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
+)
 
 run = wandb.init(
     project="BachelorThesis",
     name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
-    tags = args.tags,
+    tags=args.tags,
     config={
-    "Epochs": args.epochs,
-    "Batch size": args.batch_size,
-    "Device": DEVICE,
-    "k-fold": args.k_fold,
-    "Dataset": args.dataset,
-    "learning_rate": args.lr,
-    "seed": args.seed,
-    "k_wl": args.k_wl,
-    "model": args.model,
-    "wl_convergence": args.wl_convergence,
-    "loss_func": args.loss_func,
-    "optimizer": args.optimizer,
-    "metric": args.metric,
-    "transformer": args.transformer,
-    "transformer_args": args.transformer_args,
-    "embedding_dim": args.embedding_dim,
-    "mlp_layer_size": args.mlp_layer_size,
-    "mlp_num_layers": args.mlp_num_layers
-})
+        "Epochs": args.epochs,
+        "Batch size": args.batch_size,
+        "Device": DEVICE,
+        "k-fold": args.k_fold,
+        "Dataset": args.dataset,
+        "learning_rate": args.lr,
+        "seed": args.seed,
+        "k_wl": args.k_wl,
+        "model": args.model,
+        "wl_convergence": args.wl_convergence,
+        "loss_func": args.loss_func,
+        "optimizer": args.optimizer,
+        "metric": args.metric,
+        "transformer": args.transformer,
+        "transformer_args": args.transformer_args,
+        "embedding_dim": args.embedding_dim,
+        "mlp_layer_size": args.mlp_layer_size,
+        "mlp_num_layers": args.mlp_num_layers,
+    },
+)
 
 # Define metrics
 wandb.define_metric("epoch")
 wandb.define_metric(f"train_loss: fold*", step_metric="epoch")
 wandb.define_metric(f"val_loss: fold*", step_metric="epoch")
-wandb.define_metric(f"train_loss", summary="max", step_metric="epoch")
-wandb.define_metric(f"val_loss", summary="max", step_metric="epoch")
+wandb.define_metric(f"train_loss", summary="min", step_metric="epoch")
+wandb.define_metric(f"val_loss", summary="min", step_metric="epoch")
 wandb.define_metric(f"train_acc: fold*", step_metric="epoch")
 wandb.define_metric(f"val_acc: fold*", step_metric="epoch")
 wandb.define_metric(f"train_acc", summary="max", step_metric="epoch")
 wandb.define_metric(f"val_acc", summary="max", step_metric="epoch")
 
-for metric in args.metric:
-    wandb.define_metric(f"val_{metric}: fold*", step_metric="epoch")
-    wandb.define_metric(f"val_{metric}", summary="max", step_metric="epoch") #TODO:FIX MIN MAX
-
-metric_func = []
-for metric_name in args.metric:
-    if metric_name == "f1_score":
-        metric_func.append(lambda y_true, y_pred: f1_score(y_true, y_pred, average="micro"))
-    elif metric_name == "roc_auc_score": #TODO: case when not all classes are present in the dataset
-        metric_func.append(lambda y_true, y_pred: roc_auc_score(y_true, y_pred, average="micro"))
-    else:
-        raise NotImplementedError(f"Metric {metric_name} is not implemented.")
-
 # Prepare Pre Dataset Transformers
-transformer = [ToDevice(DEVICE)]
+transformer_list = [ToDevice(DEVICE)]
 if args.model.startswith("1WL+NN"):
-    transformer.append(WL_Transformer(use_node_attr=True, max_iterations=args.k_wl, check_convergence=args.wl_convergence, device=DEVICE))
+    wl_tranformer = WL_Transformer(
+        use_node_attr=True,
+        max_iterations=args.k_wl,
+        check_convergence=args.wl_convergence,
+        device=DEVICE,
+    )
+    transformer_list.append(wl_tranformer)
+
 elif args.transformer == "OneHotDegree":
-    transformer.append(OneHotDegree(max_degree=args.tramsformer_args[0]))
+    one_hot_degree_transformer = OneHotDegree(max_degree=args.tramsformer_args[0])
+    transformer_list.append(one_hot_degree_transformer)
+
 elif args.transformer == "Constant_Long":
-    transformer.append(Constant_Long(args.transformer_args[0]))
+    constant_transformer = Constant_Long(args.transformer_args[0])
+    transformer_list.append(constant_transformer)
 
 # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-transformer_list = [ToDevice(DEVICE),
-                    WL_Transformer(use_node_attr=True, max_iterations=args.k_wl,
-                                check_convergence=args.wl_convergence, device=DEVICE)
-                ]
-
-dataset = Wrapper_TUDataset(root=f'Code/datasets', name=f'{args.dataset}', use_node_attr=False,
-                            pre_transform=transformer_list, pre_shuffle=True)
-
-#TODO: Somehow the data.x is an empty tensor :(
-
+dataset = Wrapper_TUDataset(
+    root=f"Code/datasets",
+    name=f"{args.dataset}",
+    use_node_attr=True,
+    pre_transform=transformer_list,
+    pre_shuffle=True,
+)
 # Load model
-model = load_model(model_name = args.model,
-                    output_dim = dataset.num_classes,
-                    is_classification = True,
-                    device = DEVICE,
-                    largest_color = dataset.max_node_feature + 1,
-                    embedding_dim = args.embedding_dim,
-                    mlp_hidden_layer_conf=[args.mlp_layer_size]*args.mlp_num_layers)
+model = load_model(
+    model_name=args.model,
+    output_dim=dataset.num_classes,
+    is_classification=True,
+    device=DEVICE,
+    largest_color=dataset.max_node_feature + 1,
+    embedding_dim=args.embedding_dim,
+    mlp_hidden_layer_conf=[args.mlp_layer_size] * args.mlp_num_layers,
+)
 
 # Load optimizer
 optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
@@ -137,12 +133,45 @@ optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
 # Load loss function
 loss_func = getattr(torch.nn, args.loss_func)()
 
+metric_func = {}
+for metric_name in args.metric:
+    if metric_name == "f1_score" and IS_CLASSIFICATION:
+        wandb.define_metric(f"val_f1_score: fold*", step_metric="epoch")
+        wandb.define_metric(f"val_f1_score", summary="max", step_metric="epoch")
+
+        f1_score = torchmetrics.classification.F1Score(
+            num_labels=dataset.num_classes,
+            average="macro",
+            task="multiclass" if dataset.num_classes > 2 else "binary",
+        )
+        metric_func["f1_score"] = f1_score
+
+    elif metric_name == "roc_auc_score" and IS_CLASSIFICATION:
+        wandb.define_metric(f"val_roc_auc_score: fold*", step_metric="epoch")
+        wandb.define_metric(f"val_roc_auc_score", summary="max", step_metric="epoch")
+
+        roc_auc_score = torchmetrics.classification.AUROC(
+            num_labels=dataset.num_classes,
+            average="macro",
+            task="multiclass" if dataset.num_classes > 2 else "binary",
+        )
+        metric_func["roc_auc_score"] = roc_auc_score
+
+    else:
+        warnings.warn(
+            f"Metric {metric_name} is either supported for this dataset or not yet implemented."
+        )
+
 # Log the model to wandb
 wandb.watch(model, log="all")
 
 # Use Stratified K-Fold cross validation if it is a classification task
-cross_validation = StratifiedKFold(n_splits=args.k_fold, shuffle=True, random_state=args.seed)
-splitting_indices = list(cross_validation.split(np.zeros(dataset.len()), dataset.y.clone().detach().cpu())) #Ugly workaround for CUDA
+cross_validation = StratifiedKFold(
+    n_splits=args.k_fold, shuffle=True, random_state=args.seed
+)
+splitting_indices = list(
+    cross_validation.split(np.zeros(dataset.len()), dataset.y.clone().detach().cpu())
+)  # Ugly workaround for CUDA
 
 # Initialize local variables for local logging
 mean_train_acc = torch.zeros(args.epochs)
@@ -150,38 +179,47 @@ mean_val_acc = torch.zeros(args.epochs)
 mean_train_loss = torch.zeros(args.epochs)
 mean_val_loss = torch.zeros(args.epochs)
 
-metric_logs = []
-for metric in args.metric:
-    metric_logs.append(torch.zeros(args.epochs))
+metric_logs = {}
+for metric_name in metric_func.keys():
+    metric_logs[metric_name] = torch.zeros(args.epochs)
 
 # TRAINING LOOP: Loop over the args.k_fold splits
 for fold, (train_ids, test_ids) in enumerate(splitting_indices):
-    print(f'Cross-Validation Split {fold+1}/{args.k_fold}:')
+    print(f"Cross-Validation Split {fold+1}/{args.k_fold}:")
 
     # Reset the model parameters
     model.reset_parameters()
 
     # Initialize the data loaders
-    train_loader = PyGDataLoader(dataset[train_ids], batch_size=args.batch_size, shuffle=True)
-    val_loader = PyGDataLoader(dataset[test_ids], batch_size=args.batch_size, shuffle=False)
+    train_loader = PyGDataLoader(
+        dataset[train_ids], batch_size=args.batch_size, shuffle=True
+    )
+    val_loader = PyGDataLoader(
+        dataset[test_ids], batch_size=args.batch_size, shuffle=False
+    )
 
     # Train the model
     for epoch in range(args.epochs):
         start = time.time()
 
         # Train, validate and test the model
-        train_loss, train_acc = utils.train(model, train_loader, optimizer, loss_func, DEVICE)
-        val_loss, val_acc, metric_res = utils.val(model, val_loader, loss_func, DEVICE, metric_func)
+        train_loss, train_acc = utils.train(
+            model, train_loader, optimizer, loss_func, DEVICE
+        )
+        val_loss, val_acc, metric_results = utils.val(
+            model, val_loader, loss_func, DEVICE, metric_func
+        )
 
         # Log the results to wandb
-        wandb.log({f"val_loss: fold{fold+1}": val_loss,
-                    f"val_acc: fold{fold+1}": val_acc,
-                    f"train_loss: fold{fold+1}": train_loss,
-                    f"train_acc: fold{fold+1}": train_acc,
-                    "epoch": epoch+1})
-        
-        for metric_name, res in zip(args.metric, metric_res):
-            wandb.log({f"val_{metric_name}: fold{fold+1}": res, "epoch": epoch+1})
+        wandb.log(
+            {
+                f"val_loss: fold{fold+1}": val_loss,
+                f"val_acc: fold{fold+1}": val_acc,
+                f"train_loss: fold{fold+1}": train_loss,
+                f"train_acc: fold{fold+1}": train_acc,
+                "epoch": epoch + 1,
+            }
+        )
 
         # Log the results locally
         mean_train_acc[epoch] += train_acc
@@ -189,33 +227,41 @@ for fold, (train_ids, test_ids) in enumerate(splitting_indices):
         mean_train_loss[epoch] += train_loss
         mean_val_loss[epoch] += val_loss
 
-        for i, res in enumerate(metric_res):
-            metric_logs[i][epoch] += res
+        for metric_name, result in metric_results.items():
+            wandb.log({f"val_{metric_name}: fold{fold+1}": result, "epoch": epoch + 1})
+            metric_logs[metric_name][epoch] += result
 
         # Print current status
         if (epoch + 1) % LOG_INTERVAL == 0:
-            print(f'\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},' \
-                    f'\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},' \
-                    f'\t Val Acc: {round(val_acc, 1)}%')
+            print(
+                f"\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},"
+                f"\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},"
+                f"\t Val Acc: {round(val_acc, 1)}%"
+            )
 
-    
+
 # Averaging the local logging variables
 mean_train_acc /= args.k_fold
 mean_val_acc /= args.k_fold
 mean_train_loss /= args.k_fold
 mean_val_loss /= args.k_fold
 
-for i in range(len(metric_logs)):
-    metric_logs[i] /= args.k_fold
+for metric_name in metric_logs.keys():
+    metric_logs[metric_name] /= args.k_fold
 
+# Log the results to wandb
 for epoch in range(args.epochs):
-    wandb.log({f"val_loss": mean_val_loss[epoch],
-                f"val_acc": mean_val_acc[epoch],
-                f"train_loss": mean_train_loss[epoch],
-                f"train_acc": mean_train_acc[epoch],
-                "epoch": epoch+1})
-    
-    for i, metric_res in enumerate(metric_logs):
-        wandb.log({f"val_{args.metric[i]}": metric_res[epoch], "epoch": epoch+1})
+    wandb.log(
+        {
+            f"val_loss": mean_val_loss[epoch],
+            f"val_acc": mean_val_acc[epoch],
+            f"train_loss": mean_train_loss[epoch],
+            f"train_acc": mean_train_acc[epoch],
+            "epoch": epoch + 1,
+        }
+    )
+
+    for metric_name, metric_res in metric_logs.items():
+        wandb.log({f"val_{metric_name}": metric_res[epoch], "epoch": epoch + 1})
 
 wandb.finish()

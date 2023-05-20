@@ -15,6 +15,8 @@ from torch_geometric.transforms import BaseTransform
 import random, os
 import numpy as np
 import torch
+import warnings
+
 
 from torch_geometric.data import dataset
 import os, shutil
@@ -59,17 +61,20 @@ def train(model, loader, optimizer, loss_func, DEVICE):
 
         loss_all += data.num_graphs * loss.item()
 
-    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100
+    avg_loss = loss_all / len(loader.dataset)
+    avg_acc = (correct / len(loader.dataset)) * 100
+
+    return avg_loss, avg_acc
     
 
 # Simple validation loop
-def val(model, loader, loss_func, DEVICE, metrics=[]):
+def val(model, loader, loss_func, DEVICE, metric_func = {}):
     # Set model to evaluation mode
     model.eval()
 
     # Variable to store all predictions and all truth labels
-    pred_cat = torch.empty(0, device=DEVICE)
-    y_cat = torch.empty(0, device=DEVICE)
+    y_pred = torch.empty(0, device=DEVICE)
+    y_true = torch.empty(0, device=DEVICE)
 
     # Variable to store the accumulated loss and the number of correct predictions
     loss_all = 0
@@ -77,21 +82,27 @@ def val(model, loader, loss_func, DEVICE, metrics=[]):
     for data in loader:
         data = data.to(DEVICE)
 
-        # Count the number of correct predictions and accumulate the loss
-        pred = model(data.x, data.edge_index, data.batch)
+        # Compute the predictions and accumulate the loss
+        pred_batch = model(data.x, data.edge_index, data.batch)
+        loss_all += loss_func(pred_batch, data.y).item()
 
-        correct += (pred.max(1)[1] == data.y).sum().item()
-        loss_all += loss_func(pred, data.y).item()
+        # Convert the predictions from log-probabilities to class labels
+        y_pred_batch = pred_batch.max(1)[1]
+        correct += (y_pred_batch == data.y).sum().item()
 
-        pred_cat = torch.cat([pred_cat, pred.max(1)[1]], dim=0)
-        y_cat = torch.cat([y_cat, data.y], dim=0)
+        # Store the predictions and the truth labels
+        y_pred = torch.cat([y_pred, y_pred_batch], dim=0)
+        y_true = torch.cat([y_true, data.y], dim=0)
 
     # Compute the metrics
-    metric_results = []
-    for m in metrics:
-        metric_results.append(m(pred_cat, y_cat))
+    metric_results = {}
+    for metric_name, metric in metric_func.items():
+        metric_results[metric_name] = metric(y_pred, y_true).item()
 
-    return loss_all / len(loader.dataset), (correct / len(loader.dataset))*100, metric_results
+    avg_loss = loss_all / len(loader.dataset)
+    avg_acc = (correct / len(loader.dataset)) * 100
+
+    return avg_loss, avg_acc, metric_results
 
 # Simple test loop
 def test(model, loader, DEVICE):
@@ -112,7 +123,7 @@ class Constant_Long(BaseTransform):
     (functional name: :obj:`constant`).
 
     Args:
-        value (float, optional): The value to add. (default: :obj:`1.0`)
+        value (int, optional): The value to add. (default: :obj:`1.0`)
         cat (bool, optional): If set to :obj:`False`, existing node features
             will be replaced. (default: :obj:`True`)
         node_types (str or List[str], optional): The specified node type(s) to
@@ -122,7 +133,7 @@ class Constant_Long(BaseTransform):
     """
     def __init__(
         self,
-        value: float = 1.0,
+        value: int = 1.0,
         cat: bool = True,
         node_types: Optional[Union[str, List[str]]] = None,
     ):
@@ -180,21 +191,21 @@ class WL_Transformer(BaseTransform):
 
         elif data.x.dim() > 1:
             if data.x[:, 0].sum() > data.x.shape[0]:
-                data.x = data.x[:, 1:] #Remove first column #TODO: Check if this is correct
+                data.x = data.x[:, 1:] #Remove first column #Only needed for PROTEINS
 
             assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
             data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
         
-        # Replace the graph features directly with the WL coloring
+        # If the max iterations is set to -1, we set it to the number of nodes
         if self.max_iterations == -1:
             self.max_iterations = data.num_nodes
 
+        # 1-WL Algorithm
         old_coloring = data.x.squeeze()
         new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
 
         iteration = 0     
         while ((not self.check_convergence) or (not check_wl_convergence(old_coloring, new_coloring))) and iteration < self.max_iterations:
-            # Calculate the new coloring
             old_coloring = new_coloring
             new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
 
@@ -222,11 +233,17 @@ def check_wl_convergence(old_coloring, new_coloring):
     return True
 
 class Wrapper_TUDataset(TUDataset):
+    '''Wrapper Function for the TUDataset class from PyG.
+    This wrapper allows to pre_shuffle the dataset before applying the pre_transform, and 
+    it allows to automatically re-process the dataset if the pre_transform changes by deleting 
+    the old processed data.
+    '''
     def __init__(self, root: str, name: str,
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[List] = None,
                  pre_filter: Optional[Callable] = None,
-                 use_node_attr: bool = False, use_edge_attr: bool = False,
+                 use_node_attr: bool = False, 
+                 use_edge_attr: bool = False,
                  cleaned: bool = False,
                  pre_shuffle: bool = False):
         
@@ -237,6 +254,9 @@ class Wrapper_TUDataset(TUDataset):
 
             root = f'{root}/{"wl_convergence_true" if self.wl_convergence else "wl_convergence_false"}_{self.k_wl}'
             pre_transform = Compose(pre_transform)
+
+            if pre_shuffle is False:
+                warnings.warn('WARNING: The WL transformer is used but pre_shuffle is set to False. This will to unbalanced color histograms across all samples.')
     
         # Check if the processed data that is available used the same pre_transform
         if os.path.isdir(root + '/' + name + '/processed'):
