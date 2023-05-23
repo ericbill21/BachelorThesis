@@ -22,24 +22,30 @@ print(f"Using device: {DEVICE}")
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
-parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name')
+parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name.')
 parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
 parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
-parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use.')
+parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use. Options are "1WL+NN:Embedding-{SUM,MAX,MEAN}" or "GIN:{SUM,MAX,MEAN}".')
 parser.add_argument('--wl_convergence', type=str, choices=['True','False'], help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
-parser.add_argument('--tags', nargs='+', default=[])
-parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use.')
-parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use.')
-parser.add_argument('--metric', nargs='+', default=[], help='Metric to use.')
-parser.add_argument('--transformer', type=str, default='None', help='Transformer to use.')
-parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer.')
-parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings.')
-parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers.')
+parser.add_argument('--tags', nargs='+', default=[], help='Tags for the run on wandb.')
+parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use. Options are "L1Loss", "MSELoss", "CrossEntropyLoss", "CTCLoss", "NLLLoss", "PoissonNLLLoss", "KLDivLoss", "BCELoss", "BCEWithLogitsLoss", "MarginRankingLoss", "HingeEmbeddingLoss", "MultiLabelMarginLoss", "SmoothL1Loss", "SoftMarginLoss", "MultiLabelSoftMarginLoss", "CosineEmbeddingLoss", "MultiMarginLoss", "TripletMarginLoss" and "TripletMarginWithDistanceLoss".')
+parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use. Options are "SGD", "Adam", "Adadelta", "Adagrad", "Adamax", "RMSprop" and "Rprop".')
+parser.add_argument('--metric', nargs='+', default=[], help='Metric to use. Options are "f1_score" and "roc_auc_score".')
+parser.add_argument('--transformer', type=str, default='None', help='Transformer to use. Options are "OneHotDegree", "Constant_Long" and "None".')
+parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
+parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings. Embeddings are only used for the 1WL+NN models.')
+parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers. The last MLP layer always has the same size as the number of classes.')
 parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
+parser.add_argument('--gnn_layers', type=int, default=5, help='Number of GNN layers.')
+parser.add_argument('--activation_func', type=str, default='relu', help='Activation function to use. Options are "relu", "leaky_relu", "elu", "gelu", "tanh", "sigmoid", "softplus", "softsign", "prelu", "rrelu", "selu", "celu", "logsigmoid", "hardsigmoid", "tanhshrink", "hardtanh", "logsoftmax", "softmin", "softmax", "softshrink", "relu6", "elu6", "silu", "mish", "swish", "hardsigmoid" and "hardswish".')
+parser.add_argument('--dropout', type=float, default=0.0, help='Dropout rate. 0.0 means no dropout.')
+parser.add_argument('--mlp_norm', type=str, default='batch_norm', help='Batch normalization to use. Options are "batch_norm" and "layer_norm".')
+parser.add_argument('--jk', type=str, default='cat', help='Jumping knowledge to use. Options are "cat", "max" and "lstm".')
+parser.add_argument('--gnn_hidden_channels', type=int, default=16, help='Number of hidden channels in the GNN.')
 args = parser.parse_args()
 
 # Convert arguments
@@ -75,6 +81,12 @@ run = wandb.init(
         "embedding_dim": args.embedding_dim,
         "mlp_layer_size": args.mlp_layer_size,
         "mlp_num_layers": args.mlp_num_layers,
+        "gnn_layers": args.gnn_layers,
+        "activation_func": args.activation_func,
+        "dropout": args.dropout,
+        "mlp_norm": args.mlp_norm,
+        "jk": args.jk,
+        "gnn_hidden_channels": args.gnn_hidden_channels,
     },
 )
 
@@ -112,20 +124,26 @@ elif args.transformer == "Constant_Long":
 dataset = Wrapper_TUDataset(
     root=f"Code/datasets",
     name=f"{args.dataset}",
-    use_node_attr=True,
+    use_node_attr=False,
     pre_transform=transformer_list,
     pre_shuffle=True,
 )
+
 # Load model
 model = load_model(
     model_name=args.model,
+    input_dim=dataset.num_node_features,
     output_dim=dataset.num_classes,
     is_classification=True,
-    device=DEVICE,
     largest_color=dataset.max_node_feature + 1,
     embedding_dim=args.embedding_dim,
     mlp_hidden_layer_conf=[args.mlp_layer_size] * args.mlp_num_layers,
-)
+    gnn_layers = args.gnn_layers,
+    activation_func = args.activation_func,
+    dropout = args.dropout,
+    mlp_norm = args.mlp_norm,
+    jk = args.jk,
+    gnn_hidden_channels = args.gnn_hidden_channels).to(DEVICE)
 
 # Load optimizer
 optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
@@ -238,7 +256,6 @@ for fold, (train_ids, test_ids) in enumerate(splitting_indices):
                 f"\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},"
                 f"\t Val Acc: {round(val_acc, 1)}%"
             )
-
 
 # Averaging the local logging variables
 mean_train_acc /= args.k_fold

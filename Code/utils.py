@@ -1,33 +1,20 @@
-from typing import Callable, Optional
-import torch
-from torch import nn
-from torch_geometric.nn.conv import wl_conv
-from torch_geometric.datasets import TUDataset
+import os
+import random
+import shutil
+import warnings
+from typing import Callable, List, Optional, Union
 
-from typing import List, Optional, Union
-
-import torch
-
-from torch_geometric.data import Data, HeteroData
-from torch_geometric.data.datapipes import functional_transform
-from torch_geometric.transforms import BaseTransform
-
-import random, os
 import numpy as np
 import torch
-import warnings
-
-
-from torch_geometric.data import dataset
-import os, shutil
-
+from torch import nn
+from torch_geometric.data import Data, HeteroData, dataset
+from torch_geometric.data.datapipes import functional_transform
 from torch_geometric.datasets import TUDataset
 from torch_geometric.io import read_tu_data
-from typing import Callable, List, Optional
-
+from torch_geometric.nn.conv import wl_conv
 from torch_geometric.nn.conv.wl_conv import WLConv
+from torch_geometric.transforms import BaseTransform, Compose
 
-from torch_geometric.transforms import Compose
 
 def seed_everything(seed: int):
     random.seed(seed)
@@ -190,9 +177,6 @@ class WL_Transformer(BaseTransform):
             data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
 
         elif data.x.dim() > 1:
-            if data.x[:, 0].sum() > data.x.shape[0]:
-                data.x = data.x[:, 1:] #Remove first column #Only needed for PROTEINS
-
             assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
             data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
         
@@ -247,13 +231,15 @@ class Wrapper_TUDataset(TUDataset):
                  cleaned: bool = False,
                  pre_shuffle: bool = False):
         
+        # Set the use_node_attr attribute globally
+        self.use_node_attr = use_node_attr
+        
         # Update root path if WL transformer is used
         if pre_transform is not None and isinstance(pre_transform[-1], WL_Transformer):
             self.k_wl = pre_transform[-1].max_iterations
             self.wl_convergence =  pre_transform[-1].check_convergence
 
             root = f'{root}/{"wl_convergence_true" if self.wl_convergence else "wl_convergence_false"}_{self.k_wl}'
-            pre_transform = Compose(pre_transform)
 
             if pre_shuffle is False:
                 warnings.warn('WARNING: The WL transformer is used but pre_shuffle is set to False. This will to unbalanced color histograms across all samples.')
@@ -272,7 +258,7 @@ class Wrapper_TUDataset(TUDataset):
         super().__init__(root=root,
                             name=name,
                             transform=transform,
-                            pre_transform=pre_transform,
+                            pre_transform=Compose(pre_transform),
                             pre_filter=pre_filter,
                             use_node_attr=use_node_attr,
                             use_edge_attr=use_edge_attr,
@@ -280,9 +266,15 @@ class Wrapper_TUDataset(TUDataset):
 
         if hasattr(self, 'num_node_features') and self.num_node_features > 0:
             self.max_node_feature = torch.max(self._data.x).item() 
-        
+    
+
     def process(self):
         self.data, self.slices, sizes = read_tu_data(self.raw_dir, self.name)
+
+        # Remove additional continuous node attributes before applying the pre_transform
+        if self._data.x is not None and not self.use_node_attr:
+            num_node_attributes = sizes['num_node_attributes']
+            self._data.x = self._data.x[:, num_node_attributes:]
 
         if self.pre_filter is not None or self.pre_transform is not None or self.pre_shuffle is not None:
             # Apply permutation to all attributes
