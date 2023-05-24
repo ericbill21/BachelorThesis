@@ -131,7 +131,7 @@ dataset = Wrapper_TUDataset(
 
 # Print some information about the dataset to check if everything is correct
 print(dataset.x[0: 5])
-wandb.config['node_features_shape'] = dataset.x.shape
+wandb.config['node_features_shape'] = dataset.x.shape[1:]
 
 # Load model
 model = load_model(
