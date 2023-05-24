@@ -129,6 +129,10 @@ dataset = Wrapper_TUDataset(
     pre_shuffle=True,
 )
 
+# Print some information about the dataset to check if everything is correct
+print(dataset.x[0: 5])
+wandb.config['node_features_shape'] = dataset.x.shape
+
 # Load model
 model = load_model(
     model_name=args.model,

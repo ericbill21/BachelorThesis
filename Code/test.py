@@ -1,5 +1,11 @@
 from torch_geometric.datasets import TUDataset
+from utils import WL_Transformer, Wrapper_TUDataset
 
-dataset = TUDataset(root=f'Code/datasets', name=f'PROTEINS', use_node_attr=False)
-print(dataset.x.shape)
-print(dataset.x)
+transformer = WL_Transformer(
+    use_node_attr=True,
+    max_iterations=-1,
+    check_convergence=True,
+)
+
+dataset = Wrapper_TUDataset(root=f'Code/test_datasets', name=f'PROTEINS', use_node_attr=False, pre_shuffle=True)
+print(dataset.x[0: 5])

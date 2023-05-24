@@ -243,12 +243,16 @@ class Wrapper_TUDataset(TUDataset):
 
             if pre_shuffle is False:
                 warnings.warn('WARNING: The WL transformer is used but pre_shuffle is set to False. This will to unbalanced color histograms across all samples.')
+        
+        # Transform the pre_transform list into a Compose object
+        if pre_transform is not None:
+            pre_transform = Compose(pre_transform)
     
         # Check if the processed data that is available used the same pre_transform
         if os.path.isdir(root + '/' + name + '/processed'):
 
             # Otherwise we have to re-process the data and remove the old one
-            f = os.path.join('processed', 'pre_transform.pt')
+            f = os.path.join(root + '/' + name + '/processed', 'pre_transform.pt')
             if os.path.exists(f) and torch.load(f) != dataset._repr(pre_transform):
                 print('Re-processing dataset. To disable this behavior, remove the previous pre-processed dataset folder.')
                 shutil.rmtree(root + '/' + name + '/processed')
@@ -258,9 +262,9 @@ class Wrapper_TUDataset(TUDataset):
         super().__init__(root=root,
                             name=name,
                             transform=transform,
-                            pre_transform=Compose(pre_transform),
+                            pre_transform=pre_transform,
                             pre_filter=pre_filter,
-                            use_node_attr=use_node_attr,
+                            use_node_attr=True, # We remove extra node attributes in the process function
                             use_edge_attr=use_edge_attr,
                             cleaned=cleaned)
 
@@ -275,7 +279,7 @@ class Wrapper_TUDataset(TUDataset):
         if self._data.x is not None and not self.use_node_attr:
             num_node_attributes = sizes['num_node_attributes']
             self._data.x = self._data.x[:, num_node_attributes:]
-
+    
         if self.pre_filter is not None or self.pre_transform is not None or self.pre_shuffle is not None:
             # Apply permutation to all attributes
             if self.pre_shuffle:
