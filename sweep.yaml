@@ -5,7 +5,7 @@ metric:
   goal: maximize
 parameters:
   model:
-    values: ["GIN:Mean", "GIN:Max", "GIN:Sum"]
+    values: ["GIN:Set2Set"]
   dataset:
     value: "PROTEINS"
   epochs:
@@ -13,31 +13,36 @@ parameters:
   batch_size:
     values: [4, 8, 16, 32, 64, 128]
   lr:
-    values: [0.01, 0.02, 0.001, 0.002]
+    values: [0.01, 0.001, 0.002]
   k_fold:
     value: 5
   tags:
-    value: "sweep_gin"
+    value: "sweep_gin:set2set"
   optimizer:
     values: ["AdamW", "SGD"]
   mlp_layer_size:
     values: [8,16,32,64,128]
   mlp_num_layers:
-    values: [1,2,3,4]
+    values: [1,2,3]
   gnn_layers:
     values: [2, 4, 8, 16]
   gnn_hidden_channels:
-    values: [2, 4, 8, 16]
+    values: [4, 8, 16]
   jk:
     value: "cat"
   loss_func:
     value: "CrossEntropyLoss"
   transformer:
     value: ""
-  transformer_args:
-    value: ""
+  transformer_kwargs:
+    value: "{}"
   activation_func:
     values: ["relu", "prelu"]
   mlp_norm:
     value: "batch_norm"
-  
+  pool_func_kwargs:
+    parameters:
+      processing_steps:
+        values: [1, 2, 4, 8]
+      num_layers:
+        values: [1, 2]

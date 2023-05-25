@@ -230,7 +230,7 @@ class Wrapper_TUDataset(TUDataset):
                  use_edge_attr: bool = False,
                  cleaned: bool = False,
                  pre_shuffle: bool = False,
-                 re_process: bool = False):
+                 reprocess: bool = False):
         
         # Set the use_node_attr attribute globally
         self.use_node_attr = use_node_attr
@@ -255,7 +255,7 @@ class Wrapper_TUDataset(TUDataset):
             # Otherwise we have to re-process the data and remove the old one
             f = os.path.join(root + '/' + name + '/processed', 'pre_transform.pt')
             if os.path.exists(f):
-                if torch.load(f) != dataset._repr(pre_transform) or re_process:
+                if torch.load(f) != dataset._repr(pre_transform) or reprocess:
                     print('Re-processing dataset. To disable this behavior, remove the previous pre-processed dataset folder.')
                     shutil.rmtree(root + '/' + name + '/processed')
         

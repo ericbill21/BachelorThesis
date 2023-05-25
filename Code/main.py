@@ -1,13 +1,13 @@
 import argparse
+import ast
 import time
-import warnings
 
 import numpy as np
 import torch
 import torch_geometric
-import torchmetrics
 import utils
-from models import load_model
+from metrics import create_metrics_dict
+from models import create_model
 from sklearn.model_selection import StratifiedKFold
 from torch_geometric.loader import DataLoader as PyGDataLoader
 from torch_geometric.transforms import OneHotDegree, ToDevice
@@ -18,15 +18,14 @@ import wandb
 # GLOBAL VARIABLES
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-print(f"Using device: {DEVICE}")
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
 parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name.')
-parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
+parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
 parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
-parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
+parser.add_argument('--k_fold', type=int, default=5, help='Number of folds for k-fold cross validation.')
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use. Options are "1WL+NN:Embedding-{SUM,MAX,MEAN}" or "GIN:{SUM,MAX,MEAN}".')
@@ -36,8 +35,9 @@ parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='L
 parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use. Options are "SGD", "Adam", "Adadelta", "Adagrad", "Adamax", "RMSprop" and "Rprop".')
 parser.add_argument('--metric', nargs='+', default=[], help='Metric to use. Options are "f1_score" and "roc_auc_score".')
 parser.add_argument('--transformer', type=str, default='None', help='Transformer to use. Options are "OneHotDegree", "Constant_Long" and "None".')
-parser.add_argument('--transformer_args', nargs='+', default=[], help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
-parser.add_argument('--embedding_dim', type=int, default=8, help='Dimension of the node embeddings. Embeddings are only used for the 1WL+NN models.')
+parser.add_argument('--transformer_kwargs', type=str, default='{}', help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
+parser.add_argument('--encoding_kwargs', type=str, default='{}', help='Arguments for the encoding function. For example, for Embedding, the argument is the embedding dimension with the key "embedding_dim".')
+parser.add_argument('--pool_func_kwargs', type=str, default='{}', help='Arguments for the pooling function. For example, for Set2Set, the argument is the number of processing steps with the key "processing_steps".')
 parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers. The last MLP layer always has the same size as the number of classes.')
 parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
 parser.add_argument('--gnn_layers', type=int, default=5, help='Number of GNN layers.')
@@ -50,6 +50,9 @@ args = parser.parse_args()
 
 # Convert arguments
 args.wl_convergence = args.wl_convergence == "True"
+args.encoding_kwargs = ast.literal_eval(args.encoding_kwargs)
+args.pool_func_kwargs = ast.literal_eval(args.pool_func_kwargs)
+args.transformer_kwargs = ast.literal_eval(args.transformer_kwargs)
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
@@ -58,6 +61,7 @@ IS_CLASSIFICATION = (
     False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
 )
 
+# Initialize wandb
 run = wandb.init(
     project="BachelorThesis",
     name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
@@ -77,8 +81,8 @@ run = wandb.init(
         "optimizer": args.optimizer,
         "metric": args.metric,
         "transformer": args.transformer,
-        "transformer_args": args.transformer_args,
-        "embedding_dim": args.embedding_dim,
+        "transformer_kwargs": args.transformer_kwargs,
+        "encoding_kwargs": args.encoding_kwargs,
         "mlp_layer_size": args.mlp_layer_size,
         "mlp_num_layers": args.mlp_num_layers,
         "gnn_layers": args.gnn_layers,
@@ -87,6 +91,7 @@ run = wandb.init(
         "mlp_norm": args.mlp_norm,
         "jk": args.jk,
         "gnn_hidden_channels": args.gnn_hidden_channels,
+        "pool_func_kwargs": args.pool_func_kwargs,
     },
 )
 
@@ -113,11 +118,11 @@ if args.model.startswith("1WL+NN"):
     transformer_list.append(wl_tranformer)
 
 elif args.transformer == "OneHotDegree":
-    one_hot_degree_transformer = OneHotDegree(max_degree=args.tramsformer_args[0])
+    one_hot_degree_transformer = OneHotDegree(max_degree=args.tramsformer_args['max_degree'])
     transformer_list.append(one_hot_degree_transformer)
 
 elif args.transformer == "Constant_Long":
-    constant_transformer = Constant_Long(args.transformer_args[0])
+    constant_transformer = Constant_Long(args.transformer_kwargs['value'])
     transformer_list.append(constant_transformer)
 
 # Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
@@ -129,25 +134,37 @@ dataset = Wrapper_TUDataset(
     pre_shuffle=True,
 )
 
-# Print some information about the dataset to check if everything is correct
-print(dataset.x[0: 5])
+# Add dataset information to encoding kwargs
+args.encoding_kwargs["largest_color"] = dataset.max_node_feature + 1
+
+# Log dataset information to wandb
 wandb.config['node_features_shape'] = dataset.x.shape[1:]
 
 # Load model
-model = load_model(
+model = create_model(
     model_name=args.model,
     input_dim=dataset.num_node_features,
     output_dim=dataset.num_classes,
     is_classification=True,
-    largest_color=dataset.max_node_feature + 1,
-    embedding_dim=args.embedding_dim,
     mlp_hidden_layer_conf=[args.mlp_layer_size] * args.mlp_num_layers,
     gnn_layers = args.gnn_layers,
     activation_func = args.activation_func,
     dropout = args.dropout,
     mlp_norm = args.mlp_norm,
     jk = args.jk,
-    gnn_hidden_channels = args.gnn_hidden_channels).to(DEVICE)
+    gnn_hidden_channels = args.gnn_hidden_channels,
+    encoding_kwargs=args.encoding_kwargs,
+    pool_func_kwargs=args.pool_func_kwargs).to(DEVICE)
+
+# Add dataset config to model for saving
+model.dataset_config = {
+    "dataset_name" : args.dataset,
+    "k_wl" : args.k_wl,
+    "wl_convergence" : args.wl_convergence,
+    "transformer" : args.transformer,
+    "transformer_kwargs" : args.transformer_kwargs,
+    "seed" : args.seed,
+}
 
 # Load optimizer
 optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
@@ -155,45 +172,30 @@ optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
 # Load loss function
 loss_func = getattr(torch.nn, args.loss_func)()
 
-metric_func = {}
-for metric_name in args.metric:
-    if metric_name == "f1_score" and IS_CLASSIFICATION:
-        wandb.define_metric(f"val_f1_score: fold*", step_metric="epoch")
-        wandb.define_metric(f"val_f1_score", summary="max", step_metric="epoch")
+# Load metric functions
+metric_func = create_metrics_dict(metric_names=args.metric,
+                                   num_classes=dataset.num_classes,
+                                    IS_CLASSIFICATION=IS_CLASSIFICATION)
 
-        f1_score = torchmetrics.classification.F1Score(
-            num_labels=dataset.num_classes,
-            average="macro",
-            task="multiclass" if dataset.num_classes > 2 else "binary",
-        )
-        metric_func["f1_score"] = f1_score
-
-    elif metric_name == "roc_auc_score" and IS_CLASSIFICATION:
-        wandb.define_metric(f"val_roc_auc_score: fold*", step_metric="epoch")
-        wandb.define_metric(f"val_roc_auc_score", summary="max", step_metric="epoch")
-
-        roc_auc_score = torchmetrics.classification.AUROC(
-            num_labels=dataset.num_classes,
-            average="macro",
-            task="multiclass" if dataset.num_classes > 2 else "binary",
-        )
-        metric_func["roc_auc_score"] = roc_auc_score
-
-    else:
-        warnings.warn(
-            f"Metric {metric_name} is either supported for this dataset or not yet implemented."
-        )
-
-# Log the model to wandb
-wandb.watch(model, log="all")
+# Print some information about the run to check if everything is correct
+print('#' * 100)
+print(f"Device: {DEVICE}")
+print(f"Model: {model}")
+print(f"Optimizer: {optimizer}")
+print(f"Loss Function: {loss_func}")
+print(f"Dataset: {dataset}")
+print(f"Dataset node features: {dataset.x if hasattr(dataset, 'x') else 'None'}")
+print(f"Dataset edge features: {dataset.edge_attr if hasattr(dataset, 'edge_attr') else 'None'}")
+print(f"Metric Functions: {metric_func}")
+print('#' * 100)
 
 # Use Stratified K-Fold cross validation if it is a classification task
-cross_validation = StratifiedKFold(
-    n_splits=args.k_fold, shuffle=True, random_state=args.seed
-)
-splitting_indices = list(
-    cross_validation.split(np.zeros(dataset.len()), dataset.y.clone().detach().cpu())
-)  # Ugly workaround for CUDA
+cross_validation = StratifiedKFold(n_splits=args.k_fold, 
+                                   shuffle=True, 
+                                   random_state=args.seed)
+splitting_indices = list( # Ugly workaround for CUDA
+    cross_validation.split(np.zeros(dataset.len()),
+                            dataset.y.clone().detach().cpu()))
 
 # Initialize local variables for local logging
 mean_train_acc = torch.zeros(args.epochs)
@@ -206,6 +208,7 @@ for metric_name in metric_func.keys():
     metric_logs[metric_name] = torch.zeros(args.epochs)
 
 # TRAINING LOOP: Loop over the args.k_fold splits
+best_val_acc = 0
 for fold, (train_ids, test_ids) in enumerate(splitting_indices):
     print(f"Cross-Validation Split {fold+1}/{args.k_fold}:")
 
@@ -260,6 +263,11 @@ for fold, (train_ids, test_ids) in enumerate(splitting_indices):
                 f"\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},"
                 f"\t Val Acc: {round(val_acc, 1)}%"
             )
+    
+    # Save the best model after each fold
+    if val_acc > best_val_acc:
+        best_val_acc = val_acc
+        torch.save(model, f"Code/saved_models/{run.name}.pt")
 
 # Averaging the local logging variables
 mean_train_acc /= args.k_fold
