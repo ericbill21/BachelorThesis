@@ -719,4 +719,5 @@ FodyWeavers.xsd
 # WANDB
 wandb/
 Code/datasets/
+Code/saved_models/
 output_*.txt
