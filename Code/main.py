@@ -214,6 +214,9 @@ for fold, (train_ids, test_ids) in enumerate(splitting_indices):
 
     # Reset the model parameters
     model.reset_parameters()
+    
+    # Reset the optimizer: TODO check if this really works
+    #new_optimizer = old_optimizer.__class__(model, **old_optimizer.defaults)
 
     # Initialize the data loaders
     train_loader = PyGDataLoader(

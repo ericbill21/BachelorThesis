@@ -5,31 +5,29 @@ metric:
   goal: maximize
 parameters:
   model:
-    values: ["GIN:Set2Set"]
+    values: ["1WL+NN:Embedding-Set2Set"]
   dataset:
     value: "PROTEINS"
   epochs:
     value: 200
   batch_size:
-    values: [4, 8, 16, 32, 64, 128]
+    values: [4, 8, 16, 32, 128]
   lr:
     values: [0.01, 0.001, 0.002]
   k_fold:
     value: 5
   tags:
-    value: "sweep_gin:set2set"
+    value: "sweep_wlnn:set2set"
   optimizer:
     values: ["AdamW", "SGD"]
   mlp_layer_size:
     values: [8,16,32,64,128]
   mlp_num_layers:
-    values: [1,2,3]
-  gnn_layers:
-    values: [2, 4, 8, 16]
-  gnn_hidden_channels:
-    values: [4, 8, 16]
-  jk:
-    value: "cat"
+    values: [1,2,4,8]
+  wl_convergence:
+    values: ["True", "False"]
+  k_wl:
+    value: 1
   loss_func:
     value: "CrossEntropyLoss"
   transformer:
@@ -40,6 +38,10 @@ parameters:
     values: ["relu", "prelu"]
   mlp_norm:
     value: "batch_norm"
+  encoding_kwargs:
+    parameters:
+      embedding_dim:
+        values: [1, 2, 4, 8, 16]
   pool_func_kwargs:
     parameters:
       processing_steps:

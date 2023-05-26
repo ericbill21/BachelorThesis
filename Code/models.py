@@ -25,7 +25,9 @@ class generic_wlnn(torch.nn.Module):
         return x
 
     def reset_parameters(self):
-        self.embedding.reset_parameters()
+        if hasattr(self.embedding, "reset_parameters"):
+            self.embedding.reset_parameters()
+        
         self.mlp.reset_parameters()
 
         if hasattr(self.pool, "reset_parameters"):
@@ -87,7 +89,8 @@ def create_model(
             )
             mlp_input_channels = encoding_kwargs['embedding_dim']
         else:
-            encoding = torch.identiy
+            # TODO: Check if it is problematic with the squeeze
+            encoding = torch.nn.Identity()
             mlp_input_channels = 1
 
         # Retrieve the correct pooling function
