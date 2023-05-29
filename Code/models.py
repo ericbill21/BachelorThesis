@@ -1,3 +1,4 @@
+#import HGP_SL_model
 import torch
 import torch_geometric
 from torch_geometric.nn.models import GIN, MLP
@@ -17,7 +18,9 @@ class generic_wlnn(torch.nn.Module):
         self.pool = pool_func
         self.softmax = torch.nn.Softmax(dim=1)
 
-    def forward(self, x, edge_index, batch):
+    def forward(self, data):
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+
         x = self.embedding(x).squeeze()
         x = self.pool(x, batch)
         x = self.mlp(x)
@@ -47,7 +50,9 @@ class generic_gnn(torch.nn.Module):
         self.pool = pool_func
         self.softmax = torch.nn.Softmax(dim=1)
 
-    def forward(self, x, edge_index, batch):
+    def forward(self, data):
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+
         x = self.gnn(x, edge_index)
         x = self.pool(x, batch)
         x = self.mlp(x)
@@ -165,4 +170,23 @@ def create_model(
                             mlp=mlp,
                             pool_func=pool_func)
     
+    elif model_name == "HGP_SL":
+
+        class Object(object):
+            pass
+
+        dummy_object = Object()
+        dummy_object.num_features = input_dim
+        dummy_object.nhid = 128
+        dummy_object.num_classes = output_dim
+        dummy_object.pooling_ratio = 0.5
+        dummy_object.dropout_ratio = 0.0
+        dummy_object.sample_neighbor = True
+        dummy_object.sparse_attention = True
+        dummy_object.structure_learning = True
+        dummy_object.lamb = 1.0
+
+        #model = HGP_SL_model.Model(dummy_object)
+    
+
     return model

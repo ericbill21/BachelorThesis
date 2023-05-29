@@ -4,7 +4,7 @@ import torch
 
 import wandb
 
-SWEEP_IDS = ["zaffc3vo", "lf4lhg08", "gykfim06"]
+SWEEP_IDS = ["zaffc3vo", "lf4lhg08", "gykfim06", "eh0fsrx1"]
 PERCENTAGE_STEPS = [0.5, 0.25, 0.1, 0.05, 0.01]
 
 api = wandb.Api()

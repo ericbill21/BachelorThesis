@@ -6,7 +6,9 @@ import torch_geometric
 from models import generic_gnn, generic_wlnn
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.manifold import TSNE
+from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
 from torch_geometric.datasets import TUDataset
 from utils import WL_Transformer, Wrapper_TUDataset, seed_everything
@@ -16,6 +18,7 @@ import wandb
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch GNN')
 parser.add_argument('--model_path', type=str, default="")
+parser.add_argument('--k_fold', type=int, default=5)
 args = parser.parse_args()
 
 # Load model
@@ -26,7 +29,7 @@ DATASET_NAME = model.dataset_config["dataset_name"]
 K_WL = model.dataset_config["k_wl"]
 WL_CONVERGENCE = model.dataset_config["wl_convergence"]
 TRANSFORMER = model.dataset_config["transformer"]
-TRANSFORMER_ARGS = model.dataset_config["transformer_args"]
+TRANSFORMER_ARGS = model.dataset_config["transformer_kwargs"]
 SEED = model.dataset_config["seed"]
 
 # Initialize wandb
@@ -89,6 +92,7 @@ with torch.no_grad():
         
         unique_values_per_class[y] = unique_values
         wandb.summary[f'unique_aggregate_values: class {y}'] = unique_values
+        wandb.summary[f'total values: class {y}'] = aggregate_class.shape[0]
 
     # Reduce Data to 2D
     # PCA
@@ -107,20 +111,28 @@ with torch.no_grad():
                         columns = ["x", "y", "class"])
     wandb.log({"tsne": table})
 
-    # Clustering alogrithm: KNN
+    # Testing different clustering algorithms
     wandb.define_metric("k")
-    wandb.define_metric("knn_acc", summary="max", step_metric="k")
+    wandb.define_metric("mean_knn_acc", summary="max", step_metric="k")
+    
+    # Cross validation
+    skf = StratifiedKFold(n_splits=args.k_fold, shuffle=True, random_state=SEED)
+    splits = list(skf.split(data_aggregate, data_y))
 
     num_test = dataset.len() // 10
+
+    # Clustering alogrithm: KNN
     knn_acc = np.zeros(num_test)
     for k in range(num_test):
-        clustering_algorithm = KNeighborsClassifier(n_neighbors=k+1)
-        clustering_algorithm.fit(data_aggregate, data_y)
+    
+        for fold, (train_index, test_index) in enumerate(splits):
 
-        score = clustering_algorithm.score(data_aggregate, data_y)
-        knn_acc[k] = score
-        wandb.log({"knn_acc": score,
-                   "k" : k+1})
+            clustering_algorithm = KNeighborsClassifier(n_neighbors=k+1)
+            clustering_algorithm.fit(data_aggregate[train_index], data_y[train_index])
 
-    best_k = np.argmax(knn_acc)
-    print(f"KNN: {k+1} -> {knn_acc[best_k]}")
+            score = clustering_algorithm.score(data_aggregate[test_index], data_y[test_index])
+            knn_acc[k] += score
+        
+        knn_acc[k] /= args.k_fold
+        print(f"KNN accuracy for k={k+1}: {knn_acc[k]}")
+        wandb.log({"mean_knn_acc": knn_acc[k], "k": k+1})

@@ -24,7 +24,6 @@ def seed_everything(seed: int):
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    torch.mps.manual_seed(seed)
 
 # Simple training loop
 def train(model, loader, optimizer, loss_func, DEVICE):
@@ -38,7 +37,7 @@ def train(model, loader, optimizer, loss_func, DEVICE):
         optimizer.zero_grad()
 
         # Count the number of correct predictions and accumulate the loss
-        pred = model(data.x, data.edge_index, data.batch)
+        pred = model(data)
         correct += (pred.max(1)[1] == data.y).sum().item()
         loss = loss_func(pred, data.y)
 
@@ -70,7 +69,7 @@ def val(model, loader, loss_func, DEVICE, metric_func = {}):
         data = data.to(DEVICE)
 
         # Compute the predictions and accumulate the loss
-        pred_batch = model(data.x, data.edge_index, data.batch)
+        pred_batch = model(data)
         loss_all += loss_func(pred_batch, data.y).item()
 
         # Convert the predictions from log-probabilities to class labels
@@ -90,18 +89,6 @@ def val(model, loader, loss_func, DEVICE, metric_func = {}):
     avg_acc = (correct / len(loader.dataset)) * 100
 
     return avg_loss, avg_acc, metric_results
-
-# Simple test loop
-def test(model, loader, DEVICE):
-    # Set model to evaluation mode
-    model.eval()
-
-    correct = 0
-    for data in loader:
-        data = data.to(DEVICE)
-        pred = model(data.x, data.edge_index, data.batch).max(1)[1]
-        correct += (pred == data.y).sum().item()
-    return correct / len(loader.dataset)
 
 
 @functional_transform('constant_long')

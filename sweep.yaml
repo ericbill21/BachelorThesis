@@ -1,3 +1,81 @@
+method: random
+metric:
+  goal: maximize
+  name: val_acc.max
+parameters:
+  activation_func:
+    values:
+      - relu
+      - prelu
+  batch_size:
+    values:
+      - 4
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+  dataset:
+    value: PROTEINS
+  epochs:
+    value: 200
+  gnn_hidden_channels:
+    values:
+      - 2
+      - 4
+      - 8
+      - 16
+  gnn_layers:
+    values:
+      - 2
+      - 4
+      - 8
+      - 16
+  jk:
+    value: cat
+  k_fold:
+    value: 5
+  loss_func:
+    value: CrossEntropyLoss
+  lr:
+    values:
+      - 0.01
+      - 0.02
+      - 0.001
+      - 0.002
+  mlp_layer_size:
+    values:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+  mlp_norm:
+    value: batch_norm
+  mlp_num_layers:
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
+  model:
+    values:
+      - GIN:Mean
+      - GIN:Max
+      - GIN:Sum
+  optimizer:
+    values:
+      - AdamW
+      - SGD
+  tags:
+    value: sweep_gin
+  transformer:
+    value: ""
+  transformer_args:
+    value: ""
+program: Code/main.py
+
+
 program: Code/main.py
 method: random
 metric:
