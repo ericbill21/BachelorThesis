@@ -92,7 +92,7 @@ for i in range(args.num_repition):
 
     # Precalculate the Weisfeiler-Lehman coloring for the dataset.
     if args.model.startswith("1WL+NN"):
-        dataset_rep = Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence)
+        dataset_rep = Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE)
         args.encoding_kwargs["max_node_feature"] = dataset_rep.max_node_feature + 1
 
     else:

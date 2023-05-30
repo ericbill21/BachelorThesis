@@ -166,21 +166,30 @@ def check_wl_convergence(old_coloring, new_coloring):
     return True
 
 class Wrapper_WL_TUDataset(InMemoryDataset):
-    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool):
+    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool, DEVICE: str):
         super().__init__(root=None, transform=None, pre_transform=None, pre_filter=None, log=None)
 
         # First we copy the given Dataset with respect to the current ordering
+        print("Copying dataset...")
         data_list = []
         for idx in range(dataset.len()):
             data_list.append(dataset[idx])
         
+        print(f"Device: {data_list[0].x.device}")
+        print("Applying WL Algorithm...")
+
         # Apply k_wl times the 1-WL convolution
-        self.wl_conv = WLConv()
+        self.wl_conv = WLConv().to(DEVICE)
         for data in data_list:
             for _ in range(k_wl):
                 data.x = self.wl_conv(data.x, data.edge_index)
 
+        print("Applying WL Algorithm... Done")
+
         self.data, self.slices = self.collate(data_list)
+        print("collate done")
+        print(f"device {self._data.x.device}")
+
 
         # Make the array range small for smaller embedding later on
         self._data.x = self._data.x - self._data.x.min()
