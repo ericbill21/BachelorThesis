@@ -6,8 +6,10 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import torch
+import torch_geometric
 from torch import nn
-from torch_geometric.data import Data, HeteroData, dataset
+from torch.nn import functional as F
+from torch_geometric.data import Data, HeteroData, InMemoryDataset, dataset
 from torch_geometric.data.datapipes import functional_transform
 from torch_geometric.datasets import TUDataset
 from torch_geometric.io import read_tu_data
@@ -25,70 +27,30 @@ def seed_everything(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# Simple training loop
-def train(model, loader, optimizer, loss_func, DEVICE):
-    # Set model to training mode
+# One training epoch for GNN model.
+def train(train_loader, model, optimizer, device):
     model.train()
 
-    loss_all = 0
-    correct = 0
-    for data in loader:
-        data = data.to(DEVICE)
+    for data in train_loader:
+        data = data.to(device)
         optimizer.zero_grad()
-
-        # Count the number of correct predictions and accumulate the loss
-        pred = model(data)
-        correct += (pred.max(1)[1] == data.y).sum().item()
-        loss = loss_func(pred, data.y)
-
-        # Update the weights
+        output = model(data)
+        loss = F.nll_loss(output, data.y)
         loss.backward()
         optimizer.step()
 
-        loss_all += data.num_graphs * loss.item()
 
-    avg_loss = loss_all / len(loader.dataset)
-    avg_acc = (correct / len(loader.dataset)) * 100
-
-    return avg_loss, avg_acc
-    
-
-# Simple validation loop
-def val(model, loader, loss_func, DEVICE, metric_func = {}):
-    # Set model to evaluation mode
+# Get acc. of GNN model.
+def test(loader, model, device):
     model.eval()
 
-    # Variable to store all predictions and all truth labels
-    y_pred = torch.empty(0, device=DEVICE)
-    y_true = torch.empty(0, device=DEVICE)
-
-    # Variable to store the accumulated loss and the number of correct predictions
-    loss_all = 0
     correct = 0
     for data in loader:
-        data = data.to(DEVICE)
-
-        # Compute the predictions and accumulate the loss
-        pred_batch = model(data)
-        loss_all += loss_func(pred_batch, data.y).item()
-
-        # Convert the predictions from log-probabilities to class labels
-        y_pred_batch = pred_batch.max(1)[1]
-        correct += (y_pred_batch == data.y).sum().item()
-
-        # Store the predictions and the truth labels
-        y_pred = torch.cat([y_pred, y_pred_batch], dim=0)
-        y_true = torch.cat([y_true, data.y], dim=0)
-
-    # Compute the metrics
-    metric_results = {}
-    for metric_name, metric in metric_func.items():
-        metric_results[metric_name] = metric(y_pred, y_true).item()
-
-    avg_loss = loss_all / len(loader.dataset)
-    avg_acc = (correct / len(loader.dataset)) * 100
-
-    return avg_loss, avg_acc, metric_results
+        data = data.to(device)
+        output = model(data)
+        pred = output.max(dim=1)[1]
+        correct += pred.eq(data.y).sum().item()
+    return correct / len(loader.dataset)
 
 
 @functional_transform('constant_long')
@@ -203,89 +165,25 @@ def check_wl_convergence(old_coloring, new_coloring):
         
     return True
 
-class Wrapper_TUDataset(TUDataset):
-    '''Wrapper Function for the TUDataset class from PyG.
-    This wrapper allows to pre_shuffle the dataset before applying the pre_transform, and 
-    it allows to automatically re-process the dataset if the pre_transform changes by deleting 
-    the old processed data.
-    '''
-    def __init__(self, root: str, name: str,
-                 transform: Optional[Callable] = None,
-                 pre_transform: Optional[List] = None,
-                 pre_filter: Optional[Callable] = None,
-                 use_node_attr: bool = False, 
-                 use_edge_attr: bool = False,
-                 cleaned: bool = False,
-                 pre_shuffle: bool = False,
-                 reprocess: bool = False):
+class Wrapper_WL_TUDataset(InMemoryDataset):
+    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool):
+        super().__init__(root=None, transform=None, pre_transform=None, pre_filter=None, log=None)
+
+        # First we copy the given Dataset with respect to the current ordering
+        data_list = []
+        for idx in range(dataset.len()):
+            data_list.append(dataset[idx])
         
-        # Set the use_node_attr attribute globally
-        self.use_node_attr = use_node_attr
-        
-        # Update root path if WL transformer is used
-        if pre_transform is not None and isinstance(pre_transform[-1], WL_Transformer):
-            self.k_wl = pre_transform[-1].max_iterations
-            self.wl_convergence =  pre_transform[-1].check_convergence
+        # Apply k_wl times the 1-WL convolution
+        self.wl_conv = WLConv()
+        for data in data_list:
+            for _ in range(k_wl):
+                data.x = self.wl_conv(data.x, data.edge_index)
 
-            root = f'{root}/{"wl_convergence_true" if self.wl_convergence else "wl_convergence_false"}_{self.k_wl}'
+        self.data, self.slices = self.collate(data_list)
 
-            if pre_shuffle is False:
-                warnings.warn('WARNING: The WL transformer is used but pre_shuffle is set to False. This will to unbalanced color histograms across all samples.')
-        
-        # Transform the pre_transform list into a Compose object
-        if pre_transform is not None:
-            pre_transform = Compose(pre_transform)
-    
-        # Check if the processed data that is available used the same pre_transform
-        if os.path.isdir(root + '/' + name + '/processed'):
+        # Make the array range small for smaller embedding later on
+        self._data.x = self._data.x - self._data.x.min()
 
-            # Otherwise we have to re-process the data and remove the old one
-            f = os.path.join(root + '/' + name + '/processed', 'pre_transform.pt')
-            if os.path.exists(f):
-                if torch.load(f) != dataset._repr(pre_transform) or reprocess:
-                    print('Re-processing dataset. To disable this behavior, remove the previous pre-processed dataset folder.')
-                    shutil.rmtree(root + '/' + name + '/processed')
-        
-        # Setting new attributes and initializing the super class
-        self.pre_shuffle = pre_shuffle
-        super().__init__(root=root,
-                            name=name,
-                            transform=transform,
-                            pre_transform=pre_transform,
-                            pre_filter=pre_filter,
-                            use_node_attr=True, # We remove extra node attributes in the process function
-                            use_edge_attr=use_edge_attr,
-                            cleaned=cleaned)
-
-        if hasattr(self, 'num_node_features') and self.num_node_features > 0:
-            self.max_node_feature = torch.max(self._data.x).item() 
-    
-
-    def process(self):
-        self.data, self.slices, sizes = read_tu_data(self.raw_dir, self.name)
-
-        # Remove additional continuous node attributes before applying the pre_transform
-        if self._data.x is not None and not self.use_node_attr:
-            num_node_attributes = sizes['num_node_attributes']
-            self._data.x = self._data.x[:, num_node_attributes:]
-    
-        if self.pre_filter is not None or self.pre_transform is not None or self.pre_shuffle is not None:
-            # Apply permutation to all attributes
-            if self.pre_shuffle:
-                data_list = [self.get(idx) for idx in torch.randperm(len(self))]
-            else:
-                data_list = [self.get(idx) for idx in range(len(self))]
-            
-            # Apply pre_filter
-            if self.pre_filter is not None:
-                data_list = [d for d in data_list if self.pre_filter(d)]
-
-            # Apply pre_transform
-            if self.pre_transform is not None:
-                data_list = [self.pre_transform(d) for d in data_list]
-
-            # Collate the list of Data objects into a single Data object
-            self.data, self.slices = self.collate(data_list)
-        
-        sizes['num_node_labels'] = 1 
-        torch.save((self._data, self.slices, sizes), self.processed_paths[0])
+        # Save the maximum node feature as attribute
+        self.max_node_feature = self._data.x.max().item()

@@ -8,10 +8,11 @@ import torch_geometric
 import utils
 from metrics import create_metrics_dict
 from models import create_model
-from sklearn.model_selection import StratifiedKFold
-from torch_geometric.loader import DataLoader as PyGDataLoader
+from sklearn.model_selection import KFold, train_test_split
+from torch_geometric.datasets import TUDataset
+from torch_geometric.loader import DataLoader
 from torch_geometric.transforms import OneHotDegree, ToDevice
-from utils import Constant_Long, WL_Transformer, Wrapper_TUDataset
+from utils import Constant_Long, WL_Transformer, Wrapper_WL_TUDataset
 
 import wandb
 
@@ -20,280 +21,152 @@ LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 # Parse arguments
-parser = argparse.ArgumentParser(description='PyTorch GNN')
-parser.add_argument('--dataset', type=str, default='PROTEINS', help='Dataset name.')
-parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train.')
-parser.add_argument('--batch_size', type=int, default=32, help='Number of samples per batch.')
-parser.add_argument('--lr', type=float, default=0.02, help='Initial learning rate.')
-parser.add_argument('--k_fold', type=int, default=5, help='Number of folds for k-fold cross validation.')
+parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
+parser.add_argument('--dataset', type=str, help='Dataset name.')
+parser.add_argument('--max_epochs', type=int, help='Number of epochs to train.')
+parser.add_argument('--batch_size', type=int, help='Number of samples per batch.')
+parser.add_argument('--lr', type=float, help='Initial learning rate.')
+parser.add_argument('--k_fold', type=int, default=10, help='Number of folds for k-fold cross validation.')
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-parser.add_argument('--k_wl', type=int, default=3, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
+parser.add_argument('--k_wl', type=int, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
 parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use. Options are "1WL+NN:Embedding-{SUM,MAX,MEAN}" or "GIN:{SUM,MAX,MEAN}".')
 parser.add_argument('--wl_convergence', type=str, choices=['True','False'], help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
 parser.add_argument('--tags', nargs='+', default=[], help='Tags for the run on wandb.')
-parser.add_argument('--loss_func', type=str, default='CrossEntropyLoss', help='Loss function to use. Options are "L1Loss", "MSELoss", "CrossEntropyLoss", "CTCLoss", "NLLLoss", "PoissonNLLLoss", "KLDivLoss", "BCELoss", "BCEWithLogitsLoss", "MarginRankingLoss", "HingeEmbeddingLoss", "MultiLabelMarginLoss", "SmoothL1Loss", "SoftMarginLoss", "MultiLabelSoftMarginLoss", "CosineEmbeddingLoss", "MultiMarginLoss", "TripletMarginLoss" and "TripletMarginWithDistanceLoss".')
-parser.add_argument('--optimizer', type=str, default='Adam', help='Optimizer to use. Options are "SGD", "Adam", "Adadelta", "Adagrad", "Adamax", "RMSprop" and "Rprop".')
-parser.add_argument('--metric', nargs='+', default=[], help='Metric to use. Options are "f1_score" and "roc_auc_score".')
-parser.add_argument('--transformer', type=str, default='None', help='Transformer to use. Options are "OneHotDegree", "Constant_Long" and "None".')
+parser.add_argument('--num_repition', type=int, default=1, help='Number of repitions.')
 parser.add_argument('--transformer_kwargs', type=str, default='{}', help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
 parser.add_argument('--encoding_kwargs', type=str, default='{}', help='Arguments for the encoding function. For example, for Embedding, the argument is the embedding dimension with the key "embedding_dim".')
-parser.add_argument('--pool_func_kwargs', type=str, default='{}', help='Arguments for the pooling function. For example, for Set2Set, the argument is the number of processing steps with the key "processing_steps".')
-parser.add_argument('--mlp_layer_size', type=int, default=64, help='Size of the initial MLP hidden layers. The last MLP layer always has the same size as the number of classes.')
-parser.add_argument('--mlp_num_layers', type=int, default=2, help='Number of MLP hidden layers.')
-parser.add_argument('--gnn_layers', type=int, default=5, help='Number of GNN layers.')
-parser.add_argument('--activation_func', type=str, default='relu', help='Activation function to use. Options are "relu", "leaky_relu", "elu", "gelu", "tanh", "sigmoid", "softplus", "softsign", "prelu", "rrelu", "selu", "celu", "logsigmoid", "hardsigmoid", "tanhshrink", "hardtanh", "logsoftmax", "softmin", "softmax", "softshrink", "relu6", "elu6", "silu", "mish", "swish", "hardsigmoid" and "hardswish".')
-parser.add_argument('--dropout', type=float, default=0.0, help='Dropout rate. 0.0 means no dropout.')
-parser.add_argument('--mlp_norm', type=str, default='batch_norm', help='Batch normalization to use. Options are "batch_norm" and "layer_norm".')
-parser.add_argument('--jk', type=str, default='cat', help='Jumping knowledge to use. Options are "cat", "max" and "lstm".')
-parser.add_argument('--gnn_hidden_channels', type=int, default=16, help='Number of hidden channels in the GNN.')
+parser.add_argument('--mlp_kwargs', type=str, default='{}', help='Arguments for the MLP. For example, for the MLP, the argument is the number of hidden layers with the key "num_layers".')
+parser.add_argument('--gnn_kwargs', type=str, default='{}', help='Number of GNN layers.')
 args = parser.parse_args()
 
 # Convert arguments
 args.wl_convergence = args.wl_convergence == "True"
 args.encoding_kwargs = ast.literal_eval(args.encoding_kwargs)
-args.pool_func_kwargs = ast.literal_eval(args.pool_func_kwargs)
+args.gnn_kwargs = ast.literal_eval(args.gnn_kwargs)
+args.mlp_kwargs = ast.literal_eval(args.mlp_kwargs)
 args.transformer_kwargs = ast.literal_eval(args.transformer_kwargs)
 
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
 
-IS_CLASSIFICATION = (
-    False if args.dataset in ["ZINC", "ZINC_val", "ZINC_test", "ZINC_full"] else True
-)
-
 # Initialize wandb
 run = wandb.init(
-    project="BachelorThesis",
+    project="BachelorThesisExperiments",
     name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
     tags=args.tags,
     config={
-        "Epochs": args.epochs,
-        "Batch size": args.batch_size,
-        "Device": DEVICE,
-        "k-fold": args.k_fold,
-        "Dataset": args.dataset,
-        "learning_rate": args.lr,
+        "max_epochs": args.max_epochs,
+        "batch_size": args.batch_size,
+        "device": DEVICE,
+        "k_fold": args.k_fold,
+        "dataset": args.dataset,
+        "lr": args.lr,
         "seed": args.seed,
         "k_wl": args.k_wl,
         "model": args.model,
-        "wl_convergence": args.wl_convergence,
-        "loss_func": args.loss_func,
-        "optimizer": args.optimizer,
-        "metric": args.metric,
-        "transformer": args.transformer,
-        "transformer_kwargs": args.transformer_kwargs,
-        "encoding_kwargs": args.encoding_kwargs,
-        "mlp_layer_size": args.mlp_layer_size,
-        "mlp_num_layers": args.mlp_num_layers,
-        "gnn_layers": args.gnn_layers,
-        "activation_func": args.activation_func,
-        "dropout": args.dropout,
-        "mlp_norm": args.mlp_norm,
-        "jk": args.jk,
-        "gnn_hidden_channels": args.gnn_hidden_channels,
-        "pool_func_kwargs": args.pool_func_kwargs,
-    },
+        "wl_convergence": args.wl_convergence} | args.encoding_kwargs | args.gnn_kwargs | args.mlp_kwargs | args.transformer_kwargs
 )
 
 # Define metrics
-wandb.define_metric("epoch")
-wandb.define_metric(f"train_loss: fold*", step_metric="epoch")
-wandb.define_metric(f"val_loss: fold*", step_metric="epoch")
-wandb.define_metric(f"train_loss", summary="min", step_metric="epoch")
-wandb.define_metric(f"val_loss", summary="min", step_metric="epoch")
-wandb.define_metric(f"train_acc: fold*", step_metric="epoch")
-wandb.define_metric(f"val_acc: fold*", step_metric="epoch")
-wandb.define_metric(f"train_acc", summary="max", step_metric="epoch")
-wandb.define_metric(f"val_acc", summary="max", step_metric="epoch")
+wandb.define_metric("test_accuracies")
+wandb.define_metric("test_accuracies_std")
+wandb.define_metric("train_accuracies")
+wandb.define_metric("train_accuracies_std")
+wandb.define_metric("val_accuracies")
+wandb.define_metric("val_accuracies_std")
 
-# Prepare Pre Dataset Transformers
-transformer_list = [ToDevice(DEVICE)]
-if args.model.startswith("1WL+NN"):
-    wl_tranformer = WL_Transformer(
-        use_node_attr=True,
-        max_iterations=args.k_wl,
-        check_convergence=args.wl_convergence,
-        device=DEVICE,
-    )
-    transformer_list.append(wl_tranformer)
+dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
 
-elif args.transformer == "OneHotDegree":
-    one_hot_degree_transformer = OneHotDegree(max_degree=args.tramsformer_args['max_degree'])
-    transformer_list.append(one_hot_degree_transformer)
+# Lists for logging
+test_accuracies = []
+train_accuracies = []
+val_accuracies = []
 
-elif args.transformer == "Constant_Long":
-    constant_transformer = Constant_Long(args.transformer_kwargs['value'])
-    transformer_list.append(constant_transformer)
+# Number of repitions
+for i in range(args.num_repition):
+    print(f"Repition {i+1}/{args.num_repition}:")
 
-# Load Dataset from https://chrsmrrs.github.io/datasets/docs/datasets/
-dataset = Wrapper_TUDataset(
-    root=f"Code/datasets",
-    name=f"{args.dataset}",
-    use_node_attr=False,
-    pre_transform=transformer_list,
-    pre_shuffle=True,
-)
+    # Initialize k-fold cross validation
+    kf = KFold(n_splits=args.k_fold, shuffle=True)
+    dataset.shuffle()
 
-# Add dataset information to encoding kwargs
-args.encoding_kwargs["largest_color"] = dataset.max_node_feature + 1
+    # Precalculate the Weisfeiler-Lehman coloring for the dataset.
+    if args.model.startswith("1WL+NN"):
+        dataset_rep = Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence)
+        args.encoding_kwargs["max_node_feature"] = dataset_rep.max_node_feature + 1
 
-# Log dataset information to wandb
-wandb.config['node_features_shape'] = dataset.x.shape[1:]
+    else:
+        dataset_rep = dataset
 
-# Load model
-model = create_model(
-    model_name=args.model,
-    input_dim=dataset.num_node_features,
-    output_dim=dataset.num_classes,
-    is_classification=True,
-    mlp_hidden_layer_conf=[args.mlp_layer_size] * args.mlp_num_layers,
-    gnn_layers = args.gnn_layers,
-    activation_func = args.activation_func,
-    dropout = args.dropout,
-    mlp_norm = args.mlp_norm,
-    jk = args.jk,
-    gnn_hidden_channels = args.gnn_hidden_channels,
-    encoding_kwargs=args.encoding_kwargs,
-    pool_func_kwargs=args.pool_func_kwargs).to(DEVICE)
+    # Initialize lists for logging
+    test_accuracies += [[]]
+    train_accuracies += [[]]
+    val_accuracies += [[]]
 
-# Add dataset config to model for saving
-model.dataset_config = {
-    "dataset_name" : args.dataset,
-    "k_wl" : args.k_wl,
-    "wl_convergence" : args.wl_convergence,
-    "transformer" : args.transformer,
-    "transformer_kwargs" : args.transformer_kwargs,
-    "seed" : args.seed,
-}
+    for fold, (train_index, test_index) in enumerate(kf.split(list(range(len(dataset))))):
+        print(f"\tCross-Validation Split {fold+1}/{args.k_fold}")
 
-# Load optimizer
-optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.lr)
+        # Sample 10% split from training split for validation.
+        train_index, val_index = train_test_split(train_index, test_size=0.1)
+        best_val_acc = 0.0
+        best_test = 0.0
 
-# Load loss function
-loss_func = getattr(torch.nn, args.loss_func)()
+        # Split data.
+        train_dataset = dataset_rep[train_index.tolist()]
+        val_dataset = dataset_rep[val_index.tolist()]
+        test_dataset = dataset_rep[test_index.tolist()]
 
-# Load metric functions
-metric_func = create_metrics_dict(metric_names=args.metric,
-                                   num_classes=dataset.num_classes,
-                                    IS_CLASSIFICATION=IS_CLASSIFICATION)
+        # Prepare batching.
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 
-# Print some information about the run to check if everything is correct
-print('#' * 100)
-print(f"Device: {DEVICE}")
-print(f"Model: {model}")
-print(f"Optimizer: {optimizer}")
-print(f"Loss Function: {loss_func}")
-print(f"Dataset: {dataset}")
-print(f"Dataset node features: {dataset.x if hasattr(dataset, 'x') else 'None'}")
-print(f"Dataset edge features: {dataset.edge_attr if hasattr(dataset, 'edge_attr') else 'None'}")
-print(f"Metric Functions: {metric_func}")
-print('#' * 100)
+        # Setup model.
+        model = create_model(model_name=args.model,
+                                input_dim=dataset_rep.num_node_features,
+                                output_dim=dataset_rep.num_classes,
+                                mlp_kwargs=args.mlp_kwargs,
+                                gnn_kwargs=args.gnn_kwargs,
+                                encoding_kwargs=args.encoding_kwargs).to(DEVICE)
+        model.reset_parameters()
+        
+        # Setup Optimizer
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
+                                                                factor=0.5, patience=5,
+                                                                min_lr=0.0000001)
+        for epoch in range(1, args.max_epochs + 1):
+            if epoch % LOG_INTERVAL == 0: print(f"\t\tEpoch {epoch}/{args.max_epochs}")
 
-# Use Stratified K-Fold cross validation if it is a classification task
-cross_validation = StratifiedKFold(n_splits=args.k_fold, 
-                                   shuffle=True, 
-                                   random_state=args.seed)
-splitting_indices = list( # Ugly workaround for CUDA
-    cross_validation.split(np.zeros(dataset.len()),
-                            dataset.y.clone().detach().cpu()))
+            lr = scheduler.optimizer.param_groups[0]['lr']
+            utils.train(train_loader, model, optimizer, DEVICE)
+            val_acc = utils.test(val_loader, model, DEVICE) * 100.0
+            scheduler.step(val_acc)
 
-# Initialize local variables for local logging
-mean_train_acc = torch.zeros(args.epochs)
-mean_val_acc = torch.zeros(args.epochs)
-mean_train_loss = torch.zeros(args.epochs)
-mean_val_loss = torch.zeros(args.epochs)
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                best_test_acc = utils.test(test_loader, model, DEVICE) * 100.0
+                best_train_acc = utils.test(train_loader, model, DEVICE) * 100.0
 
-metric_logs = {}
-for metric_name in metric_func.keys():
-    metric_logs[metric_name] = torch.zeros(args.epochs)
+            # Break if learning rate is smaller 10**-6.
+            if lr < 0.000001:
+                print(f"\t\tEpoch {epoch}/{args.max_epochs}")
+                break
 
-# TRAINING LOOP: Loop over the args.k_fold splits
-best_val_acc = 0
-for fold, (train_ids, test_ids) in enumerate(splitting_indices):
-    print(f"Cross-Validation Split {fold+1}/{args.k_fold}:")
-
-    # Reset the model parameters
-    model.reset_parameters()
+        test_accuracies[i].append(best_test_acc)
+        train_accuracies[i].append(best_train_acc)
+        val_accuracies[i].append(best_val_acc)
     
-    # Reset the optimizer: TODO check if this really works
-    #new_optimizer = old_optimizer.__class__(model, **old_optimizer.defaults)
+# Transform to torch.Tensor
+test_accuracies = torch.tensor(test_accuracies)
+train_accuracies = torch.tensor(train_accuracies)
+val_accuracies = torch.tensor(val_accuracies)
 
-    # Initialize the data loaders
-    train_loader = PyGDataLoader(
-        dataset[train_ids], batch_size=args.batch_size, shuffle=True
-    )
-    val_loader = PyGDataLoader(
-        dataset[test_ids], batch_size=args.batch_size, shuffle=False
-    )
+print(f"Test Accuracies: {test_accuracies.mean()} with {test_accuracies.std()} std")
+print(f"Train Accuracies: {train_accuracies.mean()} with {train_accuracies.std()} std")
+print(f"Val Accuracies: {val_accuracies.mean()} with {val_accuracies.std()} std")
 
-    # Train the model
-    for epoch in range(args.epochs):
-        start = time.time()
-
-        # Train, validate and test the model
-        train_loss, train_acc = utils.train(
-            model, train_loader, optimizer, loss_func, DEVICE
-        )
-        val_loss, val_acc, metric_results = utils.val(
-            model, val_loader, loss_func, DEVICE, metric_func
-        )
-
-        # Log the results to wandb
-        wandb.log(
-            {
-                f"val_loss: fold{fold+1}": val_loss,
-                f"val_acc: fold{fold+1}": val_acc,
-                f"train_loss: fold{fold+1}": train_loss,
-                f"train_acc: fold{fold+1}": train_acc,
-                "epoch": epoch + 1,
-            }
-        )
-
-        # Log the results locally
-        mean_train_acc[epoch] += train_acc
-        mean_val_acc[epoch] += val_acc
-        mean_train_loss[epoch] += train_loss
-        mean_val_loss[epoch] += val_loss
-
-        for metric_name, result in metric_results.items():
-            wandb.log({f"val_{metric_name}: fold{fold+1}": result, "epoch": epoch + 1})
-            metric_logs[metric_name][epoch] += result
-
-        # Print current status
-        if (epoch + 1) % LOG_INTERVAL == 0:
-            print(
-                f"\tEpoch: {epoch+1},\t Train Loss: {round(train_loss, 5)},"
-                f"\t Train Acc: {round(train_acc, 1)}%,\t Val Loss: {round(val_loss, 5)},"
-                f"\t Val Acc: {round(val_acc, 1)}%"
-            )
-    
-    # Save the best model after each fold
-    if val_acc > best_val_acc:
-        best_val_acc = val_acc
-        torch.save(model, f"Code/saved_models/{run.name}.pt")
-
-# Averaging the local logging variables
-mean_train_acc /= args.k_fold
-mean_val_acc /= args.k_fold
-mean_train_loss /= args.k_fold
-mean_val_loss /= args.k_fold
-
-for metric_name in metric_logs.keys():
-    metric_logs[metric_name] /= args.k_fold
-
-# Log the results to wandb
-for epoch in range(args.epochs):
-    wandb.log(
-        {
-            f"val_loss": mean_val_loss[epoch],
-            f"val_acc": mean_val_acc[epoch],
-            f"train_loss": mean_train_loss[epoch],
-            f"train_acc": mean_train_acc[epoch],
-            "epoch": epoch + 1,
-        }
-    )
-
-    for metric_name, metric_res in metric_logs.items():
-        wandb.log({f"val_{metric_name}": metric_res[epoch], "epoch": epoch + 1})
-
+wandb.log({'test_accuracy': test_accuracies.mean(), 'test_accuracy_std': test_accuracies.std(),
+           'train_accuracy': train_accuracies.mean(), 'train_accuracy_std': train_accuracies.std(),
+           'val_accuracy' : val_accuracies.mean(), 'val_accuracy_std': val_accuracies.std()})
 wandb.finish()
