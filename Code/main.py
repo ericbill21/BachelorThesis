@@ -20,8 +20,6 @@ import wandb
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-start_time = time.time()
-
 # Parse arguments
 parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
 parser.add_argument('--dataset', type=str, help='Dataset name.')
@@ -51,9 +49,6 @@ args.transformer_kwargs = ast.literal_eval(args.transformer_kwargs)
 # Set seed for reproducibility
 utils.seed_everything(args.seed)
 
-print(f"time elapsed after args: {time.time() - start_time} seconds")
-start_time = time.time()
-
 # Initialize wandb
 run = wandb.init(
     project="BachelorThesisExperiments",
@@ -80,15 +75,8 @@ wandb.define_metric("train_accuracies_std")
 wandb.define_metric("val_accuracies")
 wandb.define_metric("val_accuracies_std")
 
-print(f"time elapsed after wandb: {time.time() - start_time} seconds")
-start_time = time.time()
-
-
+# Load dataset from https://chrsmrrs.github.io/datasets/docs/datasets/.
 dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
-
-print(f"time elapsed after dataset: {time.time() - start_time} seconds")
-start_time = time.time()
-
 
 # Lists for logging
 test_accuracies = []
@@ -107,10 +95,6 @@ for i in range(args.num_repition):
     if args.model.startswith("1WL+NN"):
         dataset_rep = Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE)
         args.encoding_kwargs["max_node_feature"] = dataset_rep.max_node_feature + 1
-
-        print(f"time elapsed after wl: {time.time() - start_time} seconds")
-        start_time = time.time()
-
 
     else:
         dataset_rep = dataset
