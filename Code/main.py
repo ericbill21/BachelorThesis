@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch_geometric
 import utils
+from metrics import create_metrics_dict
 from models import create_model
 from sklearn.model_selection import KFold, train_test_split
 from torch_geometric.datasets import TUDataset
@@ -73,6 +74,8 @@ wandb.define_metric("train_accuracies")
 wandb.define_metric("train_accuracies_std")
 wandb.define_metric("val_accuracies")
 wandb.define_metric("val_accuracies_std")
+wandb.define_metric("num_epochs")
+wandb.define_metric("num_epochs_std")
 
 # Load dataset from https://chrsmrrs.github.io/datasets/docs/datasets/.
 dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
@@ -81,6 +84,7 @@ dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=Fals
 test_accuracies = []
 train_accuracies = []
 val_accuracies = []
+num_epochs = []
 
 # Number of repitions
 for i in range(args.num_repition):
@@ -156,17 +160,21 @@ for i in range(args.num_repition):
         test_accuracies[i].append(best_test_acc)
         train_accuracies[i].append(best_train_acc)
         val_accuracies[i].append(best_val_acc)
+        num_epochs.append(epoch)
     
 # Transform to torch.Tensor
 test_accuracies = torch.tensor(test_accuracies)
 train_accuracies = torch.tensor(train_accuracies)
 val_accuracies = torch.tensor(val_accuracies)
+num_epochs = torch.tensor(num_epochs)
 
 print(f"Test Accuracies: {test_accuracies.mean()} with {test_accuracies.std()} std")
 print(f"Train Accuracies: {train_accuracies.mean()} with {train_accuracies.std()} std")
 print(f"Val Accuracies: {val_accuracies.mean()} with {val_accuracies.std()} std")
+print(f"Number of epochs on average: {num_epochs.mean()} with {num_epochs.std()} std")
 
 wandb.log({'test_accuracy': test_accuracies.mean(), 'test_accuracy_std': test_accuracies.std(),
            'train_accuracy': train_accuracies.mean(), 'train_accuracy_std': train_accuracies.std(),
-           'val_accuracy' : val_accuracies.mean(), 'val_accuracy_std': val_accuracies.std()})
+           'val_accuracy' : val_accuracies.mean(), 'val_accuracy_std': val_accuracies.std(),
+           'num_epochs': num_epochs.mean(), 'num_epochs_std': num_epochs.std()})
 wandb.finish()

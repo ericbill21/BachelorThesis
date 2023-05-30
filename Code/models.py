@@ -25,15 +25,7 @@ class generic_wlnn(torch.nn.Module):
 
         x = self.embedding(x).squeeze()
         x = self.pool(x, batch)
-
-        # Weird hack for the case where the batch is only one graph, we have to disable the batchnorm
-        if self.mlp.norms is not None and batch.min() == batch.max():
-            self.eval()
-            x = self.mlp(x)
-            self.train()
-        else:
-            x = self.mlp(x)
-
+        x = self.mlp(x)
         x = self.softmax(x)
         return x
 

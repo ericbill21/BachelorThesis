@@ -17,18 +17,21 @@ parameters:
     max: 0.1
   k_fold:
     value: 10
+  num_repition:
+    value: 5
   tags:
-    value: "sweep_wlnn:set2set"
+    value: "sweep_wlnn:basic_pool"
   wl_convergence:
-    values: "False"
+    value: False
   k_wl:
     value: 1
   mlp_kwargs:
     parameters:
       num_layers:
-        values: [2,3,4,5]
+        values: [2,3,4,5,6]
       dropout:
-        values: []
+        min: 0.0
+        max: 0.2
       act:
         value: "relu"
       norm:

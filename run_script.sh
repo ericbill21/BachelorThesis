@@ -39,4 +39,4 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-python Code/main.py --dataset PROTEINS --max_epochs 200 --batch_size 32 --lr 0.02 --k_fold 5 --k_wl 3 --model 1WL+NN:Embedding-Sum --wl_convergence True --encoding_kwargs "{'embedding_dim' : 64}" --mlp_kwargs "{'num_layers' : 6, 'dropout' : 0.1, 'act' : 'relu', 'norm' : 'batch_norm', 'hidden_channels' : 64}" --num_repition 5
+python -m wandb agent eric-bill/BachelorThesisExperiments/voqi1dol
