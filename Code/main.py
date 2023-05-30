@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch_geometric
 import utils
-from metrics import create_metrics_dict
 from models import create_model
 from sklearn.model_selection import KFold, train_test_split
 from torch_geometric.datasets import TUDataset
