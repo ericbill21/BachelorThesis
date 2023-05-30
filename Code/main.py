@@ -165,7 +165,7 @@ for i in range(args.num_repition):
 test_accuracies = torch.tensor(test_accuracies)
 train_accuracies = torch.tensor(train_accuracies)
 val_accuracies = torch.tensor(val_accuracies)
-num_epochs = torch.tensor(num_epochs)
+num_epochs = torch.tensor(num_epochs, dtype=torch.float32)
 
 print(f"Test Accuracies: {test_accuracies.mean()} with {test_accuracies.std()} std")
 print(f"Train Accuracies: {train_accuracies.mean()} with {train_accuracies.std()} std")
