@@ -39,4 +39,4 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-python -m wandb agent eric-bill/BachelorThesisExperiments/voqi1dol
+python -m wandb agent eric-bill/BachelorThesisExperiments/mv7ywqme

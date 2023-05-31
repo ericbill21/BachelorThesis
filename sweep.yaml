@@ -4,8 +4,10 @@ metric:
   name: test_accuracy
   goal: maximize
 parameters:
+  seed:
+    value: 42
   model:
-    values: ["1WL+NN:Embedding-Sum", "1WL+NN:Embedding-Max", "1WL+NN:Embedding-Mean"]
+    values: ["GIN:Sum", "GIN:Max", "GIN:Mean", "GCN:Sum", "GCN:Max", "GCN:Mean", "GAT:Sum", "GAT:Max", "GAT:Mean"]
   dataset:
     value: "PROTEINS"
   max_epochs:
@@ -20,7 +22,7 @@ parameters:
   num_repition:
     value: 5
   tags:
-    value: "sweep_wlnn:basic_pool"
+    value: "sweep_gnn:basic_pool"
   wl_convergence:
     value: False
   k_wl:
@@ -38,9 +40,23 @@ parameters:
         value: "batch_norm"
       num_layers:
         values: [2,3,4,5]
-  encoding_kwargs:
+  gnn_kwargs:
     parameters:
-      embedding_dim:
+      hidden_channels:
         values: [16, 32, 64, 128]
+      num_layers:
+        value: 5
+      act:
+        value: "relu"
+      jk:
+        value: "cat"
+      act_first:
+        value: False
+      norm:
+        value: null
+      dropout:
+        min: 0.0
+        max: 0.2
+
   
       

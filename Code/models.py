@@ -3,7 +3,7 @@ import math
 
 import torch
 import torch_geometric
-from torch_geometric.nn.models import GIN, MLP
+from torch_geometric.nn.models import GAT, GIN, MLP
 
 
 class generic_wlnn(torch.nn.Module):
@@ -115,21 +115,16 @@ def create_model(model_name: str,
                              pool_func=pool_func)
     
     # Check if the model is a GIN model
-    elif model_name.startswith("GIN"):
-        # Construct the GIN
-        gin = GIN(in_channels=input_dim, **gnn_kwargs)
-
-        # Remove the last linear layer that would otherwise remove all jk information
-        if 'jk' in gnn_kwargs:
-            if gnn_kwargs['jk'] == "cat":
-                delattr(gin, "lin")
-                mlp_input_channels = gin.out_channels * gin.num_layers
-
-            elif gnn_kwargs['jk'] == "last" or gnn_kwargs['jk'] == "max":
-                mlp_input_channels = gin.out_channels
-
-        else:
-            mlp_input_channels = gin.out_channels
+    elif model_name.startswith("GIN") or model_name.startswith("GAT") or model_name.startswith("GCN"):
+        # Construct the GNN
+        if model_name.startswith("GIN"):
+            gnn = GIN(in_channels=input_dim, **gnn_kwargs)
+        elif model_name.startswith("GAT"):
+            gnn = GAT(in_channels=input_dim, **gnn_kwargs)
+        elif model_name.startswith("GCN"):
+            gnn = torch_geometric.nn.GCN(in_channels=input_dim, **gnn_kwargs)
+        
+        mlp_input_channels = gnn.out_channels
 
         # Retrieve the correct pooling function
         if model_name == "GIN:Max":
@@ -150,9 +145,8 @@ def create_model(model_name: str,
         mlp = MLP(in_channels=mlp_input_channels, out_channels=output_dim, **mlp_kwargs)
 
         # Construct the model
-        model = generic_gnn(gnn=gin,
+        model = generic_gnn(gnn=gnn,
                             mlp=mlp,
                             pool_func=pool_func)
     
-
     return model
