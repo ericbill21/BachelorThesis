@@ -166,7 +166,7 @@ def check_wl_convergence(old_coloring, new_coloring):
     return True
 
 class Wrapper_WL_TUDataset(InMemoryDataset):
-    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool, DEVICE: str):
+    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool, DEVICE: torch.device = torch.device("cpu")):
         super().__init__(root=None, transform=None, pre_transform=None, pre_filter=None, log=None)
 
         # First we copy the given Dataset with respect to the current ordering

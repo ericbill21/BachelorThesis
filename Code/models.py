@@ -103,6 +103,8 @@ def create_model(model_name: str,
 
             pool_func = torch_geometric.nn.aggr.Set2Set(in_channels=mlp_input_channels, **encoding_kwargs)
             mlp_input_channels = pool_func.out_channels
+        else:
+            raise ValueError(f"Invalid pooling function: {model_name}")
 
         # Construct the MLP
         if "hidden_channels" not in mlp_kwargs:
@@ -127,17 +129,19 @@ def create_model(model_name: str,
         mlp_input_channels = gnn.out_channels
 
         # Retrieve the correct pooling function
-        if model_name == "GIN:Max":
+        if "Max" in model_name:
             pool_func = torch_geometric.nn.pool.global_max_pool
-        elif model_name == "GIN:Mean":
+        elif "Mean" in model_name:
             pool_func = torch_geometric.nn.pool.global_mean_pool
-        elif model_name == "GIN:Sum":
+        elif "Sum" in model_name:
             pool_func = torch_geometric.nn.pool.global_add_pool
-        elif model_name == "GIN:Set2Set":
+        elif "Set2Set" in model_name:
             assert encoding_kwargs["processing_steps"] > 0, "Key 'processing_steps' must be defined in encoding_kwargs as a postive integer greater zero."
 
             pool_func = torch_geometric.nn.aggr.Set2Set(in_channels=mlp_input_channels, **encoding_kwargs)
             mlp_input_channels = pool_func.out_channels
+        else:
+            raise ValueError(f"Invalid pooling function: {model_name}")
 
         # Construct the MLP: 
         if "hidden_channels" not in mlp_kwargs:

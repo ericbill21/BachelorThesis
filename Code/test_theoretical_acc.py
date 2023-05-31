@@ -1,18 +1,18 @@
 import torch
 from sklearn.decomposition import PCA
 from torch_geometric.datasets import TUDataset
-from utils import WL_Transformer, Wrapper_TUDataset, seed_everything
+from utils import WL_Transformer, Wrapper_WL_TUDataset, seed_everything
 
 import wandb
 
-WL_CONVERGENCE = [True, False]
-WL_MAX_ITERATIONS = [-1,1,2,3,4,5,6,7,8]
+WL_CONVERGENCE = [False]
+WL_MAX_ITERATIONS = [0,1,2,3,4,5,6,7,8]
 SEED = 42
 DATASET_NAME = "PROTEINS"
 MODEL_NAME = "1WL+NN"
 
 run = wandb.init(
-    project="BachelorThesis",
+    project="BachelorThesisExperiments",
     name=f"Accurary {DATASET_NAME}",
     tags=["1WL+NN Theoretical Accuracy"],
     config={
@@ -23,6 +23,8 @@ run = wandb.init(
     },
 )
 
+global_dataset = TUDataset(root=f"Code/datasets", name=DATASET_NAME, use_node_attr=False)
+
 # We loop over all combinations of convergence and max_iterations
 data_dict = {}
 for convergence in WL_CONVERGENCE:
@@ -32,37 +34,54 @@ for convergence in WL_CONVERGENCE:
         
         seed_everything(SEED)
 
-        # Load dataset
-        transformer = WL_Transformer(
-            use_node_attr=True,
-            max_iterations=k_wl,
-            check_convergence=convergence,
-        )
-        wl_conv = transformer.wl_conv
+        dataset = Wrapper_WL_TUDataset(global_dataset, k_wl=k_wl, wl_convergence=convergence)
 
-        dataset = Wrapper_TUDataset(root=f'Code/datasets', name=DATASET_NAME, use_node_attr=False, pre_shuffle=True, pre_transform=[transformer], reprocess=True)
-
-        # Count unique representations
-        all_color_histograms = [wl_conv.histogram(dataset.get(i).x.squeeze()).squeeze() for i in range(dataset.len())]
-        histogram_tensor = torch.stack(all_color_histograms, dim=0)
-        unique_values = torch.unique(histogram_tensor, dim=0, sorted=False).shape[0]
+        class_indices = {i : [] for i in range(dataset.num_classes)}
+        for i in range(dataset.len()):
+            class_indices[dataset[i].y.item()].append(i)
         
-        # Save data and print
-        data_dict[convergence][k_wl] = unique_values
-        print(f"Convergence: {convergence}, k_wl: {k_wl}, unique_values: {unique_values}, percentage: {(unique_values / dataset.len()) * 100}")
+        # Count unique representations
+        class_unique_values = {}
+        class_total_values = {}
+        class_all_histo = {}
+        for i in range(dataset.num_classes):
+            # Convert every graph to a color histogram
+            if k_wl == 0:
+                data_list = [data.x.argmax(dim=-1) for data in dataset[class_indices[i]]]
+                max_value = max([data_list[i].max().item() for i in range(len(data_list))])
+                all_color_histograms = [torch.tensor([(data_list[i] == j).count_nonzero().item() for j in range(max_value+1)]) for i in range(len(data_list))]
+            else:
+                all_color_histograms = [dataset.wl_conv.histogram(data.x) for data in dataset[class_indices[i]]]
+            class_total_values[i] = len(all_color_histograms)
+            class_all_histo[i] = all_color_histograms
+
+            # Count unique color histograms
+            histogram_tensor = torch.stack(all_color_histograms, dim=0).squeeze()
+            class_unique_values[i] = torch.unique(histogram_tensor, dim=0, sorted=False).shape[0]
+        
+        # Calc the number of total intersections
+        count_intersections = 0
+        for i in range(dataset.num_classes):
+            for j in range(i+1, dataset.num_classes):
+                for histo_i in class_all_histo[i]:
+                    for histo_j in class_all_histo[j]:
+                        if (histo_i == histo_j).all():
+                            count_intersections += 1
+
+        summary = {f"class_{i}" : {
+                        "unique_values" : class_unique_values[i],
+                        "total_values" : class_total_values[i],
+                        "max_accuracy" : class_unique_values[i] / class_total_values[i]
+                        } for i in range(dataset.num_classes)} | {
+                    "total_unique_values" : dataset.len() - count_intersections,
+                    "total_values" : dataset.len(),
+                    "max_accuracy" : (dataset.len() - count_intersections) / dataset.len()}
+        print(f"Convergence: {convergence}, k_wl: {k_wl}: max_accuracy: {summary['max_accuracy']}")
+
+        wandb.log({f"summary_{convergence}_{k_wl}" : summary})
+        data_dict[convergence][k_wl] = summary
+    
 
 
-# Log data to wandb
-data_total = [[convergence] + [data_dict[convergence][k_wl] for k_wl in WL_MAX_ITERATIONS] for convergence in WL_CONVERGENCE]
-data_percentage = [[convergence] + [round((data_dict[convergence][k_wl] / dataset.len()) * 100, 2) for k_wl in WL_MAX_ITERATIONS] for convergence in WL_CONVERGENCE]
-
-data = []
-for i in range(dataset.num_classes):
-    data.append(data_percentage[i])
-    data.append(data_total[i])
-
-table = wandb.Table(columns=['Use WL Convergence'] + [str(i) for i in WL_MAX_ITERATIONS],
-            data=data)
-wandb.log({"table_key" : table})
 
 
