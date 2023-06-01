@@ -5,13 +5,15 @@ import time
 import numpy as np
 import torch
 import torch_geometric
+import torch_geometric.transforms as T
 import utils
 from models import create_model
 from sklearn.model_selection import KFold, train_test_split
 from torch_geometric.datasets import TUDataset
 from torch_geometric.loader import DataLoader
 from torch_geometric.transforms import OneHotDegree, ToDevice
-from utils import Constant_Long, WL_Transformer, Wrapper_WL_TUDataset
+from torch_geometric.utils import degree
+from utils import Constant_Long, NormalizedDegree, WL_Transformer, Wrapper_WL_TUDataset
 
 import wandb
 
@@ -79,6 +81,26 @@ wandb.define_metric("num_epochs_std")
 # Load dataset from https://chrsmrrs.github.io/datasets/docs/datasets/.
 dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
 
+# In the case where no node features are available, we use one-hot degree for GNNs and the constant function for 1WL+NN.
+# The following if clause is inspired from  https://github.com/rusty1s/pytorch_geometric/blob/master/benchmark/kernel/datasets.py.
+if dataset.data.x is None:
+    if args.model.startswith("1WL+NN"):
+        dataset.transform = Constant_Long(0, dtype=torch.long)
+
+    else:
+        max_degree = 0
+        degs = []
+        for data in dataset:
+            degs += [degree(data.edge_index[0], dtype=torch.long)]
+            max_degree = max(max_degree, degs[-1].max().item())
+
+        if max_degree < 1000:
+            dataset.transform = T.OneHotDegree(max_degree)
+        else:
+            deg = torch.cat(degs, dim=0).to(torch.float)
+            mean, std = deg.mean().item(), deg.std().item()
+            dataset.transform = NormalizedDegree(mean, std)
+
 # Lists for logging
 test_accuracies = []
 train_accuracies = []
@@ -118,7 +140,7 @@ for i in range(args.num_repition):
         train_dataset = dataset_rep[train_index.tolist()]
         val_dataset = dataset_rep[val_index.tolist()]
         test_dataset = dataset_rep[test_index.tolist()]
-
+        
         # Prepare batching.
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True)

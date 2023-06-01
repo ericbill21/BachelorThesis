@@ -1,62 +1,56 @@
-program: Code/main.py
 method: random
 metric:
-  name: test_accuracy
   goal: maximize
+  name: test_accuracy
 parameters:
   seed:
     value: 42
-  model:
-    values: ["GIN:Sum", "GIN:Max", "GIN:Mean", "GCN:Sum", "GCN:Max", "GCN:Mean", "GAT:Sum", "GAT:Max", "GAT:Mean"]
-  dataset:
-    value: "PROTEINS"
-  max_epochs:
-    value: 200
   batch_size:
-    value: 32
-  lr:
-    min: 0.0001
-    max: 0.1
+    value: 33
+  dataset:
+    value: NCI1
+  encoding_kwargs:
+    parameters:
+      embedding_dim:
+        values:
+          - 16
+          - 32
+          - 64
+          - 128
   k_fold:
     value: 10
+  k_wl:
+    values: [1,2,3]
+  lr:
+    distribution: uniform
+    max: 0.1
+    min: 0.0001
+  max_epochs:
+    value: 200
+  mlp_kwargs:
+    parameters:
+      act:
+        value: relu
+      dropout:
+        max: 0.2
+        min: 0
+      norm:
+        value: batch_norm
+      num_layers:
+        values:
+          - 2
+          - 3
+          - 4
+          - 5
+  model:
+    values:
+      - 1WL+NN:Embedding-Sum
+      - 1WL+NN:Embedding-Max
+      - 1WL+NN:Embedding-Mean
   num_repition:
     value: 5
   tags:
-    value: "sweep_gnn:basic_pool"
+    value: sweep_wlnn:basic_pool
   wl_convergence:
-    value: False
-  k_wl:
-    value: 1
-  mlp_kwargs:
-    parameters:
-      num_layers:
-        values: [2,3,4,5,6]
-      dropout:
-        min: 0.0
-        max: 0.2
-      act:
-        value: "relu"
-      norm:
-        value: "batch_norm"
-      num_layers:
-        values: [2,3,4,5]
-  gnn_kwargs:
-    parameters:
-      hidden_channels:
-        values: [16, 32, 64, 128]
-      num_layers:
-        value: 5
-      act:
-        value: "relu"
-      jk:
-        value: "cat"
-      act_first:
-        value: False
-      norm:
-        value: null
-      dropout:
-        min: 0.0
-        max: 0.2
-
-  
-      
+    value: false
+program: Code/main.py

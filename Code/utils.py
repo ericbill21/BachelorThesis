@@ -16,6 +16,7 @@ from torch_geometric.io import read_tu_data
 from torch_geometric.nn.conv import wl_conv
 from torch_geometric.nn.conv.wl_conv import WLConv
 from torch_geometric.transforms import BaseTransform, Compose
+from torch_geometric.utils import degree
 
 
 def seed_everything(seed: int):
@@ -165,6 +166,17 @@ def check_wl_convergence(old_coloring, new_coloring):
         
     return True
 
+class NormalizedDegree(object):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, data):
+        deg = degree(data.edge_index[0], dtype=torch.float)
+        deg = (deg - self.mean) / self.std
+        data.x = deg.view(-1, 1)
+        return data
+
 class Wrapper_WL_TUDataset(InMemoryDataset):
     def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool, DEVICE: torch.device = torch.device("cpu")):
         super().__init__(root=None, transform=None, pre_transform=None, pre_filter=None, log=None)
@@ -178,7 +190,7 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
         self.wl_conv = WLConv().to(DEVICE)
         for data in data_list:
             for _ in range(k_wl):
-                data.x = self.wl_conv(data.x, data.edge_index)
+                data.x = self.wl_conv(data.x.squeeze(), data.edge_index)
 
         self.data, self.slices = self.collate(data_list)
 
