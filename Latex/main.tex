@@ -69,6 +69,8 @@
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 \usepackage{blindtext}
+\usepackage{eso-pic}
+
 
 \usepackage{todonotes}
 
@@ -201,11 +203,22 @@ pdfcreator={pdflatex}
 \begin{document}
 
 \maketitle
+
+\input{acknowledgement.tex}
+\input{abstract.tex}
+
 \tableofcontents
 \newpage
+
 \input{intro.tex}
 \input{related_work.tex}
+
+\part{Theoretical Equivalence}\label{part1}
+
 \input{part1.tex}
+
+\part{Empirical Testing}\label{part2}
+
 \input{part2.tex}
 
 \setcitestyle{numbers}

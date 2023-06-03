@@ -1,26 +1,38 @@
 method: random
+name: ENZYMES_GNN_BASIC_POOL
 metric:
   goal: maximize
   name: test_accuracy
 parameters:
-  seed:
-    value: 42
   batch_size:
-    value: 33
+    value: 32
   dataset:
-    value: NCI1
-  encoding_kwargs:
+    value: ENZYMES
+  gnn_kwargs:
     parameters:
-      embedding_dim:
+      act:
+        value: relu
+      act_first:
+        value: false
+      dropout:
+        max: 0.2
+        min: 0
+      hidden_channels:
         values:
           - 16
           - 32
           - 64
           - 128
+      jk:
+        value: cat
+      norm:
+        value: null
+      num_layers:
+        value: 5
   k_fold:
     value: 10
   k_wl:
-    values: [1,2,3]
+    value: 1
   lr:
     distribution: uniform
     max: 0.1
@@ -44,13 +56,21 @@ parameters:
           - 5
   model:
     values:
-      - 1WL+NN:Embedding-Sum
-      - 1WL+NN:Embedding-Max
-      - 1WL+NN:Embedding-Mean
+      - GIN:Sum
+      - GIN:Max
+      - GIN:Mean
+      - GCN:Sum
+      - GCN:Max
+      - GCN:Mean
+      - GAT:Sum
+      - GAT:Max
+      - GAT:Mean
   num_repition:
     value: 5
+  seed:
+    value: 42
   tags:
-    value: sweep_wlnn:basic_pool
+    value: sweep_gnn:basic_pool
   wl_convergence:
     value: false
 program: Code/main.py

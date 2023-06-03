@@ -1,4 +1,4 @@
-\section{Preliminaries}
+\section{Preliminaries}\label{sec:pre_lim}
 First, we introduce a couple of notions and definitions that will be used throughout this thesis. In particular, the definitions will play a crucial role in the theoretical part that follows. We start with some general notations, introduce a general graph definition, and familiarize the reader with the Weisfeiler-Leman algorithm. We will then introduce each framework independently, first the $\wlnn$ and then GNN. At the end, we will briefly introduce important properties of collections of functions computed by both methods.
 
 \subsection{General Notation}
@@ -165,7 +165,7 @@ The $\wliso$ relation can further be classified as an equivalence relation, as i
     Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty \coloneqq \sup_{G \in \mathcal{X}} |\cA(G) - h_{\cA,\epsilon}(G)| < \epsilon$
 \end{definition}
 
-\section{Theoretical Connection}
+\section{Theoretical Connection}\label{sec:theo_connections}
 This section is the main part of our theoretical investigation of the two frameworks. We will present 4 intriguing theorems, which will be proven separately afterwards. These results will form the basis for the empirical part that follows. The first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. The last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.
 
 All the results we will now present focus on graph task functions, since this is the more complex problem, as any node or edge task function can be adapted to a graph task. In the first two theorems, we focus on a finite collection of graphs, which we denote by $\cX \subset \cG$.
