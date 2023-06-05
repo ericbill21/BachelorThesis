@@ -79,27 +79,27 @@ wandb.define_metric("num_epochs")
 wandb.define_metric("num_epochs_std")
 
 # Load dataset from https://chrsmrrs.github.io/datasets/docs/datasets/.
-dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
+dataset_original = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
 
 # In the case where no node features are available, we use one-hot degree for GNNs and the constant function for 1WL+NN.
 # The following if clause is inspired from  https://github.com/rusty1s/pytorch_geometric/blob/master/benchmark/kernel/datasets.py.
-if dataset.data.x is None:
+if dataset_original.data.x is None:
     if args.model.startswith("1WL+NN"):
-        dataset.transform = Constant_Long(0, dtype=torch.long)
+        dataset_original.transform = Constant_Long(0, dtype=torch.long)
 
     else:
         max_degree = 0
         degs = []
-        for data in dataset:
+        for data in dataset_original:
             degs += [degree(data.edge_index[0], dtype=torch.long)]
             max_degree = max(max_degree, degs[-1].max().item())
 
         if max_degree < 1000:
-            dataset.transform = T.OneHotDegree(max_degree)
+            dataset_original.transform = T.OneHotDegree(max_degree)
         else:
             deg = torch.cat(degs, dim=0).to(torch.float)
             mean, std = deg.mean().item(), deg.std().item()
-            dataset.transform = NormalizedDegree(mean, std)
+            dataset_original.transform = NormalizedDegree(mean, std)
 
 # Lists for logging
 test_accuracies = []
@@ -113,22 +113,24 @@ for i in range(args.num_repition):
 
     # Initialize k-fold cross validation
     kf = KFold(n_splits=args.k_fold, shuffle=True)
-    dataset.shuffle()
+    dataset_original.shuffle()
 
     # Precalculate the Weisfeiler-Lehman coloring for the dataset.
     if args.model.startswith("1WL+NN"):
-        dataset_rep = Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE)
-        args.encoding_kwargs["max_node_feature"] = dataset_rep.max_node_feature + 1
+        dataset_current = Wrapper_WL_TUDataset(dataset_original, args.k_wl, args.wl_convergence, DEVICE)
+        args.encoding_kwargs["max_node_feature"] = dataset_current.max_node_feature + 1
 
     else:
-        dataset_rep = dataset
+        dataset_current = dataset_original
+
+    print(dataset_current[0].x)
 
     # Initialize lists for logging
     test_accuracies += [[]]
     train_accuracies += [[]]
     val_accuracies += [[]]
 
-    for fold, (train_index, test_index) in enumerate(kf.split(list(range(len(dataset))))):
+    for fold, (train_index, test_index) in enumerate(kf.split(list(range(len(dataset_current))))):
         print(f"\tCross-Validation Split {fold+1}/{args.k_fold}")
 
         # Sample 10% split from training split for validation.
@@ -137,9 +139,9 @@ for i in range(args.num_repition):
         best_test = 0.0
 
         # Split data.
-        train_dataset = dataset_rep[train_index.tolist()]
-        val_dataset = dataset_rep[val_index.tolist()]
-        test_dataset = dataset_rep[test_index.tolist()]
+        train_dataset = dataset_current[train_index.tolist()]
+        val_dataset = dataset_current[val_index.tolist()]
+        test_dataset = dataset_current[test_index.tolist()]
         
         # Prepare batching.
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
@@ -148,8 +150,8 @@ for i in range(args.num_repition):
 
         # Setup model.
         model = create_model(model_name=args.model,
-                                input_dim=dataset_rep.num_node_features,
-                                output_dim=dataset_rep.num_classes,
+                                input_dim=dataset_current.num_node_features,
+                                output_dim=dataset_current.num_classes,
                                 mlp_kwargs=args.mlp_kwargs,
                                 gnn_kwargs=args.gnn_kwargs,
                                 encoding_kwargs=args.encoding_kwargs).to(DEVICE)

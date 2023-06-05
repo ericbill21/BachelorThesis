@@ -1,13 +1,13 @@
 method: random
-name: ENZYMES_GNN_BASIC_POOL
 metric:
   goal: maximize
   name: test_accuracy
+name: NCI1_GNN_BASIC_POOL
 parameters:
   batch_size:
-    value: 32
+    value: 33
   dataset:
-    value: ENZYMES
+    value: NCI1
   gnn_kwargs:
     parameters:
       act:
@@ -31,8 +31,6 @@ parameters:
         value: 5
   k_fold:
     value: 10
-  k_wl:
-    value: 1
   lr:
     distribution: uniform
     max: 0.1
