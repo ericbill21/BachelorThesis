@@ -28,7 +28,7 @@ def seed_everything(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# One training epoch for GNN model.
+# One training epoch for GNN model for a classification task.
 def train(train_loader, model, optimizer, device):
     model.train()
 
@@ -52,6 +52,44 @@ def test(loader, model, device):
         pred = output.max(dim=1)[1]
         correct += pred.eq(data.y).sum().item()
     return correct / len(loader.dataset)
+
+# One training epoch for GNN model for a regression task.
+def train_regression(train_loader, model, optimizer, device):
+    model.train()
+
+    for data in train_loader:
+        data = data.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = F.mse_loss(output.squeeze(), data.y, reduction="mean")
+        loss.backward()
+        optimizer.step()
+
+# Get loss of GNN model.
+def test_regression(loader, model, device):
+    model.eval()
+
+    loss = 0.0
+    for data in loader:
+        data = data.to(device)
+        output = model(data)
+        loss += F.mse_loss(output.squeeze(), data.y, reduction="sum")
+
+    return loss / len(loader.dataset)
+
+def calc_shannon_diversity(dataset):
+    # Shannon diversity index for assessing class imbalance of a dataset.
+    n = dataset.len()
+    k = dataset.num_classes
+
+    n, k = torch.tensor(n), torch.tensor(k)
+    H = torch.tensor(0.0)
+    for i in range(k):
+        c_i = torch.count_nonzero(dataset._data.y == i)
+        H -= (c_i / n) * torch.log2(c_i / n)
+
+    unbalance = H / torch.log2(k)
+    return unbalance.round(decimals=3).item()
 
 
 @functional_transform('constant_long')

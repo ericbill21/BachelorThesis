@@ -85,7 +85,7 @@ dataset_original = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_
 # The following if clause is inspired from  https://github.com/rusty1s/pytorch_geometric/blob/master/benchmark/kernel/datasets.py.
 if dataset_original.data.x is None:
     if args.model.startswith("1WL+NN"):
-        dataset_original.transform = Constant_Long(0, dtype=torch.long)
+        dataset_original.transform = Constant_Long(0)
 
     else:
         max_degree = 0
@@ -136,7 +136,6 @@ for i in range(args.num_repition):
         # Sample 10% split from training split for validation.
         train_index, val_index = train_test_split(train_index, test_size=0.1)
         best_val_acc = 0.0
-        best_test = 0.0
 
         # Split data.
         train_dataset = dataset_current[train_index.tolist()]

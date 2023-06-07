@@ -1,3 +1,47 @@
-\section{Empirical Investigation}
-Yet to come!
-\newpage
+Give a short Outline
+
+\section{Setup}
+Introduction to this section!
+
+\subsection{Choice of Datasets}
+Luis' Taxonomy, verschiedene Bereiche -> TUDataset
+
+\subsection{Choice of Models}
+GIN weil sehr expressive \cite{Xu2018}, GAT und GCN wegen \cite{Nikolentzos2023} mit basic pool um complexity der models zu containen und bessere vergleiche zu haben
+
+$\wlnn$ auch nur mit basic pool
+
+\subsection{Experimental Setup}
+python 3.10, pytorch und pytorch-geometric (use footnotes from outline). Use of Wheights and Biases as data logging instance, HPC, Colab und meine eigene Hardware - > summierte overall computation time. Standard procedure, training with 10-fold and repition and a split of training, validation and test dataset.
+
+\section{Results}
+Introduction to this section!
+
+\subsection{Explain how results look like}
+Shortly explain, their performance and how they typically learn. Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
+
+\subsubsection{1-WL+NN}
+Explain most important parameters such as k-wl mit der wl accuracy on. Show how it relates to the datasets by showing the table of theoretical accuracies, 
+Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
+
+\subsubsection{GNN}
+Show performance of different GNN models -> Boxplot of different pooling functions
+Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
+
+\subsection{Test Accuracy}
+Show a big table with all test-accuracies and its standard deviaton and highlight in bold face, the best one.
+Asses the std of both model types.
+
+\subsection{Overfitting Behaviour}
+Compare the difference between training data performance vs test accuracy accross both models
+
+\subsection{Aggregate Analysis}
+Explain what aggregates are and show tSNE with the of the best models with SVM
+
+Also use KNN to assess how good the actuall aggregates are differentiable. -> local clusters ?
+
+\section{Discusssion}
+\subsection{Learned Lessons}
+\subsection{Future Work}
+
+\section{Conclusion}

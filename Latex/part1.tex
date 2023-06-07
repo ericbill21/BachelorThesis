@@ -1,8 +1,8 @@
 \section{Preliminaries}\label{sec:pre_lim}
-First, we introduce a couple of notions and definitions that will be used throughout this thesis. In particular, the definitions will play a crucial role in the theoretical part that follows. We start with some general notations, introduce a general graph definition, and familiarize the reader with the Weisfeiler-Leman algorithm. We will then introduce each framework independently, first the $\wlnn$ and then GNN. At the end, we will briefly introduce important properties of collections of functions computed by both methods.
+First, we introduce a couple of notions and definitions that will be used throughout this thesis. In particular, the definitions will be crucial in the following section containing the proofs. We start with general notations, introduce a general graph definition, and familiarize the reader with the Weisfeiler-Leman algorithm. We will introduce each framework independently, first the $\wlnn$ and then GNN. In the end, we will briefly introduce important properties of collections of functions computed by both methods.
 
 \subsection{General Notation}
-We first introduce a couple of notations and definitions that will be used throughout the thesis. With $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for any $n \in \mathbb{N}$ and with $\MSopen \ldots \MSclose$ we denote a multiset which is formally defined as a 2 tuple $(X, m)$ with $X$ being a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps every element in $X$ to its number of occurrences in the multiset.
+Let $\Nb$ denote the set of natural numbers such that $\Nb := \{0, 1,2, \ldots \}$. By $[n]$, we denote the set $\{1, \ldots, n\} \subset \mathbb{N}$ for each $n \in \mathbb{N}$. Further, with $\MSopen \ldots \MSclose$ we denote a multiset formally defined as a 2-tuple $(X, m)$, where $X$ is a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps each element in $X$ to the number of its occurrences in the multiset.
 
 \subsection{Graphs}
 A graph $G$ is a 3-tuple $G\coloneqq (V, E, l)$ that consists of the set of all nodes $V$, the set of all edges $E \subseteq V \times V$ and a label function $l: M \rightarrow \Sigma$ with $M$ being either $V, V \cup E$ or $E$ and $\Sigma \subset \mathbb{N}$ a finite alphabet. Moreover, let $\mathcal{G}$ be the set of all finite graphs. Note that our definition of the labeling function allows graphs with labels either on the nodes only, on the edges only, or on both the nodes and the edges. In some cases we refer to the values assigned by $l$ as features instead of labels, however this is usually only the case when $\Sigma$ is multidimensional. In addition, although we have defined it this way, the labeling function is optional, and in cases where no labeling function is given, we add the trivial labeling function $f_1: V(G) \rightarrow \{1\}$.
@@ -136,13 +136,22 @@ To demonstrate what kind of functions are typically used, we provide functions u
 \end{align*}
 where $\text{ReLU}$ is a rectified linear unit element wise activation function, $\textsf{MAX}$ the element-wise $\max$ operator; $W_{\text{merge}}$, $W_{\text{pool}}$ are trainable matrices, $b$ a trainable vector and \textsf{concat} the concatenation function.
 
+\begin{table}[h]
+    \centering
+    \begin{tabularx}{0.45\textwidth}{c|c}
+        \textbf{Model} & \textbf{Update Equation}\\
+        \hline
+        GCN & $h_v^{(k)} = \text{ReLU}\biggl( \sum_{u \in \cN(v) \cup \{v\}} \frac{W^{k} h_u^{(k-1)}}{\sqrt{(1 + d(v))(1 + d(u))}}\biggr)$
+    \end{tabularx}
+    \caption{Overview of attacks on FL architectures}
+    \label{tab:models}
+\end{table}
 
-
-\subsection{Important for later}
+\subsection{General Definitions}
 In this section, we introduce a formal definition of multilayer perceptron as it is required in a later proof, as well as the $\wliso$ relation. Additionally, two very important properties for collections of functions.
 
 \begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp \coloneqq (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as:
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp \coloneqq (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $(\mlp)_i$. Further, all layers are recursively defined as: \todo{Adapt the notation for sequences $(\mlp_i)_{i \in [k]}$}
     \begin{align*}
         (\mlp)_{0}(v) &\coloneqq v\\
         (\mlp)_{i+1}(v) &\coloneqq \sigma_i(W_i \cdot (\mlp)_{i} (v) + b_i), \quad \forall i \in [k-1]
