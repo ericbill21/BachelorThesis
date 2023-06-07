@@ -2,12 +2,12 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: NCI1_GNN_BASIC_POOL
+name: IMDB-BINARY_GNN_BASIC_POOL
 parameters:
   batch_size:
-    value: 33
+    value: 32
   dataset:
-    value: NCI1
+    value: IMDB-BINARY
   gnn_kwargs:
     parameters:
       act:

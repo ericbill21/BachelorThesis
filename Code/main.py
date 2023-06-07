@@ -83,11 +83,13 @@ dataset_original = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_
 
 # In the case where no node features are available, we use one-hot degree for GNNs and the constant function for 1WL+NN.
 # The following if clause is inspired from  https://github.com/rusty1s/pytorch_geometric/blob/master/benchmark/kernel/datasets.py.
-if dataset_original.data.x is None:
+if dataset_original._data.x is None:
     if args.model.startswith("1WL+NN"):
+        print('No node features found. Using constant function for 1WL+NN.')
         dataset_original.transform = Constant_Long(0)
 
     else:
+        print('No node features found. Using one-hot degree for GNNs.')
         max_degree = 0
         degs = []
         for data in dataset_original:
