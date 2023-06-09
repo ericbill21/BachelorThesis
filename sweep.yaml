@@ -2,12 +2,12 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: IMDB-BINARY_GNN_BASIC_POOL
+name: NCI1_GNN_BASIC_POOL
 parameters:
   batch_size:
-    value: 32
+    value: 129
   dataset:
-    value: IMDB-BINARY
+    value: NCI1
   gnn_kwargs:
     parameters:
       act:
@@ -15,12 +15,10 @@ parameters:
       act_first:
         value: false
       dropout:
-        max: 0.2
+        max: 0.1
         min: 0
       hidden_channels:
         values:
-          - 16
-          - 32
           - 64
           - 128
       jk:
@@ -57,18 +55,12 @@ parameters:
       - GIN:Sum
       - GIN:Max
       - GIN:Mean
-      - GCN:Sum
-      - GCN:Max
-      - GCN:Mean
-      - GAT:Sum
-      - GAT:Max
-      - GAT:Mean
   num_repition:
     value: 5
   seed:
     value: 42
   tags:
-    value: sweep_gnn:basic_pool
+    value: sweep_gin:basic_pool
   wl_convergence:
     value: false
 program: Code/main.py

@@ -20,6 +20,7 @@ import wandb
 # GLOBAL VARIABLES
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+SAVE_MODEL = False
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
@@ -109,6 +110,9 @@ train_accuracies = []
 val_accuracies = []
 num_epochs = []
 
+# Saving model
+best_model_global = 0.0
+
 # Number of repitions
 for i in range(args.num_repition):
     print(f"Repition {i+1}/{args.num_repition}:")
@@ -175,6 +179,11 @@ for i in range(args.num_repition):
                 best_val_acc = val_acc
                 best_test_acc = utils.test(test_loader, model, DEVICE) * 100.0
                 best_train_acc = utils.test(train_loader, model, DEVICE) * 100.0
+
+                # Save and override the current best model if the test accuracy is better than the current best.
+                if SAVE_MODEL and best_test_acc > best_model_global:
+                    best_model_global = best_test_acc
+                    torch.save(model, f"Code/saved_models/{run.name}.pt")
 
             # Break if learning rate is smaller 10**-6.
             if lr < 0.000001:

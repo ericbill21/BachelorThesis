@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+    \tikzset{line/.style={draw,thick}}
+    \tikzset{arrow/.style={line,->,>=stealth}}
+    \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
+    
+    \node[line,node,fill=orange] (x1) at (-0.75 - 1.0, 0.75) {};
+    \node[line,node,fill=orange] (x2) at (-0.75 - 1.0, -0.75) {};
+    \node[line,node,fill=orange] (x3) at (0.75 - 1.0, -0.75) {};
+    \node[line,node,fill=orange] (x4) at (0 - 1.0, 0) {};
+    
+    \path[line] (x1) to (x2);
+    \path[line] (x1) to (x4);
+    \path[line] (x2) to (x4);
+    \path[line] (x3) to (x4);
+
+    \draw[arrow, thick] (0.1, 0.0) to (0.9, 0.0);
+
+    \draw (2.3, 0.9) node {$\wlnn$:};
+    \filldraw[draw=black, fill=gray!40, thick, rounded corners] (1.1, -0.7) rectangle (8.9, 0.7);
+
+    \filldraw[draw=black, fill=green, thick, rounded corners] (1.2, -0.6) rectangle (2.4, 0.6) node[midway,align=center]{$\wl$};
+
+    \draw[arrow, thick] (2.5, 0.0) to (2.9, 0.0);
+    
+    \draw (3.5, 0.0) node {$\MSopen \ldots \MSclose$};
+
+    \draw[arrow, thick] (4.1, 0.0) to (4.5, 0.0);
+
+    \filldraw[draw=black, fill=cyan, thick, rounded corners] (4.6, -0.6) rectangle (5.8, 0.6) node[midway,align=center]{$f_{\text{enc}}$};
+
+    \draw[arrow, thick] (5.9, 0.0) to (6.3, 0.0);
+    \draw (6.7, 0.0) node {$\begin{pmatrix*} \vdots \end{pmatrix*}$};
+    \draw[arrow, thick] (7.1, 0.0) to (7.5, 0.0);
+
+    \filldraw[draw=black, fill=pink, thick, rounded corners] (7.6, -0.6) rectangle (8.8, 0.6) node[midway,align=center]{$\mlp$};
+
+    \draw[arrow, thick] (9.1, 0.0) to (9.9, 0.0);
+    \draw (10.3, 0.0) node {$42$};
+    
+\end{tikzpicture}
