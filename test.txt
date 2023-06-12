@@ -1,0 +1,8 @@
+python Code/test_aggregate.py --model_path "Code/saved_models/1WL+NN:Embedding-Max: 10.06.2023 10:28:32.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/1WL+NN:Embedding-Mean: 10.06.2023 10:35:20.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/1WL+NN:Embedding-Sum: 10.06.2023 10:26:32.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/1WL+NN:Embedding-Sum: 10.06.2023 14:28:00.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/GAT:Sum: 10.06.2023 10:24:22.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/GCN:Mean: 10.06.2023 10:32:22.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/GIN:Max: 10.06.2023 10:30:42.pt"
+python Code/test_aggregate.py --model_path "Code/saved_models/GIN:Max: 10.06.2023 14:29:27.pt"

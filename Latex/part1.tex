@@ -78,71 +78,65 @@ Note that this test is only sound and not complete for the \textit{graph isomorp
 \end{figure}
 
 \subsection{$\wlnn$}
-As the previous section shows, the $\wl$ algorithm is quite powerful in identifying a graph's substructures and distinguishing non-isomorphic graph pairs. With the $\wlnn$ framework, we define functions that utilize this structural information to derive further application-specific insights. We do this by combining well-known machine-learning techniques with the algorithm.
+As the previous section shows, the $\wl$ algorithm is quite powerful in identifying a graph's substructures and distinguishing non-isomorphic graph pairs. With the $\wlnn$ framework, we define functions that utilize this structural information to derive further application-specific insights.
 
 \begin{definition}[$\wlnn$]
-    We say a function $\cB$ working over a set of graphs $\cX \subseteq \cG$ is computable by $\wlnn$, if it can be decomposed into a multilayer perceptron $\mlp$, an encoding function $f_{enc}$ and the $\wl$ algorithm. In particular, when dealing with graph task $\cB$ can be decomposed as:
+    A $\wlnn$ model consists of three components that are applied sequentially to its input: 1. the $\wl$ algorithm, 2. an encoding function $f_\text{enc}$ operating on multisets of $\Nb$, and 3. an arbitrary multilayer perceptron $\mlp$. In detail, the model computes the function $\cB$ as follows:
     \begin{align*}
-        \cB: \cX \rightarrow \Rb, \ G \mapsto \text{MLP} \circ f_{\text{enc}}(\MSopen \wl(G)(v) \mid v \in V(G) \MSclose),
+        \cB: \cG \rightarrow \Rb^k, \ G \mapsto \text{MLP} \circ f_{\text{enc}}(\MSopen \wl(G)(v) \mid v \in V(G) \MSclose),
     \end{align*}
-    where $\wl(G)$ is the coloring computed by the $\wl$ algorithm when applied on $G$. For node or edge tasks we define it as below:
-    \begin{align*}
-        \cB: \cX \rightarrow \mathcal{Y}, \ G \mapsto G' \coloneqq (V(G), \ E(G), \ \mlp \circ \wl(G)),
-    \end{align*}
-    where a graph $G$ is mapped to a structurally identical graph $G'$ with the key difference being that the label function is replaced with the coloring computed by the $\wl$ algorithm and further processed by a $\mlp$.
-\end{definition}\todo{Deleted the counting encoding function, check if it has been removed completly in all succedding sections!}
+    where ``$\wl(G)$'' is the coloring computed by the $\wl$ algorithm when applied on $G$, and $k \in \Nb$ is an arbitrary constant. For a better understanding and an illustrative explanation, see \Cref{fig:wlnn}.
+\end{definition}
+
+It is worth noting that this definition can be easily adjusted to accommodate node or edge-related tasks by applying the encoding function $f_\text{enc}$ and the multilayer perceptron $\mlp$ elementwise to the colors of the multiset. However, for the purposes of this thesis, we will not delve into these variations, as our main focus will be on graph-wide tasks such as graph classification or regression, which possess greater theoretical interest and are more prevalent in most datasets. Furthermore, all the theoretical findings presented in this thesis can also be applied to $\wlnn$ models designed for node or edge tasks.
 
 \begin{figure}[H]
     \centering
     \input{Figures/wlnn.tex}
-    \caption{An simplified illustration of the how a $\wlnn$ model is composed of.}
+    \caption{This simplified illustration explains the components that make up a $\wlnn$ model and how each one processes the input. In detail, the model takes the graph on the left as input and first applies the $\wl$ algorithm, thereby obtaining a multiset of the colors assigned by the algorithm. Then the encoding function $f_\text{enc}$ is applied, resulting in a fixed-size vector further processed by the multilayer perceptron $\mlp$. The output of the $\mlp$ is then propagated as the $\wlnn$ models output, here the number 42.}
+    \label{fig:wlnn}
 \end{figure}
 
 
 \subsection{Graph Neural Networks (Message Passing)}\label{sec:GNN Defintion}
-A Graph Neural Network (GNN) is a composition of multiple layers, where each layer computes a new feature for each node and edge. The GNN layer thus technically obtains a new graph that is structurally identical to the previous one, but contains new feature information. After an input graph has been passed through all layers, there can be an additional final function, aggregating the computed information into a fixed size output. With this, it is possible to apply a GNN to every graph, regardless of its size, as the ``computation'' will only take place on the nodes and edges of the graph.
+A Graph Neural Network (GNN) is a composition of multiple layers, where each layer computes a new feature for each node and edge. Each GNN layer thus technically obtains a new graph structurally identical to the previous one but contains new feature information. After an input graph has been passed through all layers, a final readout function is applied that pools all graph features and derives a task-related output. With this, it is possible to apply a GNN to every graph, regardless of its size, as the ``computation'' will only take place on the nodes and edges of the graph.
 
-Note that in the following we will restrict the definition to only consider node features, however, one can easily extend it to also include edge features.
+Note that in the following, we will restrict the definition only to consider node features; however, one can easily extend it to include edge features as well.
 
 \begin{definition}[Graph Neural Network]\label{def:gnn}
-    Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers where each layer $t$ is represented by a function $f^{(t)}$ that works over the set of nodes $V(G)$. To begin with, we need a function $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$, that translates all labels into a vector representation. Further, for every $t > 0$, $f^{(t)}$ is of the format:
+    Let $G = (V, E, l)$ be an arbitrary graph. A Graph Neural Network (GNN) is a composition of multiple layers and a final readout function where each layer $t$ is represented by a function $f^{(t)}$. The initial layer at $t=0$ is a functioning of the format $f^{(0)}: V(G) \rightarrow \mathbb{R}^{1 \times d}$ that is consistent with $l$ and translates all labels into a vector representation. In contrast, for every $t > 0$, $f^{(t)}$ is recursively defined as:
     \begin{align*}
-    f^{(t)}(v) = f^{W_{1,t}}_{\text{merge}} (f^{(t-1)}(v), \  f^{W_{2,t}}_{\text{agg}}( \MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose )),
+        f^{(t)}(v) = f^{(t)}_{\text{merge}} (f^{(t-1)}(v), \  f^{(t)}_{\text{agg}}( \MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose )),
     \end{align*}
-    where $f^{W_{1,t}}_{\text{merge}}$ and $f^{W_{2,t}}_{\text{agg}}$ are arbitrary differentiable functions with $W_{1,t}$ and $W_{2,t}$ their respective parameters. Additionally, $f^{W_{2,t}}_{\text{agg}}$ has to be permuation-invariant.
-
-    Depending on the objective, whether the GNN is tasked with a graph or a node task, the last layer differs. In the case of graph tasks, we add a permutation-invariant aggregation function to the end, here called $\textsf{READOUT}$, working as follows:
+    where $f^{(t)}_{\text{merge}}$ is an arbitrary function that maps the aforementioned tuple to a vector, effectively ``merging'' them, while $f^{(t)}_{\text{agg}}$ is an arbitrary function that maps the multiset to a vector, effectively "aggregating" it.
+    
+    The readout function, referred to as $\textsf{READOUT}$, is applied after the input graph has been passed subsequently through all layers and is defined as follows:
     \begin{align*}
-        \textsf{READOUT}(\MSopen f^{(t)}(v) \mid v \in V(G) \MSclose),
+        \textsf{READOUT}(\MSopen f^{(t)}(v) \mid v \in V(G) \MSclose).
     \end{align*}
-    that aggregates over every node and computes a fixed-size output vector for the entire graph, e.g. a label for graph classification. In order to ensure that we can train the GNN in an end-to-end fashion, we require $\textsf{READOUT}$ to be also differentiable. Let $\mathcal{A}$ be an instance of the described GNN framework. Further, let $K \in \mathbb{N}$ be the number of layers of the GNN, $\mathcal{G}$ the set of all graphs, $\mathcal{Y}$ the task-specific output set (e.g. labels of a classification task), then the overall function computed by $\mathcal{A}$ is:
+    This function pools the information from every node feature, processes it, and calculates a fixed-size output vector for the entire graph.
+    
+    In summary, a GNN model will compute the function $\cA$ as follows:
     \begin{align*}
-        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto \textsf{READOUT}(\MSopen f^{(K)}(v) \mid v \in V(G) \MSclose),
+        \mathcal{A}: \cG \rightarrow \Rb^k, \ G \mapsto \textsf{READOUT}(\MSopen f^{(T)}(v) \mid v \in V(G) \MSclose),
     \end{align*}
-    if $\mathcal{A}$ is configured for a graph task, otherwise:
-    \begin{align*}
-        &\mathcal{A}: \mathcal{G} \rightarrow \mathcal{Y}, \ G \mapsto G' \coloneqq (V(G), \ E(G), \ f^{(K)}),
-    \end{align*}
-    where a graph $G$ is mapped to a structurally identical graph $G'$ with the key difference being the label function is $f^{(K)}$.
+    where $T$ is the number of layer of the GNN, and $k \in \Nb$ an arbitrary constant. To enable end-to-end training of a GNN, it is essential that all its components are differentiable. Therefore, we require all $f^{(t)}{\text{merge}}$ and $f^{(t)}{\text{agg}}$ functions, along with the final $\textsf{READOUT}$ function, to be differentiable.
 \end{definition}
+Note that, due to our definition of the ``aggregation'' function and the ``readout'' function to operate over multisets, both functions are permutation invariant by definition. With this, we can conclude that the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This property enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. The definition and notation used here are inspired by \cite{Morris2018} and \cite{Xu2018}.
 
-Note that, as we require all aggregation functions to be permutation-invariant, the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. This definition and use of notation are inspired by \cite{Morris2018} and \cite{Xu2018}.
-
-To demonstrate what kind of functions are typically used, we provide functions used by \cite{Ham+2017} for a node classification:
-\begin{align*}
-    f^{W_{1,t}}_{\text{merge}}(v) &= \text{ReLU} (W_{\text{merge}} \cdot \textsf{concat}(f^{(t-1)}(v), \ f^{W_{2,t}}_{\text{agg}}(v)))\\
-    f^{W_{2,t}}_{\text{agg}}(v) &= \textsf{MAX}(\{ \text{ReLU}(W_{\text{pool}} \cdot f^{(t-1)}(u) + b) \mid u \in \mathcal{N}(v)\})
-\end{align*}
-where $\text{ReLU}$ is a rectified linear unit element wise activation function, $\textsf{MAX}$ the element-wise $\max$ operator; $W_{\text{merge}}$, $W_{\text{pool}}$ are trainable matrices, $b$ a trainable vector and \textsf{concat} the concatenation function.
-
+To demonstrate we present what type of functions are used, we present three very different types of configuartions that have been empricial successfully in the lass decade. Further, these are also the models will use in the empricial part. Typical readout functions, are simple pooling functions such as elementwise summation, mean, or max, combined with a multilayer layer perceptron that further processes the pooled information. GCN \cite{Kip+2017} GIN \cite{Xu2018} and GAT \cite{Velivckovic2017}.
 \begin{table}[h]
     \centering
-    \begin{tabularx}{0.45\textwidth}{c|c}
+    \begin{tabular}{ c|c }
         \textbf{Model} & \textbf{Update Equation}\\
         \hline
-        GCN & $h_v^{(k)} = \text{ReLU}\biggl( \sum_{u \in \cN(v) \cup \{v\}} \frac{W^{k} h_u^{(k-1)}}{\sqrt{(1 + d(v))(1 + d(u))}}\biggr)$
-    \end{tabularx}
-    \caption{Overview of attacks on FL architectures}
+        GCN & $f^{(t)}(v) = \text{ReLU}\biggl( \sum_{u \in \cN(v) \cup \{v\}} \frac{W^{(t)}}{\sqrt{(1 + d(v))(1 + d(u))}} f^{(t-1)}(u)\biggr)$ \\
+        \hline
+        GIN & $f^{(t)}(v) = \mlp^{(k)} \biggl( (1 + \epsilon^{(k)}) f^{(t-1)}(v) + \sum_{u \in \cN(v)} f^{(t-1)}(u)\biggr)$\\
+        \hline
+        GAT & $f^{(t)}(v) = \sigma \biggl( \sum_{u \in \cN(v)} \alpha_{vu} W^{(t)} f^{(t-1)}(u) \biggr)$
+    \end{tabular}
+    \caption{Overview of the update equations used by popular GNN configuration. This format is inspired by \cite{Nikolentzos2023}.}
     \label{tab:models}
 \end{table}
 

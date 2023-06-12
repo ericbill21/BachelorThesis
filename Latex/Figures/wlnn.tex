@@ -1,12 +1,15 @@
 \begin{tikzpicture}
+    \definecolor{pastell_blue}{RGB}{133,154,202}
+    \definecolor{pastell_green}{RGB}{192,223,211}
+    \definecolor{pastell_pink}{RGB}{228,197,212}
     \tikzset{line/.style={draw,thick}}
     \tikzset{arrow/.style={line,->,>=stealth}}
     \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
     
-    \node[line,node,fill=orange] (x1) at (-0.75 - 1.0, 0.75) {};
-    \node[line,node,fill=orange] (x2) at (-0.75 - 1.0, -0.75) {};
-    \node[line,node,fill=orange] (x3) at (0.75 - 1.0, -0.75) {};
-    \node[line,node,fill=orange] (x4) at (0 - 1.0, 0) {};
+    \node[line,node,fill=gray] (x1) at (-0.75 - 0.8, 0.75) {};
+    \node[line,node,fill=gray] (x2) at (-0.75 - 0.8, -0.75) {};
+    \node[line,node,fill=gray] (x3) at (0.75 - 0.8, -0.75) {};
+    \node[line,node,fill=gray] (x4) at (0 - 0.8, 0) {};
     
     \path[line] (x1) to (x2);
     \path[line] (x1) to (x4);
@@ -15,7 +18,7 @@
 
     \draw[arrow, thick] (0.1, 0.0) to (0.9, 0.0);
 
-    \draw (2.3, 0.9) node {$\wlnn$:};
+    \draw (2.15, 0.9) node {$\wlnn$:};
     \filldraw[draw=black, fill=gray!40, thick, rounded corners] (1.1, -0.7) rectangle (8.9, 0.7);
 
     \filldraw[draw=black, fill=green, thick, rounded corners] (1.2, -0.6) rectangle (2.4, 0.6) node[midway,align=center]{$\wl$};
