@@ -4,10 +4,10 @@
     \tikzset{node/.style={circle,inner sep=0pt,minimum width=15pt}}
     
     \draw (-1.5 - 1.5,0.75) node {$G$:};
-    \node[line,node,fill=lightgray] (x1) at (-0.75 - 1.5, 0.75) {1};
-    \node[line,node,fill=lightgray] (x2) at (-0.75 - 1.5, -0.75) {1};
-    \node[line,node,fill=lightgray] (x3) at (0.75 - 1.5, -0.75) {1};
-    \node[line,node,fill=lightgray] (x4) at (0 - 1.5, 0) {1};
+    \node[line,node,fill=lightgray] (x1) at (-0.75 - 1.5, 0.75) {};
+    \node[line,node,fill=lightgray] (x2) at (-0.75 - 1.5, -0.75) {};
+    \node[line,node,fill=lightgray] (x3) at (0.75 - 1.5, -0.75) {};
+    \node[line,node,fill=lightgray] (x4) at (0 - 1.5, 0) {};
     
     \path[line] (x1) to (x2);
     \path[line] (x1) to (x4);
@@ -18,10 +18,10 @@
     
     \draw (3.25 - 1.25, 0.75) node {$C_\infty(G)$:};
 
-    \node[line,node,fill=cyan] (x1) at (-0.75 + 4.0, 0.75) {2};
-    \node[line,node,fill=cyan] (x2) at (-0.75 + 4.0, -0.75) {2};
-    \node[line,node,fill=orange] (x3) at (0.75 + 4.0, -0.75) {3};
-    \node[line,node,fill=green] (x4) at (0 + 4.0, 0) {4};
+    \node[line,node,fill=cyan] (x1) at (-0.75 + 4.0, 0.75) {};
+    \node[line,node,fill=cyan] (x2) at (-0.75 + 4.0, -0.75) {};
+    \node[line,node,fill=orange] (x3) at (0.75 + 4.0, -0.75) {};
+    \node[line,node,fill=green] (x4) at (0 + 4.0, 0) {};
     
     \path[line] (x1) to (x2);
     \path[line] (x1) to (x4);
@@ -37,7 +37,7 @@
     \draw[arrow, thick] (6.0 + 1.0, -0.5) to (7.6 + 1.0, -0.5);
     \draw[arrow, thick] (6.0 + 1.0, -0.5) to (6.0 + 1.0, 1.1);
 
-    \draw (7.75, -1.0) node {$\MSopen 2, 2, 3, 4 \MSclose$};
+    \draw (7.8, -1.0) node {$\MSopen \sqbox{cyan}, \sqbox{cyan}, \sqbox{orange}, \sqbox{green} \MSclose$};
 
 
     \end{tikzpicture}

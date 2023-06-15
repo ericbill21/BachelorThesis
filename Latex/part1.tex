@@ -34,8 +34,8 @@ We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n \i
 \subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
 The Weisfeiler-Leman algorithm consists of two main parts, first the coloring algorithm and second the graph isomorphism test. We will introduce them in this section.
 
-\subsubsection{The Weisfeiler-Leman graph coloring algorithm}
-The $\wl$ algorithm computes a node coloring of its input graph in each iteration. In detail, a color is assigned to each node based on the colors of its neighbors and its own current color. The algorithm continues until convergence is reached, resulting in the final coloring of the graph. We will now formally define this process and provide an illustrated example in \Cref{fig:1wl_example}.
+\subsubsection{The Weisfeiler-Leman Graph Coloring Algorithm}
+The $\wl$ algorithm computes a node coloring of its input graph in each iteration. In detail, a color is assigned to each node based on the colors of its neighbors and its own current color. The algorithm continues until convergence is reached, resulting in the final coloring of the graph. We will now formally define this process and provide an illustrated example in \cref{fig:1wl_example}.
 
 \begin{definition}[$\wl$ Algorithm]
     Let $G = (V, E, l)$ be a labeled graph. In each iteration $i$, the 1-WL algorithm computes a node coloring $C_i: V(G) \rightarrow \mathbb{N}$. In the initial iteration $i=0$, the coloring is set to $C_0 = l$ if $l$ exists. Otherwise, for all $v \in V(G)$, $C_0(v)$ is assigned an arbitrary constant value $c \in \mathbb{N}$. For $i > 0$, the algorithm assigns a color to $v \in V(G)$ as follows:
@@ -54,7 +54,7 @@ The colorings computed in each iteration always converge to the final one, such 
 \begin{figure}[H]
     \centering
     \input{Figures/example2}
-    \caption{An example of the final coloring computed by applying the 1-WL algorithm on the graph $G$. The graph $G$ consists of $4$ nodes with all their labels being initially set to $1$. Note that each label corresponds to a color, which we have also plotted for illustration purposes.}
+    \caption{An example of the final coloring computed by applying the 1-WL algorithm on the graph $G$. The graph $G$ consists of $4$ nodes with all their labels being set to the same color.}
     \label{fig:1wl_example}
 \end{figure}
 
@@ -77,7 +77,20 @@ Note that this test is only sound and not complete for the \textit{graph isomorp
     \label{1-WL Counter Example}
 \end{figure}
 
-\subsection{$\wlnn$}
+\subsubsection{Implications of the Weisfeiler-Leman Algorithm}
+In this section, we introduce two basic concepts: the 1-WL relation and the notion of $\wldisc$ property for permutation invariant functions.
+
+\begin{definition}[1-WL Relation]
+    For any graphs $G,H \in \cX$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
+\end{definition}
+
+The $\wliso$ relation can further be classified as an equivalence relation, as it is reflexive, symmetric and transitive. With this, we introduce a notation of its equivalence classes. Let $\cX \subseteq \cG$ and $G \in \cX$, then we denote with $\cX/\!{\wliso}(G): = \{ G' \in \cX \mid G \wliso G' \}$ its equivalence class.
+
+\begin{definition}[$\wldisc$]
+    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $h(G_1) \neq h(G_2)$.
+\end{definition}
+
+\subsection{$\wlnn$}\label{sec:definition_wlnn}
 As the previous section shows, the $\wl$ algorithm is quite powerful in identifying a graph's substructures and distinguishing non-isomorphic graph pairs. With the $\wlnn$ framework, we define functions that utilize this structural information to derive further application-specific insights.
 
 \begin{definition}[$\wlnn$]
@@ -85,7 +98,7 @@ As the previous section shows, the $\wl$ algorithm is quite powerful in identify
     \begin{align*}
         \cB: \cG \rightarrow \Rb^k, \ G \mapsto \text{MLP} \circ f_{\text{enc}}(\MSopen \wl(G)(v) \mid v \in V(G) \MSclose),
     \end{align*}
-    where ``$\wl(G)$'' is the coloring computed by the $\wl$ algorithm when applied on $G$, and $k \in \Nb$ is an arbitrary constant. For a better understanding and an illustrative explanation, see \Cref{fig:wlnn}.
+    where ``$\wl(G)$'' is the coloring computed by the $\wl$ algorithm when applied on $G$, and $k \in \Nb$ is an arbitrary constant. For a better understanding and an illustrative explanation, see \cref{fig:wlnn}.
 \end{definition}
 
 It is worth noting that this definition can be easily adjusted to accommodate node or edge-related tasks by applying the encoding function $f_\text{enc}$ and the multilayer perceptron $\mlp$ elementwise to the colors of the multiset. However, for the purposes of this thesis, we will not delve into these variations, as our main focus will be on graph-wide tasks such as graph classification or regression, which possess greater theoretical interest and are more prevalent in most datasets. Furthermore, all the theoretical findings presented in this thesis can also be applied to $\wlnn$ models designed for node or edge tasks.
@@ -96,7 +109,6 @@ It is worth noting that this definition can be easily adjusted to accommodate no
     \caption{This simplified illustration explains the components that make up a $\wlnn$ model and how each one processes the input. In detail, the model takes the graph on the left as input and first applies the $\wl$ algorithm, thereby obtaining a multiset of the colors assigned by the algorithm. Then the encoding function $f_\text{enc}$ is applied, resulting in a fixed-size vector further processed by the multilayer perceptron $\mlp$. The output of the $\mlp$ is then propagated as the $\wlnn$ models output, here the number 42.}
     \label{fig:wlnn}
 \end{figure}
-
 
 \subsection{Graph Neural Networks (Message Passing)}\label{sec:GNN Defintion}
 A Graph Neural Network (GNN) is a composition of multiple layers, where each layer computes a new feature for each node and edge. Each GNN layer thus technically obtains a new graph structurally identical to the previous one but contains new feature information. After an input graph has been passed through all layers, a final readout function is applied that pools all graph features and derives a task-related output. With this, it is possible to apply a GNN to every graph, regardless of its size, as the ``computation'' will only take place on the nodes and edges of the graph.
@@ -124,7 +136,8 @@ Note that in the following, we will restrict the definition only to consider nod
 \end{definition}
 Note that, due to our definition of the ``aggregation'' function and the ``readout'' function to operate over multisets, both functions are permutation invariant by definition. With this, we can conclude that the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This property enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. The definition and notation used here are inspired by \cite{Morris2018} and \cite{Xu2018}.
 
-To demonstrate we present what type of functions are used, we present three very different types of configuartions that have been empricial successfully in the lass decade. Further, these are also the models will use in the empricial part. Typical readout functions, are simple pooling functions such as elementwise summation, mean, or max, combined with a multilayer layer perceptron that further processes the pooled information. GCN \cite{Kip+2017} GIN \cite{Xu2018} and GAT \cite{Velivckovic2017}.
+To bridge the gap from the theoretical definition to practical instance of the definition, we will now introduce three distinct GNNs. Specifically, we will explore the Graph Convolutional Network (GCN) proposed by \cite{Kip+2017}, the Graph Isomorphism Network (GIN) introduced by \cite{Xu2018}, and the Graph Attention Network (GAT) presented by \cite{Velivckovic2017}. These GNNs will serve as empirical baselines in \cref{part2}. The update equations for each GNN layer, denoted as $f^{(t)}$ in the definition, are listed in \cref{tab:models}.
+
 \begin{table}[h]
     \centering
     \begin{tabular}{ c|c }
@@ -140,38 +153,15 @@ To demonstrate we present what type of functions are used, we present three very
     \label{tab:models}
 \end{table}
 
-\subsection{General Definitions}
-In this section, we introduce a formal definition of multilayer perceptron as it is required in a later proof, as well as the $\wliso$ relation. Additionally, two very important properties for collections of functions.
+Commonly employed readout functions in this context often involve straightforward pooling techniques like elementwise summation, mean calculation, or maximum extraction. These pooling operations are typically followed by a multilayer perceptron, which performs additional processing on the aggregated information.
 
-\begin{definition}[Multilayer Perceptron]\label{def:mlp}
-    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp \coloneqq (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $\mlp_i$. Further, all layers are recursively defined as: \todo{Adapt the notation for sequences $(\mlp_i)_{i \in [k]}$}
-    \begin{align*}
-        \mlp_{0}(v) &\coloneqq v\\
-        \mlp_{i+1}(v) &\coloneqq \sigma_i(W_i \cdot \mlp_{i} (v) + b_i), \quad \forall i \in [k-1]
-    \end{align*}
-    where $\sigma_i$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
-    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) \coloneqq (\mlp)_k(v)$.
-\end{definition}
+Common readout functions for GNNs, often involve simple pooling techniques like elementwise summation, averaging or maximum extraction. These pooling operations are typically followed by a multilayer perceptron, which performs additional processing on the aggregated information. %There are, of course, more complex pooling operations like, for example, Set2Set developed by \cite{Vinyals2015}, however in the work of \cite{Xu2018}, the authors showed that given the correct configuration, the elementwise summation pooling function combined with a following multilayer perceptron suffices to create a GNN that is as expressive as the 1-WL algorithm in distinguishing non-isomorphism.
 
-\begin{definition}[1-WL Relation]
-    For any graphs $G,H \in \cX$ we will denote $G \wliso H$ if the 1-WL isomorphism test can not distinguish both graphs. Note that due to the soundness of this algorithm, if $G \not\wliso H$, we always can conclude that $G \not\simeq H$.
-\end{definition}
-
-The $\wliso$ relation can further be classified as an equivalence relation, as it is reflexive, symmetric and transitive. With this, we introduce a notation of its equivalence classes. Let $\cX \subseteq \cG$ and $G \in \cX$, then we denote with $\cX/\!{\wliso}(G): = \{ G' \in \cX \mid G \wliso G' \}$ its equivalence class.
-
-\begin{definition}[$\wldisc$]
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\wldisc} if for all graphs $G_1, G_2 \in \mathcal{X}$ for which the 1-WL isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h \in \mathcal{C}$ such that $h(G_1) \neq h(G_2)$.
-\end{definition}
-
-\begin{definition}[$\gapp$]
-    Let $\mathcal{C}$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\mathcal{C}$ is \textbf{\gapp} if for all permutation-invariant functions $\mathcal{A}$ computed by a GNN, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \mathcal{C}$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty \coloneqq \sup_{G \in \mathcal{X}} |\cA(G) - h_{\cA,\epsilon}(G)| < \epsilon$
-\end{definition}
 
 \section{Theoretical Connection}\label{sec:theo_connections}
-This section is the main part of our theoretical investigation of the two frameworks. We will present 4 intriguing theorems, which will be proven separately afterwards. These results will form the basis for the empirical part that follows. The first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. The last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.
+This section is the main part of our theoretical investigation of the two frameworks. We will present four intriguing theorems, which will be proven separately afterward. In detail, the first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. In comparison, the last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.
 
-All the results we will now present focus on graph task functions, since this is the more complex problem, as any node or edge task function can be adapted to a graph task. In the first two theorems, we focus on a finite collection of graphs, which we denote by $\cX \subset \cG$.
-
+In the first two theorems, we focus on a finite collection of graphs, which we denote by $\cX \subset \cG$.
 \begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs, then $\cC$ is also computable by $\wlnn$.
 \end{theorem}
@@ -179,9 +169,9 @@ All the results we will now present focus on graph task functions, since this is
 \begin{theorem}[Finite Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:gnn_in_1wl}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$, then $\cC$ is also computable by GNNs.
 \end{theorem}
-With these theorems, we showed the equivalence between both frameworks. Specifically, every function computed by $\wlnn$ is also computable by a GNN, and vice versa. Notice that, we did not leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves, but rather kept it general. 
+With these two theorems, we showed the equivalence between both frameworks. Specifically, every function computed by $\wlnn$ working over any arbitrary $\cX \subset \cG$ is also computable by a GNN, and vice versa. Notice that we did not leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves but instead kept it general. 
 
-Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of $\wldisc$ by investigating a connection between the two frameworks for continuous feature spaces and continuous functions. However, since the \textit{graph isomorphism problem} is an inherently discrete problem, the $\wl$ algorithm is only defined as a discrete and discontinuous function operating on discrete colors, such that extending the definition of the $\wl$ algorithm to a continuous function working over continuous values is not very trivial and, to our knowledge, has not yet been widely investigated. We therefore assume in the proofs and the following theorems that there exists a continuous version of the $\wl$ algorithm. 
+Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of $\wldisc$ by investigating a connection between the two frameworks for continuous feature spaces and continuous functions. However, since the \textit{graph isomorphism problem} is an inherently discrete problem, the $\wl$ algorithm, as outlined in \cref{sec:definition_wlnn}, is only defined as a discrete and discontinuous function operating on discrete colors, such that extending the definition of the $\wl$ algorithm to a continuous function working over continuous values is not very trivial and, to our knowledge, has not yet been widely investigated. Therefore, we assume in the proofs and the following theorems that a continuous version of the $\wl$ algorithm exists. 
 
 We define the set of graphs with continuous features using the following definition:
 \begin{definition}
@@ -195,9 +185,6 @@ We define the set of graphs with continuous features using the following definit
 \begin{theorem}[Continuous Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:gnn_approximating_in_1wl}
     Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ that is GNN-Approximating, then $\cC$ is also $\wldisc$.
 \end{theorem}
-
-Since we only wanted to show the expressive power of $\wldisc$ and made the major assumption of the existence of a continuous $\wl$ algorithm, we have included the proofs of \cref{theorem:1wl_in_gnn_approximating,theorem:gnn_approximating_in_1wl} in the Appendix in \autoref{app:gnn_in_wlnn}.
-
 Immediately from the last theorem follows the corollary:
 \begin{corollary}
     There exists a collection $\cC$ of function from $\cX$ to $\Rb$ computable by GNNs that is $\wldisc$.
@@ -207,10 +194,12 @@ Immediately from the last theorem follows the corollary:
     The collection of all functions from $\cX$ to $\Rb$ computable by GNNs is trivially GNN-Approximating, such that we can apply \autoref{theorem:gnn_approximating_in_1wl} with which the proof concludes.
 \end{proof}
 
-By putting both theorems into perspective, we can now argue that even for continuous functions $\wlnn$ and GNNs can compute almost the same functions. Each framework can approximate the other framework arbitrarily well. From this we can conclude that the ability $\wldisc$ is very powerful, so we can assume that $\wlnn$ is sufficiently expressive for the upcoming empirical part.
+Since we only wanted to show the expressive power of $\wldisc$ and made the major assumption of the existence of a continuous $\wl$ algorithm, we have included the proofs of \cref{theorem:1wl_in_gnn_approximating,theorem:gnn_approximating_in_1wl} in the Appendix in \autoref{app:gnn_in_wlnn}.
+
+By putting both theorems into perspective, we can now argue that even for continuous functions $\wlnn$ and GNNs can compute almost the same functions. Each framework can approximate the other framework arbitrarily well. We can conclude that the ability $\wldisc$ is very powerful, so we can assume that $\wlnn$ is sufficiently expressive for the upcoming empirical part.
 
 \subsection{Proof of \autoref{theorem:1wl_in_gnn}}\label{sec:proof_theorem:1wl_in_gnn}
-We will prove \autoref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \autoref{lem:wl_disc_exists} we show the existence of a collection computed by $\wlnn$ that is 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
+We will prove \autoref{theorem:1wl_in_gnn} by introducing a couple of small lemmas, which combined prove the theorem. In detail, in \autoref{lem:wl_disc_exists}, we show the existence of a collection computed by $\wlnn$ that is 1-\!WL-Discriminating. In \cref{lem:wlnn_permutation_invariance,lem:wl_relation_equivalence,lem:composition_lemma} we derive properties of $\wlnn$ functions we will use throughout \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} with which we prove the theorem.
 We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2,lem:decompose_gnn_as_wl} from the proof presented in section 3.1 in the work of \cite{Chen2019}.
 
 \begin{lemma}\label{lem:wl_disc_exists}
@@ -218,14 +207,13 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \end{lemma}
 
 \begin{proof}
-    We define $f_c$  for $c \in \Nb$ as the encoding functions that returns the number of nodes colored as $c$. With this we can construct the collection of functions $C$ as follows:
+    We define $f_c$ for $c \in \Nb$ as the encoding function that returns the number of nodes colored as $c$. With this, we can construct the collection of functions $C$ as follows:
     \begin{align*}
         C := \{ \cB_c: \cX \rightarrow \Rb, \ G \mapsto \mlp_\text{id} \circ f_c (\MSopen \wl(G)(v) \mid v \in V(G) \MSclose) \mid c \in \Nb\},
     \end{align*}
-    where $\mlp_\text{id}$ is a dummy multilayer perceptron that just returns its input. Since every function $\cB_c \in C$ is composed of the $\wl$ algorithm, an encoding function and a multilayer perceptron, each function is computable by $\wlnn$, and consequently also the whole collection.
+    where $\mlp_\text{id}$ is a dummy multilayer perceptron that returns its input. Since every function $\cB_c \in C$ is composed of the $\wl$ algorithm, an encoding function, and a multilayer perceptron, each function is computable by $\wlnn$, and consequently also the whole collection.
 
-    Let $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$. Further, let $C_1, C_2$ be the final colorings computed by the $\wl$ algorithm when applied on $G_1, G_2$
-    respectively. Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,C_1}(c)  \neq h_{G_2,C_2}(c)$. Such that $\cB_c \in C$ exists with $\cB_c(G_1) \neq \cB_c(G_2)$.
+    Let $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$. Further, let $C_1, C_2$ be the final colorings computed by the $\wl$ algorithm when applied on $G_1, G_2$ respectively. Due to $G_1 \not\wliso G_2$, there exists a color $c \in \Nb$ such that $h_{G_1,C_1}(c) \neq h_{G_2,C_2}(c)$. Such that $\cB_c \in C$ exists with $\cB_c(G_1) \neq \cB_c(G_2)$.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Equivalence]\label{lem:wl_relation_equivalence}
@@ -233,7 +221,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \end{lemma}
 
 \begin{proof}
-    Let $\cB$ be an arbitrary function over $\cX$ computable by $\wlnn$, then $\cB$ is composed as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \MSopen \wl(\cdot)(v) \mid v \in V(G) \MSclose$. Further, let $G_1, G_2 \in \cX$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this the equivalence follows immediately.
+    Let $\cB$ be an arbitrary function over $\cX$ computable by $\wlnn$, then $\cB$ is composed as follows: $\cB(\cdot) = \text{MLP} \circ f_{\text{enc}} \MSopen \wl(\cdot)(v) \mid v \in V(G) \MSclose$. Further, let $G_1, G_2 \in \cX$ be arbitrary graphs with $G_1 \wliso G_2$, then by definition of the relation $\wliso$ we know that $\wl(G_1) = \wl(G_2)$. With this, the equivalence follows immediately.
 \end{proof}
 
 \begin{lemma}[$\wlnn$ Permuation Invariance]\label{lem:wlnn_permutation_invariance}
@@ -247,24 +235,24 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
 \begin{lemma}[$\wlnn$ Composition]\label[lemma]{lem:composition_lemma}
     Let $\cC$ be a collection of functions computable by $\wlnn$. Further, let $h_1, \dots h_n \in \cC$ and $\mlp^\bullet$ an multilayer perceptron, than the function $\cB$ composed of $\cB(\cdot) \coloneqq \mlp^\bullet(h_1(\cdot), \ldots, h_n(\cdot))$ is also computable by $\wlnn$.
 \end{lemma}
-\begin{proof}
-    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is, we construct an encoding function $f^*$ that duplicates its input and applies each encoding function $f_i$ individually, and we construct a multilayer perceptron $\mlp^*$ that takes in this output and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously. Afterwards, the given $\mlp^\bullet$ will be applied on the concatenation of the output of all $\mlp_i$'s.  See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. A complete proof can be found in the Appendix in \autoref{app:composition_proof}, as this proof is very technical and not that interesting.
+\begin{proof}[Proof Sketch]
+    Assume the above and let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. The idea of this proof is that we construct an encoding function $f^*$ that ``duplicates'' its input and applies each encoding function $f_i$ individually. We also construct a multilayer perceptron $\mlp^*$ that takes in the output of $f^*$ and simulates all $\text{MLP}_1, \ldots, \text{MLP}_n$ simultaneously. Afterward, the given $\mlp^\bullet$ will be applied on the concatenation of the output of all $\ mlp_i$s. See \autoref{fig:proof_idea_parallelism} for a sketch of the proof idea. For the complete proof, please refer to the Appendix in \autoref{app:composition_proof}.
 
     \begin{figure}[H]
         \centering
-        \input{Figures/proof1.tex}
-        \caption{Proof idea for \autoref{lem:composition_lemma}, how the constructed functions $f^*$ and $\mlp^*$ will work on input $G$. Here we denote with $M_G$ the multiset of colors of the nodes of $G$ after the $\wl$ algorithm has been applied. More formally $M_G := \MSopen \wl(G)(v) \mid v \in V(G) \MSclose$. Further, we let $o_i$ be the output computed by $\mlp_i$ on input $f_i(M_G)$.}
+        \includegraphics[width=\textwidth]{Figures/proof_sketch_wlnn_composition.pdf}
+        \caption{The proof idea for \autoref{lem:composition_lemma}, how the constructed functions $f^*$ and $\mlp^*$ will work on input $G \in \cX$. Here we denote with $M_G$ the multiset of colors of the nodes of $G$ after applying the $\wl$ algorithm.}
         \label{fig:proof_idea_parallelism}
     \end{figure}
 \end{proof}
     
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func1}
-    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is $\wldisc$. Then for all $G^* \in \cX$, there exists a function $h_{G^*}$ from $\cX$ to $\Rb$ computable by $\wlnn$, such that for all $G \in \cX: h_{G^*}(G) = 0$ if and only if $G \wliso G^*$.
+    Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$ that is $\wldisc$. Then for all $G^* \in \cX$, there exists a function $h_{G^*}$ from $\cX$ to $\Rb$ computable by $\wlnn$, such that for all $G \in \cX: h_{G^*}(G) = 0$, if and only if, $G \wliso G^*$.
 \end{lemma}
 
 \begin{proof}
-    Assume the above. For any $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$ let $h_{G_1, G_2} \in \cC$ be the function distinguishing them, with $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$. We define the function $\overline{h}_{G_1,G_2}$ working over $\cX$ as follows:
+    Assume the above. For any $G_1, G_2 \in \cX$ with $G_1 \not\wliso G_2$, let $h_{G_1, G_2} \in \cC$ be the function distinguishing them, with $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$. We define the function $\overline{h}_{G_1,G_2}$ working over $\cX$ as follows:
     \begin{align}\label{eq:lemma_inidcator_function_1}
         \overline{h}_{G_1, G_2}(\cdot) &= |h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1)| \nonumber\\
         &= \max(h_{G_1, G_2}(\cdot) - h_{G_1, G_2}(G_1), \ 0) + \max(h_{G_1, G_2}(G_1) - h_{G_1, G_2}(\cdot), \ 0) \nonumber\\
@@ -273,7 +261,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
     Note, that in the equations above ``$h_{G_1, G_2}(G_1)$'' is a fixed constant and the resulting function $\overline{h}_{G_1, G_2}$ is non-negative.
     Let $G_1 \in \cX$ now be fixed, we will construct the function $h_{G_1}$ with the desired properties as follows:
     \begin{align}\label{eq:lemma_inidcator_function_2}
-        h_{G_1}(x) = \sum_{G_2 \in \cX, \ G_1 \not\wliso G_2} \overline{h}_{G_1, G_2}(x).
+        h_{G_1}(\cdot) = \sum_{G_2 \in \cX, \ G_1 \not\wliso G_2} \overline{h}_{G_1, G_2}(\cdot).
     \end{align}
     Since $\cX$ is finite, the sum is finite and therefore well-defined. Next, we will prove that for a fixed graph $G_1 \in \cX$, the function $h_{G_1}$ is correct on input $G \in \cX$:
     \begin{enumerate}
@@ -281,7 +269,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
         \item If $G_1 \not\wliso G$, then $\overline{h}_{G_1, G}(G)$ is a summand of the overall sum, and since $\overline{h}_{G_1, G}(G) > 0$, 
         we can conclude $h_{G_1}(G) > 0$ due to the non-negativity of each function $\overline{h}_{G_1, G_2}$.
     \end{enumerate}
-    We can encode \autoref{eq:lemma_inidcator_function_1} via a multilayer perceptron where ``$h_{G_1, G_2}(G_1)$'' is just a constant, and consequently can encode \autoref{eq:lemma_inidcator_function_2} aswell. Therefore, we can conclude with \autoref{lem:composition_lemma} that for every graph $G$, $h_G$ is also $\wlnn$ computable.
+    Using \cref{lem:composition_lemma}, we can conclude that for any $G \in \cX$, $h_G$ is computable by $\wlnn$, as we can encode \autoref{eq:lemma_inidcator_function_2} via a multilayer perceptron where the factor ``$h_{G_1, G_2}(G_1)$'' of \autoref{eq:lemma_inidcator_function_1} is just a constant.
 \end{proof}
 
 \begin{lemma}\label[lemma]{lem:encoding-indicator-func2}
@@ -297,7 +285,7 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
         \psi_a(x) &\coloneqq \max(\frac{x}{a} -1,\ 0) + \max(\frac{x}{a}+1, \ 0) - 2 \cdot \max(\frac{x}{a}, \ 0) \nonumber\\
         &= \text{ReLU}(\frac{x}{a} -1) + \text{ReLU}(\frac{x}{a}+1) - 2 \cdot \text{ReLU}(\frac{x}{a})
     \end{align}
-    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} in the Appendix in \autoref{app:bump_function} for a plot of the relevant part of this function with exemplary values for $a$.
+    The interesting property of $\psi_a$ is that it maps every value $x$ to $0$, except when $x$ is being drawn from the interval $(-a, a)$. In particular, it maps $x$ to $1$ if and only if $x$ is equal to $0$. See \autoref{fig:bump_function} for a plot of the relevant part of this function with exemplary values for $a$.
     
     We use these properties to define for every graph ${G^*} \in \cX$ the function $\varphi_{G^*}(\cdot) \coloneqq \psi_{\delta_{G^*}} (h_{G^*}(\cdot))$. 
     We will quickly demonstrate that this function is equal to the indicator function, for this let $G^*$ be fixed and $G$, an arbitrary graph from $\cX$, the input:
@@ -308,25 +296,31 @@ We took great inspiration for \cref{lem:encoding-indicator-func1,lem:encoding-in
     Note that we can encode $\varphi_{G^*}$ using \autoref{eq:lemma_encoding_indicator_func2} via a multilayer perceptron, where $\delta_{G^*}$ is a constant. With \autoref{lem:composition_lemma} we can therefore conclude that $\varphi_{G^*}$ is computable by $\wlnn$ for every graph ${G^*} \in \cX$.
 \end{proof}
 
+\begin{figure}[H]
+    \centering
+    \input{Figures/plot1}
+    \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ used in the proof of \cref{lem:encoding-indicator-func2} with different exemplary values for $a$.}
+    \label{fig:bump_function}
+\end{figure}
+
 \begin{lemma}\label{lem:decompose_gnn_as_wl}
-    Let $\mathcal{C}$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$ so that for all $G^* \in \cX$, there exists 
-    $\varphi_{G^*} \in \cC$ satisfying $\forall G \in \cX: \varphi_{G^*}(G) = \mathds{1}_{G \wliso G^*}$, then every function computable by a GNN is also computable by $\wlnn$.
+    Let $\mathcal{C}$ be a collection of functions from $\cX$ to $\Rb$ computable by $\wlnn$ such that for all $G^* \in \cX$, there exists $\varphi_{G^*} \in \cC$ satisfying $\forall G \in \cX: \varphi_{G^*}(G) = \mathds{1}_{G \wliso G^*}$. Then every function computable by a GNN is also computable by $\wlnn$.
 \end{lemma}
 
 \begin{proof}
-    Assume the above. For any function $\mathcal{A}$ computed by an GNN that works over $\cX$ to $\Rb$, we show that it can be decomposed as follows for any $G \in \cX$ as input:
+    Assume the above. For any function $\mathcal{A}$ computed by a GNN that works over $\cX$ to $\Rb$, we show that it can be decomposed as follows for any $G \in \cX$ as input:
     \begin{align}\label{eq:gnn_decomposition}
         \mathcal{A}(G) &= \Bigl( \ \frac{1}{|\cX/\!{\wliso}(G)|}\sum_{G^* \in \cX} \mathds{1}_{G \wliso G^*} \Bigr) \cdot \mathcal{A}(G) \nonumber \\
         &= \frac{1}{|\cX/\!{\wliso}(G)|}\sum_{G^* \in \cX} \mathcal{A}(G^*) \cdot \mathds{1}_{G \wliso G^*} \nonumber \\
         &= \sum_{G^* \in \cX} \frac{\mathcal{A}(G^*)}{|\cX/\!{\wliso}(G^*)|}  \cdot \varphi_{G^*}(G)
     \end{align}
-    with $\cX/\!{\wliso}(G^*)$ we denote the set of all graphs $G$ over $\cX$ that are equivalent to $G^*$ according to the $\wliso$ relation.
+    where we denote with $\cX/\!{\wliso}(G^*)$ the set of all graphs $G$ over $\cX$ that are equivalent to $G^*$ according to the $\wliso$ relation.
 
-    Since $\cA$ is permutation-invariant, and GNNs are at most as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every graph $G,H \in \cX$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as stated in \autoref{eq:gnn_decomposition} via a multilayer perceptron with $\frac{\cA(G^*)}{|\cX/\!{\wliso}(G^*)|}$ being constants and $\varphi_{G^*} \in \cC$ encoding the indicator function. Combined with the \autoref{lem:composition_lemma}, we can conclude that $\cA$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\cX/\!{\wliso}(G^*)$ well-defined for all graphs.
+    Since $\cA$ is permutation-invariant and GNNs are, at most, as good as the 1-WL algorithm in distinguishing non-isomorphic graphs, we can use the fact that for every pair of graphs $G, H \in \cX$ with $G \wliso H$: $\cA(G) = \cA(H)$. Therefore, we can decompose $\cA$ as indicated in \autoref{eq:gnn_decomposition} and encode it using a multilayer perceptron where $\frac{\cA(G^*)}{|\cX/\!{\wliso}(G^*)|}$ is a constant, and $\varphi_{G^*} \in \cC$ encodes the indicator function. Combined with the \autoref{lem:composition_lemma}, we can conclude that $\cA$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\cX/\!{\wliso}(G^*)$ well-defined for all graphs.
 \end{proof}
 
 \subsection{Proof of \autoref{theorem:gnn_in_1wl}}
-In this section we will prove the converse direction. We start with \cref{lem:1wl_color_upper_bound}, where we introduce an upper bound that we will use in \cref{lem:gnn_1wl_disc} to show that there exists a collection of GNN-computable functions that is $\wldisc$. After that, we will prove a composition lemma with \cref{lem:composition_lemma_gnn} which is similar to the one we introduced in the previous section. From this point on, the proof continues as in the previous section and concludes the property to be proved in \cref{lem:decompose_gnn_as_wl}.
+In this section we will prove the converse direction. We start with \cref{lem:1wl_color_upper_bound}, where we introduce an upper bound that we will use in \cref{lem:gnn_1wl_disc} to show that there exists a collection of GNN-computable functions that is $\wldisc$. After that, we will prove a composition lemma with \cref{lem:composition_lemma_gnn} which is similar to the one we introduced in the previous section. From this point on, the proof continues as in the previous section and concludes the property to be proved in \cref{lem:decompose_wl_as_gnn}.
 
 \begin{lemma}\label{lem:1wl_color_upper_bound}
     Let $G$ be an arbitrary graph with $n \coloneqq |V(G)|$ the number of nodes and $C: V(G) \rightarrow \Nb$ an arbitrary coloring of the graph $G$. Then the total number of possible tuples of the form:
@@ -340,7 +334,7 @@ In this section we will prove the converse direction. We start with \cref{lem:1w
 \end{lemma}
 
 \begin{proof}
-    Assume the above. For the first entry of the tuple, there exist at most $n$ different colors, since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that the total number of possibilities is the sum over each cardinality of a multiset with $n$ different colors. In the end, we soundly combine both results by multiplying both together.
+    Assume the above. For the first entry of the tuple, at most $n$ different colors exist since there are $n$ nodes. For the second entry, each node $v \in V(G)$ can have between $0$ and $n-1$ neighbors, such that the total number of possibilities is the sum over each cardinality of a multiset with $n$ different colors. In the end, we soundly combine both results by multiplying both together.
 \end{proof}
 
 
@@ -349,38 +343,35 @@ In this section we will prove the converse direction. We start with \cref{lem:1w
 \end{lemma}
 
 \begin{proof}
-Since $\cX$ is finite, we define $n \coloneqq \max \{ |V(G)| \mid G \in \cX \}$ to be the maximum number of nodes of a graph in $\cX$, and $k \coloneqq \max \{ l_G(v) \mid v \in V(G), G \in \cX \}$ to be the largest label of any node of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We construct a GNN with $n$ layers working as follows for any $v \in V(G)$: 
+Since $\cX$ is finite, we define $n \coloneqq \max \{ |V(G)| \mid G \in \cX \}$ to be the maximum number of nodes of a graph in $\cX$, and $k \coloneqq \max \{ l_G(v) \mid v \in V(G), G \in \cX \}$ to be the largest label of any node of a graph in $\cX$. Using \cref{lem:1wl_color_upper_bound}, we can compute an upper bound $m$ using $n$ for the number of distinct tuples. Note that, this bound holds true for all graphs in $\cX$. We will now construct a GNN with $n$ layers working on input $G$ as follows:
 \begin{align*}
-    f^{(0)}(v) &\coloneqq l_G(v), \\
-    f^{(t)}(v) &\coloneqq h_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose), \quad 0 < t < n.
+    f^{(0)}(v) &\coloneqq l_G(v), \ \text{and}\\
+    f^{(t)}(v) &\coloneqq \textsc{RELABEL}_{m,t}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose), \quad 0 < t < n.
 \end{align*}
-Here $h_{m,t}$ is a function that maps the tuples injectively to an integer of the set:
-\begin{align*}\{i \in \Nb \mid k + (t-1)\cdot m +1 \leq i \leq k + t \cdot m\}
+Here $\textsc{RELABEL}_{m,t}$ is a function that maps the tuples injectively to an integer of the set:
+\begin{align*}\{i \in \Nb \mid k + (t-1)\cdot m +1 \leq i \leq k + t \cdot m\}.
 \end{align*}
-such that each layer uses its own coloring domain. This function exists as by the soundness of the upper bound of \cref{lem:1wl_color_upper_bound} the cardinality of its co-domain is greater or equal than the one of its domain. With this, we ensure that each layer, maps a tuple to a new, previously not used, color. Therefore, every layer of this GNN, computes a single iteration of the $\wl$ algorithm. Further, since the $\wl$ algorithm converges after at most $|V(G)| =: n$ iterations, we set the number of layers to $n$. Thereby we ensure that the coloring computed after $n$ layers when applied on any graph $G \in \cX$ is similarly expressive as the coloring computed by the $\wl$ algorithm when applied on $G$.
+This function exists as by the soundness of the upper bound of \cref{lem:1wl_color_upper_bound}, the cardinality of its co-domain is greater or equal than the one of its domain. Thereby, and with the injectiveness of $\textsc{RELABEL}_{m,t}$, we ensure that each GNN layer maps a tuple to a new, previously unused color. Therefore, every layer of this GNN computes a single iteration of the $\wl$ algorithm. Further, since the $\wl$ algorithm converges after at most $|V(G)| \leq n$ iterations, we set the number of layers to $n$. We ensure that the coloring computed by this GNN after $n$ layers when applied on any graph $G \in \cX$ is similarly expressive as the coloring computed by the $\wl$ algorithm when applied on $G$.
 
 We define the collection $C$ of functions computable by GNNs that is $\wldisc$ as: 
 \begin{align*}
-C \coloneqq \{ \cA: \cX \rightarrow \Rb, \ G \mapsto \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
+    C \coloneqq \{ \cA: \cX \rightarrow \Rb, \ G \mapsto \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
 \end{align*}
 where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored as $c$ in the coloring of $f^{(n)}$.
 \end{proof}
 
-Similar to the proof in the previous section, we will use \cref*{lem:composition_lemma_gnn} to introduce the ability to construct GNNs that take in as input multiple GNNs and then apply a multilayer perceptron to the combined output.
-
+Similar to the proof in the previous section, we will use \cref{lem:composition_lemma_gnn} to introduce the ability to construct GNNs that take in as input multiple GNNs and then apply a multilayer perceptron to the combined output.
 
 \begin{lemma}[Composition GNN]\label{lem:composition_lemma_gnn}
-    Let $C$ be a collection of function computable by GNNs. Further, let  $\cA_1, \dots , \cA_n \in C$ and $\mlp$ a suitable multilayer perceptron, then \\$\hat{\cA}(\cdot) \coloneqq \mlp(\cA_1(\cdot), \dots, \cA_n(\cdot))$ is also computable by a GNN.
+    Let $C$ be a collection of function computable by GNNs. Further, let  $\cA_1, \dots , \cA_n \in C$ and $\mlp^\bullet$ a suitable multilayer perceptron, then \\$\hat{\cA}(\cdot) \coloneqq \mlp(\cA_1(\cdot), \dots, \cA_n(\cdot))$ is also computable by a GNN.
 \end{lemma}
 
 \begin{proof}
-    Assume the above. Further, for the ease of readability we make the assumptions that the node features computed in each layer by each $\cA_i$ is one dimensional. Note that, one can easily extend this proof to work over arbitrary feature dimensions.
-
-    Further, we will for any $x \in \Rb^d$ use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Also, we use the following notation to indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function and $f^{(0)}_i$ the input function of $\cA_i$.
+    Further, for any $x \in \Rb^d$, we will use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function and $f^{(0)}_i$ the input function of $\cA_i$.
     
-    We will prove the lemma by giving a construction of $\hat{\cA}$. Let $K$ be the maximum number of layers of all $\cA_1, \dots, \cA_n$. We construct the GNN $\hat{\cA}$ with $K$ layers, with the input layer working as follows on $v \in G$:
+    We will prove the lemma by constructing $\hat{\cA}$. Let $T$ be the maximum number of layers of all $\cA_1, \dots, \cA_n$. We construct the GNN $\hat{\cA}$ with $T$ layers, with the input layer working as follows on an input graph $G$:
     \begin{align*}
-        \hat{f}^{(0)}(v) \coloneqq \begin{bmatrix}
+        \forall v \in V(G): \ \hat{f}^{(0)}(v) \coloneqq \begin{bmatrix}
             f^{(0)}_1(v)\\
             \vdots\\
             f^{(0)}_n(v)
@@ -389,43 +380,44 @@ Similar to the proof in the previous section, we will use \cref*{lem:composition
     and each other layer $0 < t \leq K$ uses the merge $\hat{f}^{(t)}_{\text{merge}}$ and aggregation $\hat{f}^{(t)}_{\text{agg}}$ functions as defined below:
     \begin{align*}
         \hat{f}^{(t)}_{\text{merge}} (\hat{f}^{(t-1)}(v), \ Agg) &:= \begin{bmatrix}
-            f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v)[1],\ Agg[1])\\
+            f^{(t)}_{\text{merge}, 1}(\hat{f}^{(t-1)}(v)[1],\ Agg[1])\\
             \vdots\\
             f^{(t)}_{\text{merge}, n}(\hat{f}^{(t-1)}(v)[n],\ Agg[n])
-        \end{bmatrix}\text{, and}\\
+        \end{bmatrix},\quad \text{and}\\
         \hat{f}^{(t)}_{\text{agg}}(\MSopen \hat{f}^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose ) &:= \begin{bmatrix}
             f^{(t)}_{\text{agg}, 1}(\MSopen f^{(t-1)}(w)[1] \mid w \in \mathcal{N}(v) \MSclose)\\
             \vdots\\
             f^{(t)}_{\text{agg}, n}(\MSopen f^{(t-1)}(w)[n] \mid w \in \mathcal{N}(v) \MSclose)
         \end{bmatrix}.
     \end{align*}
-    Note that, not all $\cA_i$ will have $K$ layers. For these cases we define the missing functions as follows:
+    Note that, not all $\cA_i$ will be comprised of $K$ layers. For these cases we define the missing functions as follows:
     \begin{align*}
-        f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v)\text{, and}\\
+        f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v), \quad \text{and}\\
         f^{(t)}_{\text{agg}, i}(\MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose) &\coloneqq 0.
     \end{align*}
     These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. Finally, we construct the \textsf{READOUT} function of $\hat{\cA}$ as follows:
     \begin{align*}
-        \textsf{Readout}(\MSopen \hat{f}^{(t)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
-            \textsf{Readout}_i(\MSopen f^{(t)}_{\text{merge}, 1}(v) \mid v \in V(G) \MSclose)\\
+        \textsf{READOUT}(\MSopen \hat{f}^{(T)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
+            \textsf{READOUT}_1(\MSopen \hat{f}^{(T)}(v)[1] \mid v \in V(G) \MSclose)\\
             \vdots\\
-            \textsf{Readout}_n(\MSopen f^{(t)}_{\text{merge}, n}(v) \mid v \in V(G) \MSclose)
+            \textsf{READOUT}_n(\MSopen \hat{f}^{(T)}(v)[n] \mid v \in V(G) \MSclose)
         \end{bmatrix}.
     \end{align*}
 \end{proof}
 
-As a result, we are in the same starting position as at the beginning of the proof in \autoref{sec:proof_theorem:1wl_in_gnn}. That is, we have shown with \cref{lem:gnn_1wl_disc} that there is a collection of functions that can distinguish any pair of graphs distinguishable by the 1-WL algorithm, and with \cref{lem:composition_lemma_gnn} we have shown that the composition of multiple GNNs and a multilayer perceptron is still computable by a GNN. Such that we can simply apply the results of \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2} to GNNs aswell and thereby concluding that for any fixed $G^* \in \cX$ the indicator function $\varphi_{G^*}$ working over $\cX$ with:
+As a consequence of the previous two lemmas, we find ourselves in a similar position as at the beginning of the proof in \cref{sec:proof_theorem:1wl_in_gnn}. Specifically, we have established, through \cref{lem:gnn_1wl_disc}, the existence of a collection $C$ of functions that can be computed by GNNs and can effectively distinguish any pair of graphs that are also distinguishable by the 1-WL algorithm. Furthermore, with \cref{lem:composition_lemma_gnn}, we have demonstrated that the composition of multiple GNNs and a multilayer perceptron remains computable by a single GNN. Consequently, we can also apply the findings of \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2} to GNNs. Thus, we can conclude that for any fixed $G^* \in \cX$, the indicator function $\varphi_{G^*}$ working over $\cX$ with:
 \begin{align*}
-    \forall G \in \cX: \varphi_{G^*}(G) := \begin{cases}
-    1, \quad \text{if $G \wliso G^*$}\\
-    0, \quad \text{else}
-\end{cases},
+        \forall G \in \cX: \quad \varphi_{G^*}(G) := 
+        \begin{cases}
+            1, \quad \text{if $G \wliso G^*$}\\
+            0, \quad \text{else}
+        \end{cases},
 \end{align*}
 is computable by a GNN.
 
-\begin{lemma}\label{lem:decompose_gnn_as_wl}
+\begin{lemma}\label{lem:decompose_wl_as_gnn}
     Let $\mathcal{C}$ be a collection of functions from $\cX$ to $\Rb$ computable by GNNs so that for all $G^* \in \cX$, there exists 
-    $\varphi_{G^*} \in \cC$ satisfying $\forall G \in \cX: \varphi_{G^*}(G) = \mathds{1}_{G \wliso G^*}$, then every function computable by a $\wlnn$ is also computable by a GNN.
+    $\varphi_{G^*} \in \cC$ satisfying $\forall G \in \cX: \varphi_{G^*}(G) = \mathds{1}_{G \wliso G^*}$. Then every function computable by $\wlnn$ is also computable by a GNN.
 \end{lemma}
 
 \begin{proof}
@@ -435,12 +427,7 @@ is computable by a GNN.
         &= \frac{1}{|\cX/\!{\wliso}(G)|}\sum_{G^* \in \cX} \cB(G^*) \cdot \mathds{1}_{G \wliso G^*} \nonumber \\
         &= \sum_{G^* \in \cX} \frac{\cB(G^*)}{|\cX/\!{\wliso}(G^*)|}  \cdot \varphi_{G^*}(G)
     \end{align}
-    with $\cX/\!{\wliso}(G^*)$ we denote the set of all graphs $G$ over $\cX$ that are equivalent to $G^*$ according to the $\wliso$ relation. With \cref{lem:wl_relation_equivalence}, we know that for any $G_1, G_2 \in \cX$ with $G_1 \wliso G_2: \cB(G_1) = \cB(G_2)$, such this decomposition is sound.
-    
+    where we denote with $\cX/\!{\wliso}(G^*)$ the set of all graphs $G$ over $\cX$ that are equivalent to $G^*$ according to the $\wliso$ relation. Further, with \cref{lem:wl_relation_equivalence} we know that for any $G_1, G_2 \in \cX$ with $G_1 \wliso G_2: \cB(G_1) = \cB(G_2)$.
     
     We can encode $\cB$ as stated in \autoref{eq:1wl_decomposition} via a multilayer perceptron with $\frac{\cB(G^*)}{|\cX/\!{\wliso}(G^*)|}$ being constants and $\varphi_{G^*} \in \cC$ encoding the indicator function. Combined with the \autoref{lem:composition_lemma_gnn}, we can conclude that $\cB$ is computable by $\wlnn$. Important to note, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\cX/\!{\wliso}(G^*)$ well-defined for all graphs.
 \end{proof}
-
-
-
-\newpage

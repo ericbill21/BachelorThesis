@@ -4,9 +4,12 @@ import shutil
 import warnings
 from typing import Callable, List, Optional, Union
 
+import models
 import numpy as np
 import torch
 import torch_geometric
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 from torch import nn
 from torch.nn import functional as F
 from torch_geometric.data import Data, HeteroData, InMemoryDataset, dataset
@@ -221,7 +224,7 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
 
         # First we copy the given Dataset with respect to the current ordering
         data_list = []
-        for idx in range(dataset.len()):
+        for idx in range(len(dataset)):
             data_list.append(dataset[idx])
         
         # Apply k_wl times the 1-WL convolution
@@ -237,3 +240,52 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
 
         # Save the maximum node feature as attribute
         self.max_node_feature = self._data.x.max().item()
+
+def get_agg_data(model, dataset): 
+    data_aggregate, data_y = [], []
+
+    with torch.no_grad():
+        for data in dataset:
+
+            if isinstance(model, models.generic_wlnn):
+                x = model.embedding(data.x).squeeze()
+                x = model.pool(x, data.batch).squeeze()
+
+            if isinstance(model, models.generic_gnn):
+                x = model.gnn(data.x, data.edge_index).squeeze()
+                x = model.pool(x, data.batch).squeeze()
+
+            data_aggregate.append(x)
+            data_y.append(data.y)
+
+    # Stack tensor to one big tensor
+    data_aggregate = torch.stack(data_aggregate, dim=0)
+    data_y = torch.stack(data_y, dim=0).squeeze()
+
+    data_aggregate = torch.cat([data_aggregate, data_y.unsqueeze(-1)], dim=-1)
+
+    return data_aggregate
+
+def test_knn(data_aggregate, train_index, test_index, k):
+    X = data_aggregate[:,:-1]
+    Y = data_aggregate[:,-1]
+
+    clustering_algorithm = KNeighborsClassifier(n_neighbors=k)
+    clustering_algorithm.fit(X[train_index], Y[train_index])
+
+    score = clustering_algorithm.score(X[test_index], Y[test_index])
+    return score
+
+def test_svm(data_aggregate, train_index, test_index, **kwargs):
+    X = data_aggregate[:,:-1]
+    Y = data_aggregate[:,-1]
+    
+    clustering_algorithm = SVC(**kwargs)
+    clustering_algorithm.fit(X[train_index], Y[train_index])
+
+    score = clustering_algorithm.score(X[test_index], Y[test_index])
+    return score
+        
+
+    
+

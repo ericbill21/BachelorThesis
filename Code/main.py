@@ -21,6 +21,8 @@ import wandb
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 SAVE_MODEL = True
+TEST_AGGREGATE = True
+K_MAX = 200
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
@@ -112,6 +114,13 @@ num_epochs = []
 
 # Saving model
 best_model_global = 0.0
+best_models = []
+
+# Testing Aggregation
+if TEST_AGGREGATE:
+    knn_accuracies = [[] for i in range(K_MAX)]
+    svm_lin_accuracies = []
+    svm_rbf_accuracies = []
 
 # Number of repitions
 for i in range(args.num_repition):
@@ -136,11 +145,14 @@ for i in range(args.num_repition):
     train_accuracies += [[]]
     val_accuracies += [[]]
 
-    for fold, (train_index, test_index) in enumerate(kf.split(list(range(len(dataset_current))))):
+    splits = kf.split(list(range(len(dataset_current))))
+    for fold, (train_index, test_index) in enumerate(splits):
         print(f"\tCross-Validation Split {fold+1}/{args.k_fold}")
 
         # Sample 10% split from training split for validation.
         train_index, val_index = train_test_split(train_index, test_size=0.1)
+
+        # Variables for detemining the best model of the current fold.
         best_val_acc = 0.0
 
         # Split data.
@@ -180,27 +192,62 @@ for i in range(args.num_repition):
                 best_test_acc = utils.test(test_loader, model, DEVICE) * 100.0
                 best_train_acc = utils.test(train_loader, model, DEVICE) * 100.0
 
-                # Save and override the current best model if the test accuracy is better than the current best.
+                if TEST_AGGREGATE:
+                    data_aggregate = utils.get_agg_data(model, dataset_current)
+
+                     # Save and override the current best model if the test accuracy is better than the current best.
                 if SAVE_MODEL and best_test_acc > best_model_global:
                     best_model_global = best_test_acc
                     model.config = vars(args)
+                    model.data_aggregate = data_aggregate
+                    model.train_index = train_index
+                    model.test_index = test_index
+                    model.dataset = dataset_current
                     torch.save(model, f"Code/saved_models/{run.name}.pt")
 
             # Break if learning rate is smaller 10**-6.
             if lr < 0.000001:
                 print(f"\t\tEpoch {epoch}/{args.max_epochs}")
                 break
-
+        
+        # AFTER TRAINING
+        # Log results.
         test_accuracies[i].append(best_test_acc)
         train_accuracies[i].append(best_train_acc)
         val_accuracies[i].append(best_val_acc)
         num_epochs.append(epoch)
-    
+
+        # Test the aggregate of the best model.
+        if TEST_AGGREGATE:
+            for k in range(K_MAX):
+                knn_acc = utils.test_knn(data_aggregate, train_index=train_index, test_index=test_index, k=k+1) * 100.0
+                knn_accuracies[k].append(knn_acc)
+
+            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear') * 100.0
+            svm_lin_accuracies.append(svm_acc_linear)
+
+            svm_acc_rbf = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='rbf', C=1.0, gamma='scale') * 100.0
+            svm_rbf_accuracies.append(svm_acc_rbf)
+        
 # Transform to torch.Tensor
 test_accuracies = torch.tensor(test_accuracies)
 train_accuracies = torch.tensor(train_accuracies)
 val_accuracies = torch.tensor(val_accuracies)
 num_epochs = torch.tensor(num_epochs, dtype=torch.float32)
+
+if TEST_AGGREGATE:
+    wandb.define_metric('k')
+    wandb.define_metric('knn_accuracies', step_metric='k')
+    knn_accuracies = torch.tensor(knn_accuracies)
+
+    for k in range(K_MAX):
+        wandb.log({'k': k+1, 'knn_accuracies': knn_accuracies[k].mean(), 'knn_accuracies_std': knn_accuracies[k].std()})
+
+    svm_lin_accuracies = torch.tensor(svm_lin_accuracies)
+    svm_rbf_accuracies = torch.tensor(svm_rbf_accuracies)
+
+    wandb.log({'svm_lin_accuracies': svm_lin_accuracies.mean(), 'svm_lin_accuracies_std': svm_lin_accuracies.std(),
+                'svm_rbf_accuracies': svm_rbf_accuracies.mean(), 'svm_rbf_accuracies_std': svm_rbf_accuracies.std()})
 
 print(f"Test Accuracies: {test_accuracies.mean()} with {test_accuracies.std()} std")
 print(f"Train Accuracies: {train_accuracies.mean()} with {train_accuracies.std()} std")

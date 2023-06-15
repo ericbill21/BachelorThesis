@@ -1,40 +1,20 @@
 method: random
 metric:
-  goal: maximize
-  name: test_accuracy
-name: NCI1_GNN_BASIC_POOL
+  goal: minimize
+  name: test_error
+name: ALCHEMY10K_WLNN_BASIC_POOL
 parameters:
-  batch_size:
-    value: 129
-  dataset:
-    value: NCI1
-  gnn_kwargs:
+  encoding_kwargs:
     parameters:
-      act:
-        value: relu
-      act_first:
-        value: false
-      dropout:
-        max: 0.1
-        min: 0
-      hidden_channels:
+      embedding_dim:
         values:
+          - 16
+          - 32
           - 64
           - 128
-      jk:
-        value: cat
-      norm:
-        value: null
-      num_layers:
-        value: 5
-  k_fold:
-    value: 10
-  lr:
-    distribution: uniform
-    max: 0.1
-    min: 0.0001
-  max_epochs:
-    value: 200
+          - 256
+  k_wl:
+    values: [2, 3, 4]
   mlp_kwargs:
     parameters:
       act:
@@ -50,17 +30,15 @@ parameters:
           - 3
           - 4
           - 5
+          - 6
+          - 7
   model:
     values:
-      - GIN:Sum
-      - GIN:Max
-      - GIN:Mean
-  num_repition:
-    value: 5
-  seed:
-    value: 42
+      - 1WL+NN:Embedding-Sum
+      - 1WL+NN:Embedding-Max
+      - 1WL+NN:Embedding-Mean
   tags:
-    value: sweep_gin:basic_pool
+    value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
-program: Code/main.py
+program: main_1_alchemy_10K.py

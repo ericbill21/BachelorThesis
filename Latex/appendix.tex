@@ -3,17 +3,22 @@
 \chapter{Appendix Part I}
 \section{Figures and graphs}
 
-\subsection{The ``Bump'' Function}\label{app:bump_function}
-\begin{figure}[H]
-    \centering
-    \input{Figures/plot1}
-    \caption{Illustration of the so-called ``bump'' function $\psi_a(x)$ used in the proof of \cref{lem:encoding-indicator-func2}. Here the colors of the displayed functions correspond to the parameter $a$ set to $a:=1$ in blue, $a:=2$ in red and $a:=3$ in green.}
-    \label{fig:bump_function}
-\end{figure}
 
 \section{Proofs}
 
 \subsection{\cref{lem:composition_lemma}: Composition Lemma for $\wlnn$}\label{app:composition_proof}
+Before we begin with the actual compositon proof, we give a formal defintion and notation for MLPs.
+
+\begin{definition}[Multilayer Perceptron]\label{def:mlp}
+    Multilayer perceptrons are a class of functions from $\Rb^n$ to $\Rb^m$, with $n,m \in \Nb$. In this thesis, we define a multilayer perceptron as a finite sequence, such that a multilayer perceptron $\mlp$ is defined as $\mlp \coloneqq (\mlp)_{i\in[k]}$ where $k$ is the number of layers. For every $i \in [k]$, the $i$.th layer of the $\mlp$ is the $i$.th item in the finite sequence $\mlp_i$. Further, all layers are recursively defined as: \todo{Adapt the notation for sequences $(\mlp_i)_{i \in [k]}$}
+    \begin{align*}
+        \mlp_{0}(v) &\coloneqq v\\
+        \mlp_{i+1}(v) &\coloneqq \sigma_i(W_i \cdot \mlp_{i} (v) + b_i), \quad \forall i \in [k-1]
+    \end{align*}
+    where $\sigma_i$ is an element wise activation function, $W_i$ is the weight matrix and $b_i$ the bias vector of layer $i$. Note, that for each $W_i$, the succeeding $W_{i+1}$ must have the same number of columns as $W_i$ has rows, in order to be well-defined. Similarly, for every layer $i$, $W_i$ and $b_i$ have to have the same number of rows.
+    Following this definition, when applying a $\mlp$ on input $v \in \Rb^n$ it is $\mlp(v) \coloneqq (\mlp)_k(v)$.
+\end{definition}
+
 \begin{proof}[Proof of \cref{lem:composition_lemma}]
     Let $\cC$ be a collection of functions computed by $\wlnn$, $h_1, \dots ,h_n \in \cC$, and $\mlp^\bullet$ a multilayer perceptron. Further, let $f_{1}, \ldots, f_{n}$ be the encoding functions, as well as $\text{MLP}_1, \ldots, \text{MLP}_n$ be the multilayer perceptrons used by $h_1, \dots h_n$ respectively. As outlined above, we will now construct $f^*$ and $\mlp^*$, such that for all graphs $G \in \cX$:
     \begin{equation*}

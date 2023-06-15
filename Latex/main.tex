@@ -71,6 +71,8 @@
 \usepackage{blindtext}
 \usepackage{eso-pic}
 
+\usepackage{xcolor}
+\newcommand{\sqbox}[1]{\textcolor{#1}{\rule{1.7ex}{1.7ex}}}
 
 \usepackage{todonotes}
 
@@ -114,6 +116,8 @@ pdfcreator={pdflatex}
 \usepackage{lmodern}
 
 \usepackage{pgfplots}
+\usepackage{afterpage}
+
 
 % Bold. 
 \newcommand{\mF}{\mathbf{F}}
@@ -174,7 +178,7 @@ pdfcreator={pdflatex}
 \newcommand{\mlp}{\text{MLP}}
 
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
-\def\samples{5}
+\def\samples{2}
 
 
 \usepackage[auth-lg]{authblk}
@@ -201,14 +205,29 @@ pdfcreator={pdflatex}
 \renewcommand{\thesection}{\arabic{section}}
 
 \begin{document}
+\pagenumbering{Roman}
 
+% Title
 \maketitle
+\clearpage % end title page
 
-\input{acknowledgement.tex}
+% Add empty page after title
+\begingroup
+  \pagestyle{empty}
+  \null
+  \newpage
+\endgroup
+
+
 \input{abstract.tex}
+\clearpage
+\input{acknowledgement.tex}
 
+\cleardoubleoddstandardpage
 \tableofcontents
-\newpage
+\listoffigures
+\cleardoubleoddstandardpage
+\pagenumbering{arabic}
 
 \input{intro.tex}
 \input{related_work.tex}
@@ -218,13 +237,14 @@ pdfcreator={pdflatex}
 \input{part1.tex}
 
 \part{Empirical Testing}\label{part2}
-
 \input{part2.tex}
 
+\cleardoubleoddstandardpage
 \setcitestyle{numbers}
 \settocbibname{Bibliography}
 \bibliography{references}
 
+\cleardoubleoddstandardpage
 \input{appendix.tex}
 
 
