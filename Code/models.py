@@ -24,6 +24,10 @@ class generic_wlnn(torch.nn.Module):
 
         x = self.embedding(x).squeeze()
         x = self.pool(x, batch)
+
+        if x.dim() == 1:
+            x = x.reshape(-1, 1).float()
+
         x = self.mlp(x)
         x = self.softmax(x)
         return x

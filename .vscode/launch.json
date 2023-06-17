@@ -33,7 +33,7 @@
                     "--k_wl",
                     "3",
                     "--model",
-                    "1WL+NN:Embedding-Sum",
+                    "1WL+NN:Sum",
                     "--wl_convergence",
                     "True",
                     "--encoding_kwargs"

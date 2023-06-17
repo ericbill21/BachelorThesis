@@ -74,8 +74,15 @@ for _ in range(5):
     indices.extend(indices_val)
     indices.extend(indices_test)
 
-    dataset = TUDataset(path, name="alchemy_full")[indices].shuffle()
+    def inverse_permutation(perm):
+        inv = torch.empty_like(perm)
+        inv[perm] = torch.arange(perm.size(0), device=perm.device)
+        return inv
+
+    dataset, perm= TUDataset(path, name="alchemy_full")[indices].shuffle(return_perm=True)
     dataset =  Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE=device)
+    dataset = dataset[inverse_permutation(perm)]
+
     args.encoding_kwargs["max_node_feature"] = dataset.max_node_feature + 1
 
     print(len(dataset)) 
