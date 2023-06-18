@@ -1,0 +1,17 @@
+\begin{tabular}{llllll}
+\toprule
+ &  & \multicolumn{4}{c}{result} \\
+ & dataset & ENZYMES & IMDB-BINARY & NCI1 & PROTEINS \\
+model_type & pool_type &  &  &  &  \\
+\midrule
+\multirow[t]{4}{*}{1-WL+NN} & Embedding:Max & 40.50 ± 7.36 & 69.38 ± 4.90 & 82.59 ± 1.88 & 75.20 ± 3.92 \\
+ & Embedding:Mean & 42.60 ± 9.02 & 72.16 ± 4.09 & 82.92 ± 2.03 & 72.32 ± 4.19 \\
+ & Embedding:Sum & 48.27 ± 8.11 & 72.00 ± 3.84 & 83.60 ± 2.18 & 75.18 ± 4.46 \\
+ & Sum & 17.27 ± 4.63 & NaN & NaN & NaN \\
+\cline{1-6}
+\multirow[t]{3}{*}{GNN} & Max & 32.90 ± 6.13 & 73.52 ± 4.10 & 79.63 ± 2.24 & 74.28 ± 5.07 \\
+ & Mean & 31.73 ± 6.70 & 74.68 ± 3.84 & 70.76 ± 2.16 & 71.96 ± 4.04 \\
+ & Sum & 34.40 ± 7.00 & 72.90 ± 3.83 & 70.84 ± 2.32 & 73.45 ± 3.92 \\
+\cline{1-6}
+\bottomrule
+\end{tabular}
