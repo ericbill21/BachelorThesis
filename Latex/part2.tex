@@ -39,47 +39,57 @@ Asses the std of both model types.
 			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Imdb-Multi}}           & {\textsc{Mutag}}       & {\textsc{NCI1}}           & 
 			{\textsc{Proteins}}         & {\textsc{PTC\_MR}}         &
 			{\textsc{Reddit-Binary}  } \\	\toprule
-			\multirow{4}{*}{\rotatebox{90}{\hspace*{-3pt}Baseline}}  & GR                          & 29.9  \scriptsize	$\pm  0.8$        & 59.3     \scriptsize $\pm 0.9$          & 39.2 \scriptsize $\pm 0.6$            & 72.5 \scriptsize $\pm 1.7$           & 66.2 \scriptsize $\pm 0.2$          & 71.5   \scriptsize $\pm  0.5$        & 56.6 \scriptsize $\pm 1.3$          & 59.7 \scriptsize $\pm 0.5$          
+			% \multirow{4}{*}{\rotatebox{90}{\hspace*{-3pt}Max Acc.}}  & 1-WL Iter.: $1$                           & 29.9  \scriptsize	$\pm  0.8$        & 59.3     \scriptsize $\pm 0.9$          & 39.2 \scriptsize $\pm 0.6$            & 72.5 \scriptsize $\pm 1.7$           & 66.2 \scriptsize $\pm 0.2$          & 71.5   \scriptsize $\pm  0.5$        & 56.6 \scriptsize $\pm 1.3$          & 59.7 \scriptsize $\pm 0.5$          
+			% \\ 
+			%                                      & 1-WL Iter.: $2$                          & 40.3 \scriptsize	$\pm  0.9$         & 58.7     \scriptsize $\pm 0.6$          & 39.7 \scriptsize $\pm 0.3$            & 81.7   \scriptsize $\pm 1.5$         & 74.1  \scriptsize $\pm 0.2$         & 75.8 \scriptsize $\pm 0.7$           & 59.6  \scriptsize $\pm 1.5$         & 84.5 \scriptsize $\pm 0.2$          
+			% \\ 
+			%                                                          & 1-WL Iter.: $3$              & 50.6  \scriptsize	$\pm 1.2 $        & 72.5    \scriptsize $\pm 0.8$           & 50.0 \scriptsize $\pm 0.8$            & 75.9 \scriptsize $\pm 2.0$           & 84.4 \scriptsize $\pm 0.3 $         & 73.1  \scriptsize $\pm 0.6$          & 59.3  \scriptsize $\pm 2.1$         & 73.4 \scriptsize $\pm 0.9$          
+			% \\ 	
+			%                                                          & 1-WL Iter.: $4$                 & 57.1  \scriptsize	$\pm 0.8$         & 73.2 \scriptsize $\pm 0.4$              & 49.8 \scriptsize $\pm 0.4$            & 83.4 \scriptsize $\pm 1.2$           & 85.2  \scriptsize $\pm 0.2$         & 73.0 \scriptsize $\pm 0.9$           & 60.3   \scriptsize $\pm 1.9$        & 88.3 \scriptsize $\pm 0.4$   \\       
+
+			% \cmidrule[1pt]{2-10}
+			\multirow{6}{*}{\rotatebox{90}{$\wlnn$}} 	&
+			\textsf{Max}       &  37.0 \scriptsize	$\pm 1.0$ &   68.1  \scriptsize $\pm 1.7$ & 47.5 \scriptsize $\pm 0.7$ &  85.7 \scriptsize $\pm 1.6$ &  66.9 \scriptsize $\pm 0.3$ &    75.2 \scriptsize $\pm 0.4$ & 60.5  \scriptsize $\pm 1.1$ &\textsc{Oom} 
 			\\ 
-			                                     & SHP                          & 40.3 \scriptsize	$\pm  0.9$         & 58.7     \scriptsize $\pm 0.6$          & 39.7 \scriptsize $\pm 0.3$            & 81.7   \scriptsize $\pm 1.5$         & 74.1  \scriptsize $\pm 0.2$         & 75.8 \scriptsize $\pm 0.7$           & 59.6  \scriptsize $\pm 1.5$         & 84.5 \scriptsize $\pm 0.2$          
-			\\ 
-			                                                         & \textsf{$1$-WL}               & 50.6  \scriptsize	$\pm 1.2 $        & 72.5    \scriptsize $\pm 0.8$           & 50.0 \scriptsize $\pm 0.8$            & 75.9 \scriptsize $\pm 2.0$           & 84.4 \scriptsize $\pm 0.3 $         & 73.1  \scriptsize $\pm 0.6$          & 59.3  \scriptsize $\pm 2.1$         & 73.4 \scriptsize $\pm 0.9$          
+			                                                         & \textsf{Mean}               & 42.3   \scriptsize	$\pm 1.1$        & 67.1    \scriptsize $\pm 1.5$           & 46.8  \scriptsize $\pm 0.8$           & 85.4  \scriptsize $\pm 1.5$          & \textsc{Oot}                        & \textsc{Oot}                         & 59.0 \scriptsize $\pm 2.0$          & \textsc{Oom}          
 			\\ 	
-			                                                         & \textsf{WLOA}                 & 57.1  \scriptsize	$\pm 0.8$         & 73.2 \scriptsize $\pm 0.4$              & 49.8 \scriptsize $\pm 0.4$            & 83.4 \scriptsize $\pm 1.2$           & 85.2  \scriptsize $\pm 0.2$         & 73.0 \scriptsize $\pm 0.9$           & 60.3   \scriptsize $\pm 1.9$        & 88.3 \scriptsize $\pm 0.4$   \\       
-			\cmidrule{2-10}		
-			\multirow{2}{*}{\rotatebox{90}{\hspace*{-3pt}GNN}}       & \textsf{Gin-$\varepsilon$}    & 38.7 \scriptsize	$\pm  1.5$         & 72.9    \scriptsize $\pm 0.7$           & 49.7 \scriptsize $\pm 0.7$            & 84.1 \scriptsize $\pm 1.4$           & 77.7 \scriptsize $\pm 0.8$          & 72.2  \scriptsize $\pm 0.6$          & 55.2 \scriptsize $\pm 1.7$          & 89.8 \scriptsize $\pm 0.4$          
+			                                                         & \textsf{Sum}     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           & 61.7 \scriptsize $\pm 2.4 $         & 89.4  \scriptsize $\pm 0.6$         
+			\\  
+			\cmidrule{2-10}  		
+			                                                         & \textsf{Embedding-Max} & 53.9  \scriptsize	$\pm 1.4$         & 75.6  \scriptsize $\pm 1.0$             & 62.7 \scriptsize $\pm 1.4$            & 84.1  \scriptsize $\pm 2.1$          & \textbf{91.3} \scriptsize $\pm 0.3$ & 79.2 \scriptsize $\pm 1.2$           & 61.6  \scriptsize $\pm 1.3$         & 91.4 \scriptsize $\pm 0.4$          
 			\\ 
-			                                                         & \textsf{Gin-$\varepsilon$-JK} & 39.3  \scriptsize	$\pm 1.6 $        & 73.0  \scriptsize $\pm 1.1$             & 49.6 \scriptsize $\pm 0.7$            & 83.4 \scriptsize $\pm 2.0$           & 78.3   \scriptsize $\pm 0.3 $       & 72.2 \scriptsize $\pm 0.7$           & 56.0  \scriptsize $1.3\pm $         & 90.4 \scriptsize $\pm 0.4$          
+			                                                         & \textsf{Embedding-Mean}     & \textbf{58.2} \scriptsize	$\pm 1.2$ & 72.6     \scriptsize $\pm 0.9 $         & 49.0 \scriptsize $\pm 1.2$            & 84.1   \scriptsize $\pm 1.6$         & 83.2  \scriptsize $\pm 0.4$         & \textsc{Oom}                         & 60.7 \scriptsize $\pm 2.2  $        & \textsc{Oom}                        
 			\\ 
-			\cmidrule{2-10}	
-			\multirow{6}{*}{\rotatebox{90}{k-WL}} 	&
-			\textsf{$2$-WL}       &  37.0 \scriptsize	$\pm 1.0$ &   68.1  \scriptsize $\pm 1.7$ & 47.5 \scriptsize $\pm 0.7$ &  85.7 \scriptsize $\pm 1.6$ &  66.9 \scriptsize $\pm 0.3$ &    75.2 \scriptsize $\pm 0.4$ & 60.5  \scriptsize $\pm 1.1$ &\textsc{Oom} 
-			\\ 
-			                                                         & \textsf{$3$-WL}               & 42.3   \scriptsize	$\pm 1.1$        & 67.1    \scriptsize $\pm 1.5$           & 46.8  \scriptsize $\pm 0.8$           & 85.4  \scriptsize $\pm 1.5$          & \textsc{Oot}                        & \textsc{Oot}                         & 59.0 \scriptsize $\pm 2.0$          & \textsc{Oom}                        
-			\\      
-			\cmidrule{2-10}			
-					
-			                                                         & \textsf{$\delta$-$2$-LWL}     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           & 61.7 \scriptsize $\pm 2.4 $         & 89.4  \scriptsize $\pm 0.6$         
-			\\    		
-			                                                         & \textsf{$\delta$-$2$-LWL\xspace$\!\!^+$} & 53.9  \scriptsize	$\pm 1.4$         & 75.6  \scriptsize $\pm 1.0$             & 62.7 \scriptsize $\pm 1.4$            & 84.1  \scriptsize $\pm 2.1$          & \textbf{91.3} \scriptsize $\pm 0.3$ & 79.2 \scriptsize $\pm 1.2$           & 61.6  \scriptsize $\pm 1.3$         & 91.4 \scriptsize $\pm 0.4$          
-			\\ 
-			                                                         & \textsf{$\delta$-$3$-LWL}     & \textbf{58.2} \scriptsize	$\pm 1.2$ & 72.6     \scriptsize $\pm 0.9 $         & 49.0 \scriptsize $\pm 1.2$            & 84.1   \scriptsize $\pm 1.6$         & 83.2  \scriptsize $\pm 0.4$         & \textsc{Oom}                         & 60.7 \scriptsize $\pm 2.2  $        & \textsc{Oom}                        
-			\\ 
-			                                                         & \textsf{$\delta$-$3$-LWL\xspace$\!\!^+$} & 56.5 \scriptsize	$\pm 1.4$          & 76.1  \scriptsize $\pm 1.2$             & 64.3 \scriptsize $\pm 1.2$            & 85.4   \scriptsize $\pm 1.8$         & 82.7  \scriptsize $\pm 0.4$         & \textsc{Oom}                         & 61.5   \scriptsize $\pm 1.8$        & \textsc{Oom}                        
+			                                                         & \textsf{Embedding-Sum} & 56.5 \scriptsize	$\pm 1.4$          & 76.1  \scriptsize $\pm 1.2$             & 64.3 \scriptsize $\pm 1.2$            & 85.4   \scriptsize $\pm 1.8$         & 82.7  \scriptsize $\pm 0.4$         & \textsc{Oom}                         & 61.5   \scriptsize $\pm 1.8$        & \textsc{Oom}                        
 			\\ 
 						
 			\cmidrule{2-10}	
 						
-			\multirow{6}{*}{\rotatebox{90}{\hspace*{-3pt}\wl{k}{s}}} & \wl{2}{1}                     & 53.7   \scriptsize	$\pm 1.7$        & 73.5     \scriptsize $\pm 0.8$          & 50.8 \scriptsize $\pm 0.7$            & 84.2  \scriptsize $\pm 1.7$          & 82.8  \scriptsize $\pm 0.3$         & 73.2  \scriptsize $\pm 0.6$          & 55.9  \scriptsize $\pm 2.4$         & 76.9  \scriptsize $\pm 0.6$         
+			\multirow{3}{*}{\rotatebox{90}{GCN}} & \textsf{Max}                     & 53.7   \scriptsize	$\pm 1.7$        & 73.5     \scriptsize $\pm 0.8$          & 50.8 \scriptsize $\pm 0.7$            & 84.2  \scriptsize $\pm 1.7$          & 82.8  \scriptsize $\pm 0.3$         & 73.2  \scriptsize $\pm 0.6$          & 55.9  \scriptsize $\pm 2.4$         & 76.9  \scriptsize $\pm 0.6$         
 			\\ 
-			                                                         & \wl{2}{1}$\!\!^+$             & 51.6 \scriptsize	$\pm 1.8$          & 73.7    \scriptsize $\pm 1.1$           & 55.4 \scriptsize $\pm 0.9$            & 79.6   \scriptsize $\pm 3.4$         & 81.9 \scriptsize $\pm 0.3 $         & 76.0  \scriptsize $\pm 0.9$          & 60.2 \scriptsize $\pm 2.1 $         & \textbf{94.7} \scriptsize $\pm 0.3$ 
+			                                                         & \textsf{Mean}    & 51.6 \scriptsize	$\pm 1.8$          & 73.7    \scriptsize $\pm 1.1$           & 55.4 \scriptsize $\pm 0.9$            & 79.6   \scriptsize $\pm 3.4$         & 81.9 \scriptsize $\pm 0.3 $         & 76.0  \scriptsize $\pm 0.9$          & 60.2 \scriptsize $\pm 2.1 $         & \textbf{94.7} \scriptsize $\pm 0.3$ 
 			\\ 
-			                                                         & \wl{3}{1}                     & 53.4 \scriptsize	$\pm 1.4$          & 74.6   \scriptsize $\pm 1.0$            & 51.3 \scriptsize $\pm 0.6$            & 85.3  \scriptsize $\pm 2.4$          & 81.4 \scriptsize $\pm 0.5$          & 72.9  \scriptsize$\pm 1.1$           & 60.2  \scriptsize $\pm 1.7$         & \textsc{Oom}                        
+			                                                         & \textsf{Sum}                  & 53.4 \scriptsize	$\pm 1.4$          & 74.6   \scriptsize $\pm 1.0$            & 51.3 \scriptsize $\pm 0.6$            & 85.3  \scriptsize $\pm 2.4$          & 81.4 \scriptsize $\pm 0.5$          & 72.9  \scriptsize$\pm 1.1$           & 60.2  \scriptsize $\pm 1.7$         & \textsc{Oom}                        
 			\\
-			                                                         & \wl{3}{1}$\!\!^+$             & 57.0  \scriptsize	$\pm  1.9$        & \textbf{87.1}     \scriptsize $\pm 0.6$ & \textbf{67.1}  \scriptsize $\pm 1.1 $ & 79.2 \scriptsize $\pm 1.5$           & 89.8  \scriptsize $\pm 0.4$         & \textbf{81.2}  \scriptsize $\pm 0.8$ & 59.2 \scriptsize $\pm 2.0$          & \textsc{Oom}                        
+			
+			\cmidrule{2-10}	
+						
+			\multirow{3}{*}{\rotatebox{90}{GIN}} & \textsf{Max}                     & 53.7   \scriptsize	$\pm 1.7$        & 73.5     \scriptsize $\pm 0.8$          & 50.8 \scriptsize $\pm 0.7$            & 84.2  \scriptsize $\pm 1.7$          & 82.8  \scriptsize $\pm 0.3$         & 73.2  \scriptsize $\pm 0.6$          & 55.9  \scriptsize $\pm 2.4$         & 76.9  \scriptsize $\pm 0.6$         
 			\\ 
-			                                                         & \wl{3}{2}                     & 56.4 \scriptsize	$\pm 0.7$          & 73.5    \scriptsize $\pm 0.5$           & 49.7 \scriptsize $\pm 0.6$            & \textbf{86.4}  \scriptsize $\pm 2.6$ & 84.9 \scriptsize $\pm 0.4$          & 75.1 \scriptsize $\pm 0.9$           & 61.9  \scriptsize $\pm 2.4$         & \textsc{Oom}                        \\ 
-			                                                         & \wl{3}{2}$\!\!^+$             & 55.8 \scriptsize	$\pm 1.7$          & 78.1   \scriptsize $\pm 1.4$            & 59.5 \scriptsize $\pm 1.0$            & 84.5 \scriptsize $\pm 1.9$           & 89.4  \scriptsize $\pm 0.3$         & 78.8 \scriptsize $\pm 0.6$           & \textbf{62.3} \scriptsize $\pm 3.3$ & \textsc{Oom}                        \\ 
+			                                                         & \textsf{Mean}           & 51.6 \scriptsize	$\pm 1.8$          & 73.7    \scriptsize $\pm 1.1$           & 55.4 \scriptsize $\pm 0.9$            & 79.6   \scriptsize $\pm 3.4$         & 81.9 \scriptsize $\pm 0.3 $         & 76.0  \scriptsize $\pm 0.9$          & 60.2 \scriptsize $\pm 2.1 $         & \textbf{94.7} \scriptsize $\pm 0.3$ 
+			\\ 
+			                                                         & \textsf{Sum}                    & 53.4 \scriptsize	$\pm 1.4$          & 74.6   \scriptsize $\pm 1.0$            & 51.3 \scriptsize $\pm 0.6$            & 85.3  \scriptsize $\pm 2.4$          & 81.4 \scriptsize $\pm 0.5$          & 72.9  \scriptsize$\pm 1.1$           & 60.2  \scriptsize $\pm 1.7$         & \textsc{Oom}                        
+			\\
+
+			\cmidrule{2-10}	
+						
+			\multirow{3}{*}{\rotatebox{90}{GAT}} & \textsf{Max}                    & 53.7   \scriptsize	$\pm 1.7$        & 73.5     \scriptsize $\pm 0.8$          & 50.8 \scriptsize $\pm 0.7$            & 84.2  \scriptsize $\pm 1.7$          & 82.8  \scriptsize $\pm 0.3$         & 73.2  \scriptsize $\pm 0.6$          & 55.9  \scriptsize $\pm 2.4$         & 76.9  \scriptsize $\pm 0.6$         
+			\\ 
+			                                                         & \textsf{Mean}         & 51.6 \scriptsize	$\pm 1.8$          & 73.7    \scriptsize $\pm 1.1$           & 55.4 \scriptsize $\pm 0.9$            & 79.6   \scriptsize $\pm 3.4$         & 81.9 \scriptsize $\pm 0.3 $         & 76.0  \scriptsize $\pm 0.9$          & 60.2 \scriptsize $\pm 2.1 $         & \textbf{94.7} \scriptsize $\pm 0.3$ 
+			\\ 
+			                                                         & \textsf{Sum}                   & 53.4 \scriptsize	$\pm 1.4$          & 74.6   \scriptsize $\pm 1.0$            & 51.3 \scriptsize $\pm 0.6$            & 85.3  \scriptsize $\pm 2.4$          & 81.4 \scriptsize $\pm 0.5$          & 72.9  \scriptsize$\pm 1.1$           & 60.2  \scriptsize $\pm 1.7$         & \textsc{Oom}                        
+			\\
+			
 			\bottomrule
 		\end{tabular}}
         \caption{Some caption!}

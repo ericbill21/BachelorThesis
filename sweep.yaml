@@ -2,15 +2,20 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
+name: IMDB-BINARY_WLNN_NO_EMB
 parameters:
   batch_size:
     value: 32
   dataset:
-    value: PROTEINS
+    value: IMDB-BINARY
   k_fold:
     value: 10
   k_wl:
-    value: 1
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
   lr:
     distribution: uniform
     max: 0.1
@@ -39,8 +44,10 @@ parameters:
       - 1WL+NN:Mean
   num_repition:
     value: 5
+  seed:
+    value: 42
   tags:
-    value: sweep_wlnn:no_embedding
+    value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
 program: Code/main.py
