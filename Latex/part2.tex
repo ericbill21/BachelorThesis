@@ -90,24 +90,23 @@ Asses the std of both model types.
 \begin{table}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}           & 
-			{\textsc{Reddit-Binary}}
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{8}{c}{\textbf{Dataset}}\\\cmidrule{3-10}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi}}
 			\\
 			\toprule
-			\multirow{6}{*}{\rotatebox{90}{$\wlnn$}} 	&
-			\textsf{Max}       &  37.0 \scriptsize	$\pm 1.0$ &   68.1  \scriptsize $\pm 1.7$ & 47.5 \scriptsize $\pm 0.7$ &  85.7 \scriptsize $\pm 1.6$ &  66.9 \scriptsize $\pm 0.3$ &    75.2 \scriptsize $\pm 0.4$
+			\multirow{6}{*}{} 	&
+			\textsf{0}       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
 			\\ 
-			& \textsf{Mean}               & 42.3   \scriptsize	$\pm 1.1$        & 67.1    \scriptsize $\pm 1.5$           & 46.8  \scriptsize $\pm 0.8$           & 85.4  \scriptsize $\pm 1.5$          & \textsc{Oot}                        & \textsc{Oot}       
-			\\ 	
-			& \textsf{Sum}     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           
-			\\  
-			\cmidrule{2-8}  		
-			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 0.0 \scriptsize $\pm 0.0$            & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$        
-			\\ 
-			& \textsf{Embedding-Mean}     & 42.6 \scriptsize	$\pm 9.0$ & \textbf{72.4}     \scriptsize $\pm 4.1 $         & 0.0 \scriptsize $\pm 0.0$            & 83.1   \scriptsize $\pm 1.9$         & 72.3  \scriptsize $\pm 4.2$         &  0.0 \scriptsize $\pm 0.0$                     
-			\\ 
-			& \textsf{Embedding-Sum} & \textbf{48.3} \scriptsize	$\pm 8.1$          & 72.0  \scriptsize $\pm 3.8$             & 0.0 \scriptsize $\pm 0.0$            & \textbf{83.6}   \scriptsize $\pm 2.2$         & 75.2  \scriptsize $\pm 4.5$   	& 0.0  \scriptsize $\pm 0.0$                     
+			& \textsf{1}   & 100 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & - & 100
+			\\
+			& \textsf{2}   & - & - & - & 99.5 & 99.8 & - & - & -
+			\\
+			& \textsf{3}   & - & - & - & 100 & 99.8 & - & - & -
+			\\
+			& \textsf{3}   & - & - & - & - & - & - & -
+			\\
+			\cmidrule{2-10}\morecmidrules\cmidrule{2-10}
+			& Max Accuracy     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           
 			\\
 			\bottomrule
 		\end{tabular}}
