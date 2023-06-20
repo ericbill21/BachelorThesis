@@ -2,20 +2,19 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: IMDB-BINARY_WLNN_NO_EMB
+name: ENZYMES_WLNN_BASIC_NO_EMB
 parameters:
   batch_size:
     value: 32
   dataset:
-    value: IMDB-BINARY
+    value: ENZYMES
   k_fold:
     value: 10
   k_wl:
     values:
-      - 1
-      - 2
-      - 3
-      - 4
+    - 1
+    - 2
+    - 3
   lr:
     distribution: uniform
     max: 0.1
@@ -47,7 +46,7 @@ parameters:
   seed:
     value: 42
   tags:
-    value: sweep_wlnn:basic_pool
+    value: sweep_wlnn:basic_pool_no_emb
   wl_convergence:
     value: false
 program: Code/main.py
