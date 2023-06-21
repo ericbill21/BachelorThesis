@@ -91,22 +91,22 @@ Asses the std of both model types.
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccccc@{}}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{8}{c}{\textbf{Dataset}}\\\cmidrule{3-10}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi}}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi (5K)}}
 			\\
 			\toprule
 			\multirow{6}{*}{} 	&
-			\textsf{0}       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
+			Iterations: $0$       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
 			\\ 
-			& \textsf{1}   & 100 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & - & 100
+			& Iterations: $1$    & 100 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & - & 100
 			\\
-			& \textsf{2}   & - & - & - & 99.5 & 99.8 & - & - & -
+			& Iterations: $2$    & - & - & - & 99.5 & 99.8 & - & - & -
 			\\
-			& \textsf{3}   & - & - & - & 100 & 99.8 & - & - & -
+			& Iterations: $3$   & - & - & - & 100 & 99.8 & - & - & -
 			\\
-			& \textsf{3}   & - & - & - & - & - & - & -
+			& Iterations: $4$    & - & - & - & - & - & - & -
 			\\
 			\cmidrule{2-10}\morecmidrules\cmidrule{2-10}
-			& Max Accuracy     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           
+			& Max Accuracy     & 100 & 88.6 & 63.3 & 100 & 99.8 & 99.7 & 83.9 & 100         
 			\\
 			\bottomrule
 		\end{tabular}}
