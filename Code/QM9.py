@@ -5,9 +5,6 @@ import ast
 import sys
 import time
 
-import preprocessing as pre
-import qm9_datasets as dp
-
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
 sys.path.insert(0, '.')
@@ -20,79 +17,11 @@ import torch.nn.functional as F
 from models import create_model
 from torch.nn import Linear, ReLU, Sequential
 from torch_geometric.data import Data, DataLoader, InMemoryDataset
+from torch_geometric.datasets import QM9
 from torch_geometric.nn import GINConv, Set2Set
 from utils import Wrapper_WL_TUDataset
 
 import wandb
-
-
-class QM9(InMemoryDataset):
-    def __init__(self, root, transform=None, pre_transform=None,
-                 pre_filter=None):
-        super(QM9, self).__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices = torch.load(self.processed_paths[0])
-
-    @property
-    def raw_file_names(self):
-        return "QM9_2tew"
-
-
-    @property
-    def processed_file_names(self):
-        return "QM9_2etw"
-
-    def download(self):
-        pass
-
-    def process(self):
-        data_list = []
-        targets = dp.get_dataset("QM9", multigregression=True).tolist()
-        attributes = pre.get_all_attributes_2_2("QM9")
-
-        node_labels = pre.get_all_node_labels_2_2("QM9", False, False)
-        matrices = pre.get_all_matrices_2_2("QM9", list(range(129433)))
-
-        for i, m in enumerate(matrices):
-            edge_index_1 = torch.tensor(matrices[i][0]).t().contiguous()
-            edge_index_2 = torch.tensor(matrices[i][1]).t().contiguous()
-
-            data = Data()
-            data.edge_index_1 = edge_index_1
-            data.edge_index_2 = edge_index_2
-
-            one_hot = np.eye(3)[node_labels[i]]
-            data.x = torch.from_numpy(one_hot).to(torch.float)
-
-            # Continuous information.
-            data.first = torch.from_numpy(np.array(attributes[i][0])[:,0:13]).to(torch.float)
-            data.first_coord = torch.from_numpy(np.array(attributes[i][0])[:, 13:]).to(torch.float)
-
-            data.second = torch.from_numpy(np.array(attributes[i][1])[:,0:13]).to(torch.float)
-            data.second_coord = torch.from_numpy(np.array(attributes[i][1])[:, 13:]).to(torch.float)
-            data.dist = torch.norm(data.first_coord - data.second_coord, p=2, dim=-1).view(-1, 1)
-            data.edge_attr = torch.from_numpy(np.array(attributes[i][2])).to(torch.float)
-            data.y = torch.from_numpy(np.array([targets[i]])).to(torch.float)
-
-            data_list.append(data)
-
-        data, slices = self.collate(data_list)
-        torch.save((data, slices), self.processed_paths[0])
-
-
-class MyData(Data):
-    def __inc__(self, key, value):
-        return self.num_nodes if key in [
-            'edge_index_1', 'edge_index_2'
-        ] else 0
-
-
-class MyTransform(object):
-    def __call__(self, data):
-        new_data = MyData()
-        for key, item in data:
-            new_data[key] = item
-        return new_data
-
 
 parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
 parser.add_argument('--k_wl', type=int, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
@@ -121,8 +50,9 @@ results = []
 results_log = []
 for _ in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'data', 'QM9')
-    dataset = QM9(path, transform=MyTransform()).shuffle()
+    
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'datasets', "qm9")
+    dataset = QM9(path)
     dataset.data.y = dataset.data.y[:,0:12]
 
     def inverse_permutation(perm):

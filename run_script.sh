@@ -16,7 +16,7 @@
 ### Request the time you need for execution. The full format is D-HH:MM:SS
 ### You must at least specify minutes OR days and hours and may add or
 ### leave out any other parameters
-#SBATCH --time=1200
+#SBATCH --time=600
 
 ### Name the job
 #SBATCH --job-name=SERIAL_JOB

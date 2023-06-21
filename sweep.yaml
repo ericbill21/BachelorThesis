@@ -1,24 +1,27 @@
 method: random
 metric:
-  goal: minimize
-  name: test_error
-name: QM9_WLNN_BASIC_POOL
+  goal: maximize
+  name: test_accuracy
+name: MUTAG_WLNN_BASIC_POOL_NO_EMB
 parameters:
-  encoding_kwargs:
-    parameters:
-      embedding_dim:
-        values:
-          - 16
-          - 32
-          - 64
-          - 128
-          - 256
+  batch_size:
+    value: 32
+  dataset:
+    value: MUTAG
+  k_fold:
+    value: 10
   k_wl:
     values:
       - 1
       - 2
       - 3
       - 4
+  lr:
+    distribution: uniform
+    max: 0.1
+    min: 0.0001
+  max_epochs:
+    value: 200
   mlp_kwargs:
     parameters:
       act:
@@ -34,15 +37,17 @@ parameters:
           - 3
           - 4
           - 5
-          - 6
-          - 7
   model:
     values:
-      - 1WL+NN:Embedding-Sum
-      - 1WL+NN:Embedding-Max
-      - 1WL+NN:Embedding-Mean
+      - 1WL+NN:Sum
+      - 1WL+NN:Max
+      - 1WL+NN:Mean
+  num_repition:
+    value: 5
+  seed:
+    value: 42
   tags:
     value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
-program: regression/QM9.py
+program: Code/main.py
