@@ -225,3 +225,6 @@ print(results.mean(), results.std())
 print(results_log)
 results_log = np.array(results_log)
 print(results_log.mean(), results_log.std())
+
+wandb.log({"test_error": results.mean(), "test_error_std": results.std(), "test_error_log": results_log.mean(), "test_error_log_std": results_log.std()})
+wandb.finish()
