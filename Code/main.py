@@ -203,7 +203,7 @@ for i in range(args.num_repition):
                     model.train_index = train_index
                     model.test_index = test_index
                     model.dataset = dataset_current
-                    torch.save(model, f"Code/saved_models/{run.name}.pt")
+                    torch.save(model, f"Code/saved_models/Replicate_{run.name}.pt")
 
             # Break if learning rate is smaller 10**-6.
             if lr < 0.000001:
