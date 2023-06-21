@@ -111,7 +111,7 @@ args.mlp_kwargs = ast.literal_eval(args.mlp_kwargs)
 wandb.init(project="BachelorThesisExperiments",
             name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
             config={
-                "dataset": "Alchemy10K",
+                "dataset": "QM9",
                 "k_wl": args.k_wl,
                 "model": args.model,
                 "wl_convergence": args.wl_convergence} | args.encoding_kwargs | args.mlp_kwargs
@@ -152,7 +152,7 @@ for _ in range(5):
 
     model = model = create_model(model_name=args.model,
                          input_dim=dataset.num_features,
-                         output_dim=1,
+                         output_dim=12,
                          mlp_kwargs = args.mlp_kwargs,
                          gnn_kwargs = {},
                          encoding_kwargs = args.encoding_kwargs,
