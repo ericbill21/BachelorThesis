@@ -1,23 +1,30 @@
 from __future__ import division
 
+import argparse
+import ast
 import sys
+import time
 
-import auxiliarymethods.datasets as dp
 import preprocessing as pre
+import qm9_datasets as dp
 
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
 sys.path.insert(0, '.')
 
 import os.path as osp
-import torch
-from torch.nn import Sequential, Linear, ReLU
-from torch_geometric.nn import GINConv, Set2Set
-import numpy as np
 
-from torch_geometric.data import (InMemoryDataset, Data)
-from torch_geometric.data import DataLoader
+import numpy as np
+import torch
 import torch.nn.functional as F
+from models import create_model
+from torch.nn import Linear, ReLU, Sequential
+from torch_geometric.data import Data, DataLoader, InMemoryDataset
+from torch_geometric.nn import GINConv, Set2Set
+from utils import Wrapper_WL_TUDataset
+
+import wandb
+
 
 class QM9(InMemoryDataset):
     def __init__(self, root, transform=None, pre_transform=None,
@@ -87,123 +94,28 @@ class MyTransform(object):
         return new_data
 
 
-class NetGIN(torch.nn.Module):
-    def __init__(self, dim):
-        super(NetGIN, self).__init__()
+parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
+parser.add_argument('--k_wl', type=int, help='Number of Weisfeiler-Lehman iterations, or if -1 it runs until convergences.')
+parser.add_argument('--model', type=str, default='1WL+NN:Embedding-Sum', help='Model to use. Options are "1WL+NN:Embedding-{SUM,MAX,MEAN}" or "GIN:{SUM,MAX,MEAN}".')
+parser.add_argument('--wl_convergence', type=str, choices=['True','False'], help='Whether to use the convergence criterion for the Weisfeiler-Lehman algorithm.')
+parser.add_argument('--transformer_kwargs', type=str, default='{}', help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
+parser.add_argument('--encoding_kwargs', type=str, default='{}', help='Arguments for the encoding function. For example, for Embedding, the argument is the embedding dimension with the key "embedding_dim".')
+parser.add_argument('--mlp_kwargs', type=str, default='{}', help='Arguments for the MLP. For example, for the MLP, the argument is the number of hidden layers with the key "num_layers".')
+parser.add_argument('--tags', nargs='+', default=[], help='Tags for the run on wandb.')
+args = parser.parse_args()
 
-        self.node_attribute_encoder = Sequential(Linear(2*13, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.type_encoder = Sequential(Linear(3, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                       torch.nn.BatchNorm1d(dim), ReLU())
-        self.edge_encoder = Sequential(Linear(4+1, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.mlp = Sequential(Linear(3*dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
+args.wl_convergence = args.wl_convergence == "True"
+args.encoding_kwargs = ast.literal_eval(args.encoding_kwargs)
+args.mlp_kwargs = ast.literal_eval(args.mlp_kwargs)
 
-        nn1_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn1_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv1_1 = GINConv(nn1_1, train_eps=True)
-        self.conv1_2 = GINConv(nn1_2, train_eps=True)
-        self.mlp_1 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-
-        nn2_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn2_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv2_1 = GINConv(nn2_1, train_eps=True)
-        self.conv2_2 = GINConv(nn2_2, train_eps=True)
-        self.mlp_2 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-
-        nn3_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn3_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv3_1 = GINConv(nn3_1, train_eps=True)
-        self.conv3_2 = GINConv(nn3_2, train_eps=True)
-        self.mlp_3 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-
-        nn4_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn4_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv4_1 = GINConv(nn4_1, train_eps=True)
-        self.conv4_2 = GINConv(nn4_2, train_eps=True)
-        self.mlp_4 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-
-        nn5_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn5_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv5_1 = GINConv(nn5_1, train_eps=True)
-        self.conv5_2 = GINConv(nn5_2, train_eps=True)
-        self.mlp_5 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-
-        nn6_1 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        nn6_2 = Sequential(Linear(dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                           torch.nn.BatchNorm1d(dim), ReLU())
-        self.conv6_1 = GINConv(nn6_1, train_eps=True)
-        self.conv6_2 = GINConv(nn6_2, train_eps=True)
-        self.mlp_6 = Sequential(Linear(2 * dim, dim), torch.nn.BatchNorm1d(dim), ReLU(), Linear(dim, dim),
-                                torch.nn.BatchNorm1d(dim), ReLU())
-        self.set2set = Set2Set(1 * dim, processing_steps=6)
-        self.fc1 = Linear(2 * dim, dim)
-        self.fc4 = Linear(dim, 12)
-
-    def forward(self, data):
-        first, second, edge_attr, dist =  data.first, data.second, data.edge_attr, data.dist
-
-        node_labels = data.x
-        node_labels = self.type_encoder(node_labels)
-
-        node_attributes = torch.cat([first, second], dim=-1)
-        node_attributes = self.node_attribute_encoder(node_attributes)
-
-        edge_attributes = torch.cat([edge_attr, dist], dim=-1)
-        edge_attributes = self.edge_encoder(edge_attributes)
-
-        x = torch.cat([node_labels, node_attributes, edge_attributes], dim=-1)
-        x = self.mlp(x)
-
-        x_1 = F.relu(self.conv1_1(x, data.edge_index_1))
-        x_2 = F.relu(self.conv1_2(x, data.edge_index_2))
-        x_1_r = self.mlp_1(torch.cat([x_1, x_2], dim=-1))
-
-        x_1 = F.relu(self.conv2_1(x_1_r, data.edge_index_1))
-        x_2 = F.relu(self.conv2_2(x_1_r, data.edge_index_2))
-        x_2_r = self.mlp_2(torch.cat([x_1, x_2], dim=-1))
-
-        x_1 = F.relu(self.conv3_1(x_2_r, data.edge_index_1))
-        x_2 = F.relu(self.conv3_2(x_2_r, data.edge_index_2))
-        x_3_r = self.mlp_3(torch.cat([x_1, x_2], dim=-1))
-
-        x_1 = F.relu(self.conv4_1(x_3_r, data.edge_index_1))
-        x_2 = F.relu(self.conv4_2(x_3_r, data.edge_index_2))
-        x_4_r = self.mlp_4(torch.cat([x_1, x_2], dim=-1))
-
-        x_1 = F.relu(self.conv5_1(x_4_r, data.edge_index_1))
-        x_2 = F.relu(self.conv5_2(x_4_r, data.edge_index_2))
-        x_5_r = self.mlp_5(torch.cat([x_1, x_2], dim=-1))
-
-        x_1 = F.relu(self.conv6_1(x_5_r, data.edge_index_1))
-        x_2 = F.relu(self.conv6_2(x_5_r, data.edge_index_2))
-        x_6_r = self.mlp_6(torch.cat([x_1, x_2], dim=-1))
-
-        x = x_6_r
-
-        x = self.set2set(x, data.batch)
-
-        x = F.relu(self.fc1(x))
-        x = self.fc4(x)
-        return x
-
+wandb.init(project="BachelorThesisExperiments",
+            name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
+            config={
+                "dataset": "Alchemy10K",
+                "k_wl": args.k_wl,
+                "model": args.model,
+                "wl_convergence": args.wl_convergence} | args.encoding_kwargs | args.mlp_kwargs
+)
 
 results = []
 results_log = []
@@ -212,6 +124,16 @@ for _ in range(5):
     path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'data', 'QM9')
     dataset = QM9(path, transform=MyTransform()).shuffle()
     dataset.data.y = dataset.data.y[:,0:12]
+
+    def inverse_permutation(perm):
+        inv = torch.empty_like(perm)
+        inv[perm] = torch.arange(perm.size(0), device=perm.device)
+        return inv
+
+    # Shuffle the dataset again before calculating the 1-WL colors, and afterward unshuffle it.
+    dataset, perm = dataset.shuffle(return_perm=True)
+    dataset =  Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE=device)
+    dataset = dataset[inverse_permutation(perm)]
 
     mean = dataset.data.y.mean(dim=0, keepdim=True)
     std = dataset.data.y.std(dim=0, keepdim=True)
@@ -228,7 +150,14 @@ for _ in range(5):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    model = NetGIN(64).to(device)
+    model = model = create_model(model_name=args.model,
+                         input_dim=dataset.num_features,
+                         output_dim=1,
+                         mlp_kwargs = args.mlp_kwargs,
+                         gnn_kwargs = {},
+                         encoding_kwargs = args.encoding_kwargs,
+                         is_classification=False).to(device)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
                                                            factor=0.5, patience=5,

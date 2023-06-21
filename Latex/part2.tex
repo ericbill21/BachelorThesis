@@ -114,6 +114,35 @@ Asses the std of both model types.
         \label{tab:my_label2}                  
 \end{table}
 
+\begin{table}
+	\resizebox{0.49\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+	\newcommand{\seq}[2]{$(#1, #2)$\text{-}\textsf{SpeqNet}\xspace}
+		\begin{tabular}{@{}lcc@{}}	\toprule
+			\multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{2}{c}{\textbf{Dataset}}
+			\\
+			\cmidrule{2-3} 
+			& {\textsc{Alchemy (10k)}} & {\textsc{Zinc?}} 
+			\\	
+			\toprule
+			\textsf{GINE-$\varepsilon^*$}\xspace        & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}
+			\\		
+			\text{\seq{2}{1}}$^*$   &  0.169 {\scriptsize $\pm 0.005$} -2.010    {\scriptsize $\pm 0.056$}
+			\\
+			\text{\seq{2}{2}}$^*$    & \textbf{0.115} {\scriptsize $\pm 0.001$} -2.722  {\scriptsize $\pm 0.054$}
+
+			\\
+			\cmidrule{1-3}
+			\textsf{Embedding-Max} & \textbf{0.305} {\scriptsize $\pm  0.001$} -1.740 {\scriptsize $\pm  0.042$}
+			\\
+			\textsf{Embedding-Mean} & 0.306 {\scriptsize $\pm  0.001$} -1.720  {\scriptsize $\pm  0.038$}
+			\\
+			\textsf{Embedding-Sum} & 0.306 {\scriptsize $\pm  0.001$} -1.752  {\scriptsize $\pm  0.022$} 
+			\\
+			\bottomrule
+	\end{tabular}}
+	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results of the models marked $^*$ are taken from \cite{Morris2022}}
+\end{table}
+
 \subsection{Overfitting Behaviour}
 Compare the difference between training data performance vs test accuracy accross both models
 

@@ -17,7 +17,6 @@ from torch.nn import Linear as Lin
 from torch.nn import ReLU, Sequential
 from torch_geometric.data import Data, DataLoader, InMemoryDataset
 from torch_geometric.datasets import TUDataset
-from torch_geometric.nn import MessagePassing, Set2Set, global_mean_pool
 from utils import Wrapper_WL_TUDataset
 
 import wandb
@@ -101,7 +100,7 @@ for _ in range(5):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    model = create_model(model_name="1WL+NN:Embedding-Sum",
+    model = create_model(model_name=args.model,
                          input_dim=dataset.num_features,
                          output_dim=12,
                          mlp_kwargs = args.mlp_kwargs,
