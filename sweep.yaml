@@ -2,7 +2,7 @@ method: random
 metric:
   goal: minimize
   name: test_error
-name: ALCHEMY10K_WLNN_BASIC_POOL
+name: QM9_WLNN_BASIC_POOL
 parameters:
   encoding_kwargs:
     parameters:
@@ -38,10 +38,11 @@ parameters:
           - 7
   model:
     values:
+      - 1WL+NN:Embedding-Sum
       - 1WL+NN:Embedding-Max
       - 1WL+NN:Embedding-Mean
   tags:
     value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
-program: main_1_alchemy_10K.py
+program: regression/QM9.py
