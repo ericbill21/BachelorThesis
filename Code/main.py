@@ -21,7 +21,6 @@ import wandb
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 SAVE_MODEL = True
-TEST_AGGREGATE = True
 K_MAX = 200
 
 # Parse arguments
@@ -117,7 +116,7 @@ best_model_global = 0.0
 best_models = []
 
 # Testing Aggregation
-if TEST_AGGREGATE:
+if SAVE_MODEL:
     knn_accuracies = [[] for i in range(K_MAX)]
     svm_lin_accuracies = []
     svm_rbf_accuracies = []
@@ -192,11 +191,10 @@ for i in range(args.num_repition):
                 best_test_acc = utils.test(test_loader, model, DEVICE) * 100.0
                 best_train_acc = utils.test(train_loader, model, DEVICE) * 100.0
 
-                if TEST_AGGREGATE:
+                # Save and override the current best model if the test accuracy is better than the current best.
+                if SAVE_MODEL and best_test_acc > best_model_global:
                     data_aggregate = utils.get_agg_data(model, dataset_current)
 
-                     # Save and override the current best model if the test accuracy is better than the current best.
-                if SAVE_MODEL and best_test_acc > best_model_global:
                     best_model_global = best_test_acc
                     model.config = vars(args)
                     model.data_aggregate = data_aggregate
@@ -218,7 +216,7 @@ for i in range(args.num_repition):
         num_epochs.append(epoch)
 
         # Test the aggregate of the best model.
-        if TEST_AGGREGATE:
+        if SAVE_MODEL:
             for k in range(K_MAX):
                 knn_acc = utils.test_knn(data_aggregate, train_index=train_index, test_index=test_index, k=k+1) * 100.0
                 knn_accuracies[k].append(knn_acc)
@@ -235,7 +233,7 @@ train_accuracies = torch.tensor(train_accuracies)
 val_accuracies = torch.tensor(val_accuracies)
 num_epochs = torch.tensor(num_epochs, dtype=torch.float32)
 
-if TEST_AGGREGATE:
+if SAVE_MODEL:
     wandb.define_metric('k')
     wandb.define_metric('knn_accuracies', step_metric='k')
     knn_accuracies = torch.tensor(knn_accuracies)
