@@ -32,6 +32,48 @@ Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
 Show a big table with all test-accuracies and its standard deviaton and highlight in bold face, the best one.
 Asses the std of both model types.
 
+\subsection{Overfitting Behaviour}
+Compare the difference between training data performance vs test accuracy accross both models
+
+\subsection{Aggregate Analysis}
+Explain what aggregates are and show tSNE with the of the best models with SVM
+
+Also use KNN to assess how good the actuall aggregates are differentiable. -> local clusters ?
+
+\section{Discusssion}
+\subsection{Learned Lessons}
+\subsection{Future Work}
+
+\section{Conclusion}
+
+
+\begin{table}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{8}{c}{\textbf{Dataset}}\\\cmidrule{3-10}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi (5K)}}
+			\\
+			\toprule
+			\multirow{6}{*}{} 	&
+			Iterations: $0$       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
+			\\ 
+			& Iterations: $1$    & 100.0 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & 100.0 & 100
+			\\
+			& Iterations: $2$    & - & - & - & 99.5 & 99.8 & - & - & -
+			\\
+			& Iterations: $3$   & - & - & - & 100.0 & 99.8 & - & - & -
+			\\
+			& Iterations: $4$    & - & - & - & - & - & - & -
+			\\
+			\cmidrule{2-10}\morecmidrules\cmidrule{2-10}
+			& Max Accuracy     & 100.0 & 88.6 & 63.3 & 100.0 & 99.8 & 99.7 & 100.0 & 100.0         
+			\\
+			\bottomrule
+		\end{tabular}}
+        \caption{Some caption!}
+        \label{tab:my_label2}                  
+\end{table}
+
 \begin{table}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
@@ -126,9 +168,9 @@ Asses the std of both model types.
 			\multirow{4}{*}{\rotatebox{90}{\small $\wlnn$}}
 			& \textsf{Test Accuracy} & 48.3 \scriptsize	$\pm 8.1$ & 72.4 \scriptsize	$\pm 4.1$ &  & 83.6 \scriptsize	$\pm 4.1$ & 75.2 \scriptsize $\pm 3.9$
 			\\
-			& \textsf{SVM Linear} & 34.37 \scriptsize	$\pm 5.5$ & 71.2 \scriptsize	$\pm 3.9$ &  & 83.4 \scriptsize	$\pm 2.1$ & 73.9 \scriptsize $\pm 4.1$
+			& \textsf{SVM Linear} & 34.4 \scriptsize	$\pm 5.5$ & 71.2 \scriptsize	$\pm 3.9$ &  & 83.4 \scriptsize	$\pm 2.1$ & 73.9 \scriptsize $\pm 4.1$
 			\\
-			& \textsf{SVM RBF} & 44.97 \scriptsize	$\pm 7.0$ & 72.8 \scriptsize	$\pm 4.3$ &  & 83.6 \scriptsize	$\pm 1.9$ & 75.2 \scriptsize $\pm 4.0$
+			& \textsf{SVM RBF} & 45.0 \scriptsize	$\pm 7.0$ & 72.8 \scriptsize	$\pm 4.3$ &  & 83.6 \scriptsize	$\pm 1.9$ & 75.2 \scriptsize $\pm 4.0$
 			\\
 			& \textsf{KNN} &  &  &  &  &  & 
 			\\
@@ -144,73 +186,101 @@ Asses the std of both model types.
 			\\
 			\bottomrule
 		\end{tabular}}
-        \caption{Some caption!}
         \label{tab:my_label3}                  
 \end{table}
 
+\begin{figure}
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_IMDB.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_IMDB.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}}
+	\end{subfigure}
+	\caption{Visualization of the SVM Linear and tsne plots!!}
+\end{figure}
 
-\begin{table}
-    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{8}{c}{\textbf{Dataset}}\\\cmidrule{3-10}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi (5K)}}
-			\\
-			\toprule
-			\multirow{6}{*}{} 	&
-			Iterations: $0$       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
-			\\ 
-			& Iterations: $1$    & 100.0 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & 100.0 & 100
-			\\
-			& Iterations: $2$    & - & - & - & 99.5 & 99.8 & - & - & -
-			\\
-			& Iterations: $3$   & - & - & - & 100.0 & 99.8 & - & - & -
-			\\
-			& Iterations: $4$    & - & - & - & - & - & - & -
-			\\
-			\cmidrule{2-10}\morecmidrules\cmidrule{2-10}
-			& Max Accuracy     & 100.0 & 88.6 & 63.3 & 100.0 & 99.8 & 99.7 & 100.0 & 100.0         
-			\\
-			\bottomrule
-		\end{tabular}}
-        \caption{Some caption!}
-        \label{tab:my_label2}                  
-\end{table}
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{Figures/knn.pdf}
+	\caption{k-nearest neighbors algorithm!}
+\end{figure}
 
 \begin{figure}
 	\centering
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_ENZYMES_single.pdf}
+		\vspace*{-5ex} 
         \caption{\textsc{Enzymes}}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_IMDB-BINARY_single.pdf}
+		\vspace*{-5ex} 
         \caption{\textsc{Imdb-Binary}}
 	\end{subfigure}
 	\par\bigskip
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_IMDB-BINARY_single.pdf}
+		\vspace*{-5ex} 
         \caption{\textsc{Mutag}}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_NCI1_single.pdf}
+		\vspace*{-5ex} 
         \caption{\textsc{Nci1}}
 	\end{subfigure}
 	\par\bigskip
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_PROTEINS_single.pdf}
+		\vspace*{-5ex} 
         \caption{\textsc{Proteins}}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_IMDB-BINARY_single.pdf}
+		\vspace*{-5ex}
         \caption{\textsc{Reddit-Binary}}
 	\end{subfigure}
 	\par\bigskip
@@ -218,19 +288,6 @@ Asses the std of both model types.
 		\centering
 		\includegraphics[width=\textwidth]{Figures/colorbar.pdf}
 	\end{subfigure}
-	\caption{Visualizing the performance of the best performing GNN of each dataset in approximating node colors computed by the 1-WL algorithm.}
+	\caption{Visualizing the performance of the best-performing GNN of each dataset in approximating node colors computed by the 1-WL algorithm.}
 \end{figure}
 
-\subsection{Overfitting Behaviour}
-Compare the difference between training data performance vs test accuracy accross both models
-
-\subsection{Aggregate Analysis}
-Explain what aggregates are and show tSNE with the of the best models with SVM
-
-Also use KNN to assess how good the actuall aggregates are differentiable. -> local clusters ?
-
-\section{Discusssion}
-\subsection{Learned Lessons}
-\subsection{Future Work}
-
-\section{Conclusion}
