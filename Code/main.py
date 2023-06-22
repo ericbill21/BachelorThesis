@@ -20,7 +20,7 @@ import wandb
 # GLOBAL VARIABLES
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-SAVE_MODEL = False
+SAVE_MODEL = True
 K_MAX = 200
 
 # Parse arguments
@@ -236,6 +236,7 @@ num_epochs = torch.tensor(num_epochs, dtype=torch.float32)
 if SAVE_MODEL:
     wandb.define_metric('k')
     wandb.define_metric('knn_accuracies', step_metric='k')
+    wandb.define_metric('knn_accuracies_std', step_metric='k')
     knn_accuracies = torch.tensor(knn_accuracies)
 
     for k in range(K_MAX):
