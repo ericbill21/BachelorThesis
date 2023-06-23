@@ -70,7 +70,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			\\
 			\bottomrule
 		\end{tabular}}
-        \caption{Some caption!}
+        \caption{An overview of the maximum theoretical accuracy achievable for each dataset based on the number of 1-WL iterations.}
         \label{tab:my_label2}                  
 \end{table}
 
@@ -83,11 +83,11 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			\\
 			\toprule
 			\multirow{6}{*}{\rotatebox{90}{$\wlnn$}} 	&
-			\textsf{Max}       &  37.0 \scriptsize	$\pm 1.0$ &   68.1  \scriptsize $\pm 1.7$ & 47.5 \scriptsize $\pm 0.7$ &  85.7 \scriptsize $\pm 1.6$ &  66.9 \scriptsize $\pm 0.3$ &    75.2 \scriptsize $\pm 0.4$
+			\textsf{Max} & 16.7 \scriptsize $\pm 4.2$ & 52.0 \scriptsize $\pm 5.3$	&73.8 \scriptsize $\pm 12.4$ &	58.6 \scriptsize $\pm 3.3$ & 62.9 \scriptsize $\pm 4.9$  & 	69.2 \scriptsize $\pm 4.0$
 			\\ 
-			& \textsf{Mean}               & 42.3   \scriptsize	$\pm 1.1$        & 67.1    \scriptsize $\pm 1.5$           & 46.8  \scriptsize $\pm 0.8$           & 85.4  \scriptsize $\pm 1.5$          & \textsc{Oot}                        & \textsc{Oot}       
+			& \textsf{Mean} & 18.2 \scriptsize $\pm 4.8$  &	59.4 \scriptsize $\pm 5.8$ &	77.1 \scriptsize $\pm 11.5$	 & 64.0 \scriptsize $\pm 3.3$ &	60.9 \scriptsize $\pm 4.5$ & 66.1 \scriptsize $\pm 3.2$   
 			\\ 	
-			& \textsf{Sum}     & 55.9  \scriptsize	$\pm 1.0$         & 73.0     \scriptsize $\pm 0.7$          & 50.1 \scriptsize $\pm 0.9$            & 85.6  \scriptsize $\pm 1.4$          & 84.6  \scriptsize $\pm 0.3$         & 75.1 \scriptsize $\pm 0.5$           
+			& \textsf{Sum} & 18.0 \scriptsize $\pm 6.2$	 & 57.5 \scriptsize $\pm 5.1$ & 66.8 \scriptsize $\pm 13.9$ & 56.9 \scriptsize $\pm 3.8$ & 65.6 \scriptsize $\pm 4.8$ & 73.0 \scriptsize $\pm 5.1$   
 			\\  
 			\cmidrule{2-8}  		
 			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 0.0 \scriptsize $\pm 0.0$            & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$        
@@ -98,33 +98,33 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			\\ 
 			\cmidrule{2-8}
 			\multirow{9}{*}{\rotatebox{90}{Graph Neural Networks}} 
-			& \textsf{GAT:Max}                    & 31.2 \scriptsize $\pm 6.0$        & 70.7 \scriptsize $\pm 4.8$          & 0.0 \scriptsize $\pm 0.0$            & 58.0 \scriptsize $\pm 4.2$          & 72.5 \scriptsize $\pm 5.1$         & 0.0 \scriptsize $\pm 0.0$  
+			& \textsf{GAT:Max}                    & 31.2 \scriptsize $\pm 6.0$        & 70.7 \scriptsize $\pm 4.8$          & 71.1 \scriptsize $\pm 12.2$ & 58.0 \scriptsize $\pm 4.2$          & 72.5 \scriptsize $\pm 5.1$         & 0.0 \scriptsize $\pm 0.0$  
 			\\ 
-			& \textsf{GAT:Mean}    & 28.9 \scriptsize $\pm 5.9$          & 70.9 \scriptsize $\pm 3.7$           & 0.0 \scriptsize $\pm 0.0$            & 66.1 \scriptsize $\pm 2.8$         & 64.9 \scriptsize $\pm 6.4$       & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GAT:Mean}    & 28.9 \scriptsize $\pm 5.9$          & 70.9 \scriptsize $\pm 3.7$           & 74.8 \scriptsize $\pm 9.1$            & 66.1 \scriptsize $\pm 2.8$         & 64.9 \scriptsize $\pm 6.4$       & 0.0 \scriptsize $\pm 0.0$
 			\\ 
-			& \textsf{GAT:Sum}                  & \textbf{34.4} \scriptsize $\pm 7.0$          & 72.2 \scriptsize $\pm 4.5$	            & 0.0 \scriptsize $\pm 0.0$            & 69.8 \scriptsize $\pm 2.6$	          & 73.4 \scriptsize $\pm 3.9$
+			& \textsf{GAT:Sum}                  & \textbf{34.4} \scriptsize $\pm 7.0$          & 72.2 \scriptsize $\pm 4.5$	            & 82.1 \scriptsize $\pm 11.2$            & 69.8 \scriptsize $\pm 2.6$	          & 73.4 \scriptsize $\pm 3.9$
 			& 0.0 \scriptsize $\pm 0.0$          
 			\\
 			
 			\cmidrule{2-8}
 					
-			& \textsf{GCN:Max} & 33.1 \scriptsize $\pm 7.5$ &	73.5 \scriptsize $\pm 4.1$	& 0.0 \scriptsize $\pm 0.0$ & 61.1 \scriptsize $\pm 3.6$ &	69.8 \scriptsize $\pm 5.9$ & 0.0 \scriptsize $\pm 0.0$  
+			& \textsf{GCN:Max} & 33.1 \scriptsize $\pm 7.5$ &	73.5 \scriptsize $\pm 4.1$	& 74.5 \scriptsize $\pm 11.3$ & 61.1 \scriptsize $\pm 3.6$ &	69.8 \scriptsize $\pm 5.9$ & 0.0 \scriptsize $\pm 0.0$  
 			\\ 
-			& \textsf{GCN:Mean} & 29.9 \scriptsize $\pm 5.7$ &	\textbf{74.7} \scriptsize $\pm 3.8$ & 0.0 \scriptsize $\pm 0.0$ &	68.9 \scriptsize $\pm 2.4$ &	70.9 \scriptsize $\pm 5.2$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GCN:Mean} & 29.9 \scriptsize $\pm 5.7$ &	\textbf{74.7} \scriptsize $\pm 3.8$ & 75.0 \scriptsize $\pm 10.4$ &	68.9 \scriptsize $\pm 2.4$ &	70.9 \scriptsize $\pm 5.2$ & 0.0 \scriptsize $\pm 0.0$
 			\\ 
-			& \textsf{GCN:Sum} & 31.7 \scriptsize $\pm 7.2$ &	73.0 \scriptsize $\pm 4.4$	& 0.0 \scriptsize $\pm 0.0$ & 70.4 \scriptsize $\pm 2.1$ & 3.5 \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$                        
+			& \textsf{GCN:Sum} & 31.7 \scriptsize $\pm 7.2$ &	73.0 \scriptsize $\pm 4.4$	& 81.5 \scriptsize $\pm 10.3$ & 70.4 \scriptsize $\pm 2.1$ & 3.5 \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$                        
 			\\
 			\cmidrule{2-8}	
 						
-			& \textsf{GIN:Max} & 29.2 \scriptsize $\pm 6.2$	& 70.8 \scriptsize $\pm 4.7$ & 0.0 \scriptsize $\pm 0.0$ & \textbf{79.9} \scriptsize $\pm 2.2$ & \textbf{74.3} \scriptsize $\pm 5.1$ & 0.0 \scriptsize $\pm 0.0$   
+			& \textsf{GIN:Max} & 29.2 \scriptsize $\pm 6.2$	& 70.8 \scriptsize $\pm 4.7$ & 77.3 \scriptsize $\pm 10.7$ & \textbf{79.9} \scriptsize $\pm 2.2$ & \textbf{74.3} \scriptsize $\pm 5.1$ & 0.0 \scriptsize $\pm 0.0$   
 			\\ 
-			& \textsf{GIN:Mean}  & 31.7 \scriptsize $\pm 6.7$	& 71.1 \scriptsize $\pm 5.4$ & 0.0 \scriptsize $\pm 0.0$ & 	70.8 \scriptsize $\pm 2.2$ & 72.0 \scriptsize $\pm 4.0$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GIN:Mean}  & 31.7 \scriptsize $\pm 6.7$	& 71.1 \scriptsize $\pm 5.4$ & 82.4 \scriptsize $\pm 9.8$ & 	70.8 \scriptsize $\pm 2.2$ & 72.0 \scriptsize $\pm 4.0$ & 0.0 \scriptsize $\pm 0.0$
 			\\ 
-			& \textsf{GIN:Sum} & 28.9 \scriptsize $\pm 8.7$ & 	69.5 \scriptsize $\pm 4.8$	& 0.0 \scriptsize $\pm 0.0$ & 70.8 \scriptsize $\pm 2.3$ &	73.2 \scriptsize $\pm 4.3$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GIN:Sum} & 28.9 \scriptsize $\pm 8.7$ & 	69.5 \scriptsize $\pm 4.8$	& \textbf{84.6} \scriptsize $\pm 8.7$ & 70.8 \scriptsize $\pm 2.3$ &	73.2 \scriptsize $\pm 4.3$ & 0.0 \scriptsize $\pm 0.0$
 			\\
 			\bottomrule
 		\end{tabular}}
-        \caption{Some caption!}
+        \caption{Overview of the classification accuracies achieved by the best model of each configuration for each dataset in percent and standard deviation.}
         \label{tab:my_label}                  
 \end{table}
 
@@ -146,11 +146,11 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 
 			\\
 			\cmidrule{1-3}
-			\textsf{Embedding-Max} & \textbf{0.305} {\scriptsize $\pm  0.001$} -1.740 {\scriptsize $\pm  0.042$}
+			\textsf{Embedding-Max} & 0.409 {\scriptsize $\pm  0.003$} -1.023 {\scriptsize $\pm  0.009$}
 			\\
-			\textsf{Embedding-Mean} & 0.306 {\scriptsize $\pm  0.001$} -1.720  {\scriptsize $\pm  0.038$}
+			\textsf{Embedding-Mean} & 0.355 {\scriptsize $\pm  0.004$} -1.269  {\scriptsize $\pm  0.020$}
 			\\
-			\textsf{Embedding-Sum} & 0.306 {\scriptsize $\pm  0.001$} -1.752  {\scriptsize $\pm  0.022$} 
+			\textsf{Embedding-Sum} & \textbf{0.305} {\scriptsize $\pm  0.001$} -1.740 {\scriptsize $\pm  0.042$}
 			\\
 			\bottomrule
 	\end{tabular}}
@@ -165,27 +165,28 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			{\textsc{Reddit-Binary}}
 			\\
 			\toprule
-			\multirow{4}{*}{\rotatebox{90}{\small $\wlnn$}}
-			& \textsf{Test Accuracy} & 48.3 \scriptsize	$\pm 8.1$ & 72.4 \scriptsize	$\pm 4.1$ &  & 83.6 \scriptsize	$\pm 4.1$ & 75.2 \scriptsize $\pm 3.9$
+			\multirow{4}{*}{\rotatebox{90}{$\wlnn$}}
+			& \textsf{MLP} & 48.3 \scriptsize	$\pm 8.1$ & \textbf{72.4} \scriptsize	$\pm 4.1$ &  & 83.6 \scriptsize	$\pm 4.1$ & \textbf{75.2} \scriptsize $\pm 3.9$
 			\\
 			& \textsf{SVM Linear} & 34.4 \scriptsize	$\pm 5.5$ & 71.2 \scriptsize	$\pm 3.9$ &  & 83.4 \scriptsize	$\pm 2.1$ & 73.9 \scriptsize $\pm 4.1$
 			\\
 			& \textsf{SVM RBF} & 45.0 \scriptsize	$\pm 7.0$ & 72.8 \scriptsize	$\pm 4.3$ &  & 83.6 \scriptsize	$\pm 1.9$ & 75.2 \scriptsize $\pm 4.0$
 			\\
-			& \textsf{KNN} &  &  &  &  &  & 
+			& \textsf{k-NN} &  \textbf{56.3} \scriptsize $\pm 5.8$ (k=1) & 72.3 \scriptsize $\pm 4.1$ (k=11)&	& \textbf{83.9} \scriptsize $\pm 1.8$ (k=5)& 73.9 \scriptsize $\pm 4.1$ (k=19) &
 			\\
 			\cmidrule{2-8}
-			\multirow{4}{*}{\rotatebox{90}{\small GNN}}
-			& \textsf{Test Accuracy} & 34.4 \scriptsize $\pm 7.0$ &  74.7 \scriptsize $\pm 3.8$ & & 79.9 \scriptsize $\pm 2.2$ & 74.3 \scriptsize $\pm 5.1$
+			\multirow{4}{*}{\rotatebox{90}{GNN}}
+			& \textsf{MLP} & 34.4 \scriptsize $\pm 7.0$ &  \textbf{74.7} \scriptsize $\pm 3.8$ & & \textbf{79.9} \scriptsize $\pm 2.2$ & 74.3 \scriptsize $\pm 5.1$
 			\\
 			& \textsf{SVM Linear} & 33.2 \scriptsize $\pm 5.9$ & 73.9 \scriptsize $\pm 4.2$ & & 67.4 \scriptsize $\pm 2.2$ & 74.7 \scriptsize $\pm 4.2$
 			\\
 			& \textsf{SVM RBF} & 35.9 \scriptsize $\pm 6.0$ & 74.1 \scriptsize $\pm 3.9$ & & 73.0 \scriptsize $\pm 1.9$ & 74.6 \scriptsize $\pm 4.6$
 			\\ 
-			& \textsf{KNN} &  &  & &
+			& \textsf{k-NN} & \textbf{51.6} \scriptsize $\pm 7.0$ (k=1)	& 74.3 \scriptsize $\pm 4.0$ (k=132) & & 77.5 \scriptsize $\pm 1.7$	(k=2)& \textbf{74.9} \scriptsize $\pm 4.3$ (k=27)&
 			\\
 			\bottomrule
 		\end{tabular}}
+		\caption{Overview of the classification accuracies achieved by the best model for each dataset in percent and standard deviation. Additionally, the performance of each model was evaluated under alternative configurations, namely the substitution of the Multilayer Perceptron (MLP) with a Support Vector Machine employing either a linear kernel (SVM Linear) or the Radial Basis Function (SVM RBF), as well as the k-nearest neighbors algorithm (k-NN) with different values for $k$.}
         \label{tab:my_label3}                  
 \end{table}
 
@@ -288,6 +289,6 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\centering
 		\includegraphics[width=\textwidth]{Figures/colorbar.pdf}
 	\end{subfigure}
-	\caption{Visualizing the performance of the best-performing GNN of each dataset in approximating node colors computed by the 1-WL algorithm.}
+	\caption{Visualizing the performance of the best-performing GNN models of each dataset in approximating node colors computed by the 1-WL algorithm.}
 \end{figure}
 
