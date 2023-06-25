@@ -46,6 +46,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 
 \section{Conclusion}
 
+\newpage
 
 \begin{table}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
@@ -70,7 +71,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			\\
 			\bottomrule
 		\end{tabular}}
-        \caption{An overview of the maximum theoretical accuracy achievable for each dataset based on the number of 1-WL iterations.}
+        \caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent.  Moreover, each hyphen indicates that the maximum accuracy has converged with fewer 1-WL iterations.}
         \label{tab:my_label2}                  
 \end{table}
 
@@ -90,11 +91,11 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			& \textsf{Sum} & 18.0 \scriptsize $\pm 6.2$	 & 57.5 \scriptsize $\pm 5.1$ & 66.8 \scriptsize $\pm 13.9$ & 56.9 \scriptsize $\pm 3.8$ & 65.6 \scriptsize $\pm 4.8$ & 73.0 \scriptsize $\pm 5.1$   
 			\\  
 			\cmidrule{2-8}  		
-			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 0.0 \scriptsize $\pm 0.0$            & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$        
+			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 81.1 \scriptsize $\pm 11.2$	 & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$        
 			\\ 
-			& \textsf{Embedding-Mean}     & 42.6 \scriptsize	$\pm 9.0$ & \textbf{72.4}     \scriptsize $\pm 4.1 $         & 0.0 \scriptsize $\pm 0.0$            & 83.1   \scriptsize $\pm 1.9$         & 72.3  \scriptsize $\pm 4.2$         &  0.0 \scriptsize $\pm 0.0$                     
+			& \textsf{Embedding-Mean}     & 42.6 \scriptsize	$\pm 9.0$ & \textbf{72.4}     \scriptsize $\pm 4.1 $         & 84.1 \scriptsize $\pm 9.1$	       & 83.1   \scriptsize $\pm 1.9$         & 72.3  \scriptsize $\pm 4.2$         &  0.0 \scriptsize $\pm 0.0$                     
 			\\ 
-			& \textsf{Embedding-Sum} & \textbf{48.3} \scriptsize	$\pm 8.1$          & 72.0  \scriptsize $\pm 3.8$             & 0.0 \scriptsize $\pm 0.0$            & \textbf{83.6}   \scriptsize $\pm 2.2$         & 75.2  \scriptsize $\pm 4.5$   	& 0.0  \scriptsize $\pm 0.0$                     
+			& \textsf{Embedding-Sum} & \textbf{48.3} \scriptsize	$\pm 8.1$          & 72.0  \scriptsize $\pm 3.8$             & \textbf{85.1} \scriptsize $\pm 8.6$	     & \textbf{83.6}   \scriptsize $\pm 2.2$         & 75.2  \scriptsize $\pm 4.5$   	& 0.0  \scriptsize $\pm 0.0$                     
 			\\ 
 			\cmidrule{2-8}
 			\multirow{9}{*}{\rotatebox{90}{Graph Neural Networks}} 
@@ -166,23 +167,23 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			\\
 			\toprule
 			\multirow{4}{*}{\rotatebox{90}{$\wlnn$}}
-			& \textsf{MLP} & 48.3 \scriptsize	$\pm 8.1$ & \textbf{72.4} \scriptsize	$\pm 4.1$ &  & 83.6 \scriptsize	$\pm 4.1$ & \textbf{75.2} \scriptsize $\pm 3.9$
+			& \textsf{MLP} & 48.3 \scriptsize	$\pm 8.1$ & \textbf{72.4} \scriptsize	$\pm 4.1$ & 85.1 \scriptsize $\pm 8.6$ & 83.6 \scriptsize	$\pm 4.1$ & \textbf{75.2} \scriptsize $\pm 3.9$
 			\\
-			& \textsf{SVM Linear} & 34.4 \scriptsize	$\pm 5.5$ & 71.2 \scriptsize	$\pm 3.9$ &  & 83.4 \scriptsize	$\pm 2.1$ & 73.9 \scriptsize $\pm 4.1$
+			& \textsf{SVM Linear} & 34.4 \scriptsize	$\pm 5.5$ & 71.2 \scriptsize	$\pm 3.9$ & 86.4 \scriptsize $\pm 8.9$	 & 83.4 \scriptsize	$\pm 2.1$ & 73.9 \scriptsize $\pm 4.1$
 			\\
-			& \textsf{SVM RBF} & 45.0 \scriptsize	$\pm 7.0$ & 72.8 \scriptsize	$\pm 4.3$ &  & 83.6 \scriptsize	$\pm 1.9$ & 75.2 \scriptsize $\pm 4.0$
+			& \textsf{SVM RBF} & 45.0 \scriptsize	$\pm 7.0$ & 72.8 \scriptsize	$\pm 4.3$ & 83.2 \scriptsize $\pm 7.5$ & 83.6 \scriptsize	$\pm 1.9$ & 75.2 \scriptsize $\pm 4.0$
 			\\
-			& \textsf{k-NN} &  \textbf{56.3} \scriptsize $\pm 5.8$ (k=1) & 72.3 \scriptsize $\pm 4.1$ (k=11)&	& \textbf{83.9} \scriptsize $\pm 1.8$ (k=5)& 73.9 \scriptsize $\pm 4.1$ (k=19) &
+			& \textsf{k-NN} &  \textbf{56.3} \scriptsize $\pm 5.8$ (k=1) & 72.3 \scriptsize $\pm 4.1$ (k=11)& \textbf{86.7} \scriptsize $\pm 7.7$ (k=10) & \textbf{83.9} \scriptsize $\pm 1.8$ (k=5)& 73.9 \scriptsize $\pm 4.1$ (k=19) &
 			\\
 			\cmidrule{2-8}
 			\multirow{4}{*}{\rotatebox{90}{GNN}}
-			& \textsf{MLP} & 34.4 \scriptsize $\pm 7.0$ &  \textbf{74.7} \scriptsize $\pm 3.8$ & & \textbf{79.9} \scriptsize $\pm 2.2$ & 74.3 \scriptsize $\pm 5.1$
+			& \textsf{MLP} & 34.4 \scriptsize $\pm 7.0$ &  \textbf{74.7} \scriptsize $\pm 3.8$ & 84.6 \scriptsize $\pm 8.7$	 & \textbf{79.9} \scriptsize $\pm 2.2$ & 74.3 \scriptsize $\pm 5.1$
 			\\
-			& \textsf{SVM Linear} & 33.2 \scriptsize $\pm 5.9$ & 73.9 \scriptsize $\pm 4.2$ & & 67.4 \scriptsize $\pm 2.2$ & 74.7 \scriptsize $\pm 4.2$
+			& \textsf{SVM Linear} & 33.2 \scriptsize $\pm 5.9$ & 73.9 \scriptsize $\pm 4.2$ & 51.9 \scriptsize $\pm 34.1$ & 67.4 \scriptsize $\pm 2.2$ & 74.7 \scriptsize $\pm 4.2$
 			\\
-			& \textsf{SVM RBF} & 35.9 \scriptsize $\pm 6.0$ & 74.1 \scriptsize $\pm 3.9$ & & 73.0 \scriptsize $\pm 1.9$ & 74.6 \scriptsize $\pm 4.6$
+			& \textsf{SVM RBF} & 35.9 \scriptsize $\pm 6.0$ & 74.1 \scriptsize $\pm 3.9$ & \textbf{86.0} \scriptsize $\pm 7.4$ & 73.0 \scriptsize $\pm 1.9$ & 74.6 \scriptsize $\pm 4.6$
 			\\ 
-			& \textsf{k-NN} & \textbf{51.6} \scriptsize $\pm 7.0$ (k=1)	& 74.3 \scriptsize $\pm 4.0$ (k=132) & & 77.5 \scriptsize $\pm 1.7$	(k=2)& \textbf{74.9} \scriptsize $\pm 4.3$ (k=27)&
+			& \textsf{k-NN} & \textbf{51.6} \scriptsize $\pm 7.0$ (k=1)	& 74.3 \scriptsize $\pm 4.0$ (k=132) & 88.3 \scriptsize $\pm 6.5$ (k=38) & 77.5 \scriptsize $\pm 1.7$	(k=2)& \textbf{74.9} \scriptsize $\pm 4.3$ (k=27)&
 			\\
 			\bottomrule
 		\end{tabular}}
@@ -236,9 +237,54 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 \end{figure}
 
 \begin{figure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_IMDB-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_MUTAG.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/knn_PROTEINS}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}}
+	\end{subfigure}
 	\centering
-	\includegraphics[width=\textwidth]{Figures/knn.pdf}
-	\caption{k-nearest neighbors algorithm!}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
+		\vspace*{-4ex} 
+	\end{subfigure}
+	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
 \end{figure}
 
 \begin{figure}
@@ -290,5 +336,57 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\includegraphics[width=\textwidth]{Figures/colorbar.pdf}
 	\end{subfigure}
 	\caption{Visualizing the performance of the best-performing GNN models of each dataset in approximating node colors computed by the 1-WL algorithm.}
+\end{figure}
+
+
+\begin{figure}
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_IMDB-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_MUTAG.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_REDDIT-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
+		\vspace*{-4ex} 
+	\end{subfigure}
+	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
 \end{figure}
 

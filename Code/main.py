@@ -21,7 +21,7 @@ import wandb
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 SAVE_MODEL = True
-K_MAX = 200
+K_MAX = 150
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
@@ -217,11 +217,12 @@ for i in range(args.num_repition):
 
         # Test the aggregate of the best model.
         if SAVE_MODEL:
+
             for k in range(K_MAX):
                 knn_acc = utils.test_knn(data_aggregate, train_index=train_index, test_index=test_index, k=k+1) * 100.0
                 knn_accuracies[k].append(knn_acc)
 
-            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear') * 100.0
+            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear', max_iter=10000) * 100.0
             svm_lin_accuracies.append(svm_acc_linear)
 
             svm_acc_rbf = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='rbf', C=1.0, gamma='scale') * 100.0
