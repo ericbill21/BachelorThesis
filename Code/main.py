@@ -222,7 +222,8 @@ for i in range(args.num_repition):
                 knn_acc = utils.test_knn(data_aggregate, train_index=train_index, test_index=test_index, k=k+1) * 100.0
                 knn_accuracies[k].append(knn_acc)
 
-            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear', max_iter=10000) * 100.0
+            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear', max_iter=100000) * 100.0
+            print(svm_acc_linear)
             svm_lin_accuracies.append(svm_acc_linear)
 
             svm_acc_rbf = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='rbf', C=1.0, gamma='scale') * 100.0
