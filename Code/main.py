@@ -81,7 +81,7 @@ wandb.define_metric("num_epochs")
 wandb.define_metric("num_epochs_std")
 
 # Load dataset from https://chrsmrrs.github.io/datasets/docs/datasets/.
-dataset_original = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False, pre_transform=ToDevice(DEVICE)).shuffle()
+dataset_original = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False).shuffle()
 
 # In the case where no node features are available, we use one-hot degree for GNNs and the constant function for 1WL+NN.
 # The following if clause is inspired from  https://github.com/rusty1s/pytorch_geometric/blob/master/benchmark/kernel/datasets.py.
