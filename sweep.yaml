@@ -45,4 +45,4 @@ parameters:
     value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
-program: main_zinc_full.py
+program: main_alchemy_full.py
