@@ -37,7 +37,7 @@ args.mlp_kwargs = ast.literal_eval(args.mlp_kwargs)
 wandb.init(project="BachelorThesisExperiments",
             name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
             config={
-                "dataset": "Zinc 10k",
+                "dataset": "Zinc",
                 "k_wl": args.k_wl,
                 "model": args.model,
                 "wl_convergence": args.wl_convergence} | args.encoding_kwargs | args.mlp_kwargs
@@ -48,27 +48,7 @@ results = []
 results_log = []
 for _ in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    plot_it = []
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'datasets', "ZINC_10k")
-
-    infile = open("train_zinc_10.index", "r")
-    for line in infile:
-        indices_train = line.split(",")
-        indices_train = [int(i) for i in indices_train]
-
-    infile = open("val_zinc_10.index", "r")
-    for line in infile:
-        indices_val = line.split(",")
-        indices_val = [int(i) for i in indices_val]
-
-    infile = open("test_zinc_10.index", "r")
-    for line in infile:
-        indices_test = line.split(",")
-        indices_test = [int(i) for i in indices_test]
-
-    indices = indices_train
-    indices.extend(indices_val)
-    indices.extend(indices_test)
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'datasets', 'ZINC_full')
 
     def inverse_permutation(perm):
         inv = torch.empty_like(perm)
@@ -78,18 +58,18 @@ for _ in range(5):
     # Download and calculate the 1-WL colors, however to ensure that there will be no bias in
     # the calculation of the colors, we shuffle the dataset before calculating the colors and then
     # shuffle it back to the original order.
-    dataset, perm = TUDataset(path, name="ZINC_full")[indices].shuffle(return_perm=True)
+    dataset, perm = TUDataset(path, name="ZINC_full").shuffle(return_perm=True)
     dataset =  Wrapper_WL_TUDataset(dataset, args.k_wl, args.wl_convergence, DEVICE=device)
     dataset = dataset[inverse_permutation(perm)]
 
     args.encoding_kwargs["max_node_feature"] = dataset.max_node_feature + 1
 
-
-    train_dataset = dataset[0:10000].shuffle()
-    val_dataset = dataset[10000:11000].shuffle()
-    test_dataset = dataset[11000:].shuffle()
+    train_dataset = dataset[0:220011].shuffle()
+    val_dataset = dataset[225011:249456].shuffle()
+    test_dataset = dataset[220011:225011].shuffle()
 
     print(f"Size of training dataset: {len(train_dataset)}, size of validation dataset: {len(val_dataset)}, size of test dataset: {len(test_dataset)}")
+
 
     batch_size = 25
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

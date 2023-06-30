@@ -46,7 +46,6 @@ wandb.init(project="BachelorThesisExperiments",
 
 plot_all = []
 results = []
-results = []
 results_log = []
 for _ in range(5):
 

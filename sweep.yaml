@@ -2,7 +2,7 @@ method: random
 metric:
   goal: minimize
   name: test_error
-name: ZINC10K_WLNN_BASIC_POOL
+name: ZINC_WLNN_BASIC_POOL
 parameters:
   encoding_kwargs:
     parameters:
@@ -45,4 +45,4 @@ parameters:
     value: sweep_wlnn:basic_pool
   wl_convergence:
     value: false
-program: main_zinc_10.py
+program: main_zinc_full.py
