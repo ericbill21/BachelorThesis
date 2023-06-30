@@ -1,6 +1,8 @@
 \documentclass[11pt, dvipsnames, DIV=12]{scrreprt} %twoside
 \usepackage{babel}
 
+%\usepackage[showframe]{geometry}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{natbib}
@@ -120,6 +122,31 @@ pdfcreator={pdflatex}
 \usepackage{afterpage}
 
 
+% Larger sum symbol
+\usepackage{graphicx}
+\newlength{\depthofsumsign}
+\setlength{\depthofsumsign}{\depthof{$\sum$}}
+\newlength{\totalheightofsumsign}
+\newlength{\heightanddepthofargument}
+\newcommand{\nsum}[1][1.4]{% only for \displaystyle
+    \mathop{%
+        \raisebox
+            {-#1\depthofsumsign+1\depthofsumsign}
+            {\scalebox
+                {#1}
+                {$\displaystyle\sum$}%
+            }
+    }
+}
+
+% GNNs
+\newcommand{\gat}{\textsf{GAT}\xspace}
+\newcommand{\gcn}{\textsf{GCN}\xspace}
+\newcommand{\gin}{\textsf{GIN}\xspace}
+\newcommand{\gnn}{\textsf{GNN}\xspace}
+
+
+
 % Bold. 
 \newcommand{\mF}{\mathbf{F}}
 \newcommand{\mG}{\mathbf{G}}
@@ -170,13 +197,13 @@ pdfcreator={pdflatex}
 \newcommand{\MSclose}{\}\!\!\}}
 
 % 1-WL+NN
-\newcommand{\wlnn}{\text{1-WL+NN}}
+\newcommand{\wlnn}{\textsf{1-WL+NN}\xspace}
 \newcommand{\wliso}{\simeq_{\text{1WL}}}
 \newcommand{\knn}{K^{n \times n}}
 \newcommand{\gapp}{\text{GNN-Approximating}}
 \newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
-\newcommand{\wl}{\text{1-\!WL}}
-\newcommand{\mlp}{\text{MLP}}
+\newcommand{\wl}{\textsf{1-\!WL}\xspace}
+\newcommand{\mlp}{\textsf{MLP}\xspace}
 
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
 \def\samples{2}
@@ -240,8 +267,6 @@ pdfcreator={pdflatex}
 
 \part{Empirical Testing}\label{part2}
 \input{part2.tex}
-
-\input{viz.tex}
 
 \cleardoubleoddstandardpage
 \setcitestyle{numbers}

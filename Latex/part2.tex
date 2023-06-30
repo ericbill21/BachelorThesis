@@ -1,17 +1,163 @@
 Give a short Outline
 
-\section{Setup}
-Introduction to this section!
+\blindtext
 
-\subsection{Choice of Datasets}
-Luis' Taxonomy, verschiedene Bereiche -> TUDataset
+\section{Setup}
+Introduction to this section! 
+
+\blindtext
+
+\subsection{Datasets}
+We will first explain our choice of datasets and introduce each dataset individually. Afterward, we will explore essential observations that are to be considered when assessing the actual empirical results.
+
+\subsubsection{Choice of Datasets}
+In selecting the datasets for our thesis, we adhered to two fundamental principles to ensure the robustness and diversity of our evaluation for \gnn and \wlnn models. The first principle focuses on using widely recognized benchmark datasets that have been extensively employed in previous studies. This principle enables us and readers to make meaningful comparisons with existing results. The second principle focuses on choosing datasets that are distinct from one another in terms of both their application domains and the way they encode information in graphs.
+
+To fulfill the first principle, we opted for datasets from the TUDataset library. This library, curated by \cite{Mor+2020}, serves as a widely recognized standard for evaluating graph-related methods.
+
+Regarding the second principle, we incorporated the insights from \cite{Liu2022}, who developed a comprehensive taxonomy of common graph benchmark datasets. Their work examined the degree to which information is encoded in graph structures compared to node features with respect to solving the task of the datasets. Based on their taxonomy, they categorized datasets into three distinct classes:
+\begin{enumerate}
+	\item Datasets in which the most crucial information for solving the task is contained in the node features.
+	\item Datasets similar to the first category, but with the significant exception that the node degree strongly correlates with the node features. In these datasets, utilizing simple structural information, such as computing the node degree, is as beneficial for solving the task as using the original node features.
+	\item Datasets where the most crucial information is encoded within the graph structure itself.
+\end{enumerate}
+These categories help us understand how information is encoded in various datasets, such that we aim to choose datasets from all three categories.
+
+As a result of considering these two principles, we selected the following datasets for our thesis: \textsc{Enzymes}, \textsc{Imdb-Binary}, \textsc{Mutag}, \textsc{Nci1}, \textsc{Proteins}, and \textsc{Reddit-Binary} for classification tasks, and \textsc{Alchemy(10K)} and \textsc{Zinc} for regression tasks. For an overview of the elemental properties of each dataset, see \cref{tab:overview_datasets}. We will now shortly introduce each dataset individually: \newline
+
+\textsc{Enzymes}, provided by \cite{Borgwardt2005}, is a dataset consisting of proteins in their tertiary structure, categorized into six distinct enzyme classes. Each node represents a secondary structure, and has an edge to its three spatially closest nodes. Furthermore, each node feature encodes the type of secondary structure (\textit{helix}, \textit{sheet} or \textit{turn}), as well as physical and chemical information. \newline
+
+
+\textsc{Imdb-Binary}, provided by \cite{Yanardag2015}, is a dataset comprising ego networks. Each node in the network represents an actor/actress, and a unidirectional edge exists between two nodes if and only if the corresponding actors played together in a movie. The task involves determining whether each ego network's genre is \textit{action} or \textit{romance}. \newline
+
+\textsc{Mutag}, provided by \cite{Debnath1991}, is a dataset comprising Nitroaromatic compounds. Each compound is represented by a graph in which nodes represent atoms, with their types encoded as node features, and edges represent atomic bonds. The task involves determining whether a given compound has a mutagenic effect on Salmonella typhimurium bacteria. \newline
+
+\textsc{Nci1}, provided by \cite{Wale2008}, comprises graph representations of chemical compounds. In these graphs, nodes represent atoms, and edges represent atomic bonds. Moreover, the atom types are encoded in the node features. The overall task involves determining whether a given compound is active or inactive in inhibiting non-small cell lung cancer.\newline
+
+\textsc{Proteins}, provided by \cite{Borgwardt2005}, contains proteins encoded similarly to ENZYMES. The task here is to determine whether each graph represents an enzyme. \newline
+
+\textsc{Reddit-Binary}, provided by \cite{Yanardag2015}, involves graphs that are derived from popular Reddit communities. The nodes in these graphs represent users who are active in the community, while the edges represent interactions between the users. The task is to identify whether a graph belongs to a community that is focused on questions and answers, or one that is focused on discussions. \newline
+
+\textsc{Alchemy(10K)}, provided by \cite{Chen2019alchemy}, consists of organic molecules, with each node representing an atom and each edge representing an atomic bond. Additionally, each node feature encodes various properties for each atom, while each edge encodes the bond type and distance between atoms. The overall task is to compute 12 different continuous quantum mechanical properties for each graph. Note that we do not utilize the entire dataset, only a subset with a fixed training split. In detail, the training data comprises 10.000 samples, while the validation and test set each consists of 1000 graphs. \newline
+
+\begin{table}[]
+	\begin{center}
+		\caption{Dataset statistics and properties for graph-level prediction tasks. This table has been adapted from \cite{Morris2022}.}
+		\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+			\begin{tabular}{@{}c <{\enspace}@{}lccccccc@{}}\toprule
+				& \multirow{3}{*}{\vspace*{4pt}\textbf{Dataset}} & \multicolumn{7}{c}{\textbf{Properties}}\\
+				\cmidrule{3-9}
+				                         & & \shortstack{Number\\of graphs} & \shortstack{Number of\\classes/targets} & \shortstack{$\varnothing$ Number\\of nodes} & \shortstack{$\varnothing$ Number\\ of edges} & \shortstack{Node\\labels} & \shortstack{Edge\\labels} & \shortstack{Taxonomy \\Category} \\ \midrule
+				\multirow{6}{*}{\rotatebox{90}{Classification}}
+				& $\textsc{Enzymes}$       & 600               & 6                         & 32.6                          & 62.1                          & \cmark                   & \xmark  & 1    \\
+				& $\textsc{IMDB-Binary}$   & 1\,000            & 2                         & 19.8                          & 96.5                          & \xmark                   & \xmark   & 3   \\
+				& $\textsc{Mutag}$         & 188               & 2                         & 17.9                          & 19.8                          & \cmark                   & \xmark   & 2   \\
+								
+				& $\textsc{NCI1}$          & 4\,110            & 2                         & 29.9                          & 32.3                          & \cmark                   & \xmark   & 3   \\
+				& $\textsc{Proteins}$      & 1\,113            & 2                         & 39.1                          & 72.8                          & \cmark                   & \xmark  & 2    \\
+				& $\textsc{Reddit-Binary}$ & 2\,000            & 2                         & 429.6                         & 497.8                         & \xmark                   & \xmark & 3     \\ 
+				\midrule
+				\multirow{2}{*}{\rotatebox{90}{Reg.}}
+				& $\textsc{Alchemy (10k)}$       & 12000          & 12                        & 10.1                          & 20.9                          & \cmark                   & \cmark & -     \\
+				& $\textsc{Zinc}$       & 12000          & 12                        & 10.1                          & 20.9                          & \cmark                   & \cmark & -     \\
+				\bottomrule
+			\end{tabular}}
+		\label{tab:overview_datasets}
+	\end{center}
+\end{table}
+
+\subsubsection{Analysis of the Datasets}
+To ensure the reliability and fairness of our evaluation, one of our initial steps was to assess the balance of our selected datasets for classification. We employed the normalized Shannon index to evaluate the balance of a dataset, where a value close to $0$ indicates maximum imbalance, while a value close to $1$ signifies perfect balance. See \cref{sec:definition_shannon_index} in the Appendix for a formal definition of this metric.
+
+\begin{table}[H]
+	\caption{An overview of the normalized Shannon index calculated for each dataset.}
+	\label{tab:shannon_index}
+	\centering
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}          & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{1}{*}{} 	&
+			Shannon index & 1 & 1 & 0.920 & 1 & 0.973 & 1 \\
+			\bottomrule
+		\end{tabular}}              
+\end{table}
+
+\Cref{tab:shannon_index} provides an overview of the normalized Shannon index computed for each selected dataset. Upon analyzing the data, we observed that all the datasets exhibit high balance, as all their values are close to $1$. This finding assures us that the datasets do not suffer significant class imbalances, which will remain important in the following section.
+
+In addition to the balance of all datasets, another important aspect is understanding the upper bound of performance achievable by both \gnn and \wlnn models on these datasets. Unlike in other areas of machine learning where multilayer perceptron models can achieve near-perfect performance due to their universal approximation capabilities (\cite{Hornik1991}), \gnn and \wlnn models have inherent limitations on their expressiveness. This restriction stems from the fact that the expressiveness of the \wl algorithm limits the performance of both frameworks. In detail, if the \wl algorithm can not distinguish a pair of graphs in a dataset, then neither a \gnn nor a \wlnn model can.
+
+While we have pointed out that the \wl algorithm is, in general, quite powerful in distinguishing pairs of graphs in \cref{sec:related_work}; we also explained that it is not complete. Therefore, assuming that \gnn or \wlnn models exist that can achieve almost perfect accuracy on all classification datasets is not reasonable. Thus, we calculated the theoretical maximum accuracy achievable by the perfect model for each dataset. In detail, we even investigated how many iterations of the \wl algorithm it takes to achieve this accuracy. For a comprehensive overview of the accuracies achievable on all datasets, please refer to \cref{tab:max_accuracies}. In this table, we have included the accuracy achievable when running the \wl algorithm for $0$ iterations, which essentially means taking the initial node features as the coloring for iteration $0$ and assessing the expressiveness of this initial coloring.
+
+\begin{table}[H]
+	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of \wl iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. Additionally, datasets marked with a ``$*$'' indicates that these datasets do not have initial node features, such that we initialize their features with a constant for all nodes.}
+	\label{tab:max_accuracies}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {$\textsc{Imdb-Binary}^*$}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {$\textsc{Reddit-Binary}^*$}
+			\\
+			\toprule
+			\multirow{6}{*}{} 	&
+			Iterations: $0$       &  81.4 & 60.6 & 93.1 & 91.3 & 91.9 & 83.9
+			\\ 
+			& Iterations: $1$    & 100.0 & 88.6 & 95.7 & 99.5 & 99.7 & 100.0
+			\\
+			& Iterations: $2$    & - & - & 99.5 & 99.8 & - & - 
+			\\
+			& Iterations: $3$   & - & - & 100.0 & 99.8 & - & - 
+			\\
+			& Iterations: $4$    & - & - & - & - & - & -
+			\\
+			\cmidrule{2-8}\morecmidrules\cmidrule{2-8}
+			& Max Accuracy     & 100.0 & 88.6 & 100.0 & 99.8 & 99.7 & 100.0      
+			\\
+			\bottomrule
+		\end{tabular}}              
+\end{table}
+
+Upon examining the results, we observe that all datasets exhibit perfect or near-perfect theoretical classification accuracies. This result makes interpreting results obtained from actual \wlnn or \gnn models later on more straightforward. Additionally, the accuracy achievable after each number of iterations provides a theoretical lower limit on the number of message-passing layers a \gnn must be composed of to be even capable of achieving this accuracy. 
+
+We have conducted the same analyzes on additional datasets, as their results might be valuable to the reader. For these, see \cref{tab:max_accuracies_app} in the Appendix.
+
+
+
 
 \subsection{Choice of Models}
-GIN weil sehr expressive \cite{Xu2018}, GAT und GCN wegen \cite{Nikolentzos2023} mit basic pool um complexity der models zu containen und bessere vergleiche zu haben
+In selecting our models, we aimed to use techniques that are relatively generic and not highly specialized for any of the datasets. Consequently, we opted for a basic set of models to maintain simplicity and versatility.
 
-$\wlnn$ auch nur mit basic pool
+\subsubsection{\wlnn Models}
+Our primary consideration for the \wlnn models revolves around choosing an encoding function, as all other components are fixed. To keep things straightforward, we decided to employ encoding functions consisting of two main components. Firstly, an optional preprocessing step that operates on the colors computed by the \wl algorithm. Secondly, a basic pooling function for transforming the color histogram into a fixed-size vector.
+
+In more detail, the optional preprocessing step involves a simple look-up table. If utilized, this step maps each color injectively to a vector in the range of $[-1, 1]^n$, where the value of $n$ is a hyperparameter. By encoding the color information into higher dimensions, this approach aims to enhance efficiency during subsequent processing steps. For the second step, the pooling component, we selected elementary functions such as elementwise \textsf{Max}, \textsf{Mean}, and Summation (\textsf{Sum}). In summary, each of the \wlnn models can be uniquely identified by their encoding functions; therefore, we will refer to each model by their encoding function:
+
+\begin{equation*}
+	\text{Embedding}-\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\} \quad \text{or} \quad \{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\},
+\end{equation*}
+where ``Embedding'' indicates the use of the optional preprocessing step.
+
+\subsubsection{\gnn Models}
+As mentioned in the introduction to this section, our focus is on keeping the models basic. Hence, we opted for \gin by \cite{Xu2018}, \gcn by \cite{Kip+2017}, and \gat by \cite{Velivckovic2017} as the base architecture for the message-passing layers. Each of these architectures was chosen for specific reasons.
+
+Firstly, we included \gin as an obvious candidate because it can be configured to be as expressive as the 1-WL algorithm. This characteristic makes it interesting when comparing it to \wlnn models.
+Next, we also included \gcn based on its good empirical success in recent years. Furthermore, the insights provided by \cite{Nikolentzos2023} demonstrated that, in a certain sense, the node features computed by \gcn and \gin are similar, making \gcn a reasonable alternative to \gin in cases where the advantage of \gin's expressiveness is not needed.
+Lastly, we added \gat as an alternative approach to the other two models. In detail, \cite{Nikolentzos2023} also showed that the node features computed by \gat are entirely different from those computed by \gin or \gcn.
+
+Regarding the choice of Readout functions, we decided to utilize functions that are composed of two components. The first component is one of the elementwise pooling functions, such as max, mean, or Sum, to aggregate the information from a graph representation into a fixed-size vector. Secondly, we incorporate a multilayer perceptron to process the aggregated information further.
+
+In summary, each of the \gnn models can be uniquely identified by their \gnn architecture and the pooling function utilized; therefore, we will refer to each model by these two properties:
+\begin{equation*}
+	{\{\gat, \gcn, \gin\}} - \{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}.
+\end{equation*}
+
+Note that the selection of the Readout function creates similarities between the \gnn and \wlnn models. These similarities play a crucial role in ensuring that any empirical differences observed between the two frameworks are not attributed to the utilization of more powerful techniques.
 
 \subsection{Experimental Setup}
+
+To have confidence in our results we ran for each dataset and each model a hyperparameter sweep, in which we tested for example the difference configurations
+
 python 3.10, pytorch und pytorch-geometric (use footnotes from outline). Use of Wheights and Biases as data logging instance, HPC, Colab und meine eigene Hardware - > summierte overall computation time. Standard procedure, training with 10-fold and repition and a split of training, validation and test dataset.
 
 \section{Results}
@@ -20,12 +166,12 @@ Introduction to this section!
 \subsection{Explain how results look like}
 Shortly explain, their performance and how they typically learn. Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
 
-\subsubsection{1-WL+NN}
+\subsubsection{\wlnn}
 Explain most important parameters such as k-wl mit der wl accuracy on. Show how it relates to the datasets by showing the table of theoretical accuracies, 
 Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
 
-\subsubsection{GNN}
-Show performance of different GNN models -> Boxplot of different pooling functions
+\subsubsection{\gnn}
+Show performance of different \gnn models -> Boxplot of different pooling functions
 Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
 
 \subsection{Test Accuracy}
@@ -48,34 +194,11 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 
 \newpage
 
-\begin{table}
-    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{1-WL}}&\multicolumn{8}{c}{\textbf{Dataset}}\\\cmidrule{3-10}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Imdb-Multi}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}} & {\textsc{Reddit-Multi (5K)}}
-			\\
-			\toprule
-			\multirow{6}{*}{} 	&
-			Iterations: $0$       &  81.4 & 60.6 & 44.2 & 93.1 & 91.3 & 91.9 & 83.9 & 55.1
-			\\ 
-			& Iterations: $1$    & 100.0 & 88.6 & 63.3 & 95.7 & 99.5 & 99.7 & 100.0 & 100
-			\\
-			& Iterations: $2$    & - & - & - & 99.5 & 99.8 & - & - & -
-			\\
-			& Iterations: $3$   & - & - & - & 100.0 & 99.8 & - & - & -
-			\\
-			& Iterations: $4$    & - & - & - & - & - & - & -
-			\\
-			\cmidrule{2-10}\morecmidrules\cmidrule{2-10}
-			& Max Accuracy     & 100.0 & 88.6 & 63.3 & 100.0 & 99.8 & 99.7 & 100.0 & 100.0         
-			\\
-			\bottomrule
-		\end{tabular}}
-        \caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent.  Moreover, each hyphen indicates that the maximum accuracy has converged with fewer 1-WL iterations.}
-        \label{tab:my_label2}                  
-\end{table}
 
-\begin{table}
+
+\begin{table}[H]
+	\caption{Overview of the classification accuracies achieved by the best model of each configuration for each dataset in percent and standard deviation.}
+	\label{tab:my_label}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
@@ -124,12 +247,10 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			& \textsf{GIN:Sum} & 28.9 \scriptsize $\pm 8.7$ & 	69.5 \scriptsize $\pm 4.8$	& \textbf{84.6} \scriptsize $\pm 8.7$ & 70.8 \scriptsize $\pm 2.3$ &	73.2 \scriptsize $\pm 4.3$ & 0.0 \scriptsize $\pm 0.0$
 			\\
 			\bottomrule
-		\end{tabular}}
-        \caption{Overview of the classification accuracies achieved by the best model of each configuration for each dataset in percent and standard deviation.}
-        \label{tab:my_label}                  
+		\end{tabular}}            
 \end{table}
 
-\begin{table}
+\begin{table}[H]
 	\resizebox{0.49\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 	\newcommand{\seq}[2]{$(#1, #2)$\text{-}\textsf{SpeqNet}\xspace}
 		\begin{tabular}{@{}lcc@{}}	\toprule
@@ -158,7 +279,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results of the models marked $^*$ are taken from \cite{Morris2022}}
 \end{table}
 
-\begin{table}
+\begin{table}[H]
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
@@ -176,7 +297,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 			& \textsf{k-NN} &  \textbf{56.3} \scriptsize $\pm 5.8$ (k=1) & 72.3 \scriptsize $\pm 4.1$ (k=11)& \textbf{86.7} \scriptsize $\pm 7.7$ (k=10) & \textbf{83.9} \scriptsize $\pm 1.8$ (k=5)& 73.9 \scriptsize $\pm 4.1$ (k=19) &
 			\\
 			\cmidrule{2-8}
-			\multirow{4}{*}{\rotatebox{90}{GNN}}
+			\multirow{4}{*}{\rotatebox{90}{\gnn}}
 			& \textsf{MLP} & 34.4 \scriptsize $\pm 7.0$ &  \textbf{74.7} \scriptsize $\pm 3.8$ & 84.6 \scriptsize $\pm 8.7$	 & \textbf{79.9} \scriptsize $\pm 2.2$ & 74.3 \scriptsize $\pm 5.1$
 			\\
 			& \textsf{SVM Linear} & 33.2 \scriptsize $\pm 5.9$ & 73.9 \scriptsize $\pm 4.2$ & 51.9 \scriptsize $\pm 34.1$ & 67.4 \scriptsize $\pm 2.2$ & 74.7 \scriptsize $\pm 4.2$
@@ -191,52 +312,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
         \label{tab:my_label3}                  
 \end{table}
 
-\begin{figure}
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Enzymes}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_IMDB.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Imdb-Binary}}
-	\end{subfigure}
-	\par\bigskip
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_IMDB.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Mutag}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_NCI1.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Nci1}}
-	\end{subfigure}
-	\par\bigskip
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_PROTEINS.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Proteins}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.49\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Reddit-Binary}}
-	\end{subfigure}
-	\caption{Visualization of the SVM Linear and tsne plots!!}
-\end{figure}
-
-\begin{figure}
+\begin{figure}[H]
 	\begin{subfigure}[b]{0.3\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/knn_ENZYMES.pdf}
@@ -276,7 +352,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\centering
 		\includegraphics[width=\textwidth]{Figures/knn_PROTEINS}
 		\vspace*{-4ex} 
-		\caption{\textsc{Reddit-Binary}}
+		\caption{\textsc{Reddit-Binary}- MISSING}
 	\end{subfigure}
 	\centering
 	\begin{subfigure}[b]{0.3\textwidth}
@@ -284,10 +360,55 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
 		\vspace*{-4ex} 
 	\end{subfigure}
-	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
+	\caption{Average classification accuracy achieved on each dataset by replacing the multilayer perceptron of the best-performing \wlnn and \gnn model with a classifier based on the $k$-nearest neighbors algorithm. We tested for different values of $k$.}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_IMDB.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_MUTAG.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/tsne_svm_lin_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}- MISSING!}
+	\end{subfigure}
+	\caption{Visualization of the decision boundary of each Support Vector Machine with a linear kernel using t-SNE.}
+\end{figure}
+
+\begin{figure}[H]
 	\centering
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
@@ -305,7 +426,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 	\par\bigskip
 	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{Figures/heatmaps_IMDB-BINARY_single.pdf}
+		\includegraphics[width=\textwidth]{Figures/heatmaps_MUTAG_single.pdf}
 		\vspace*{-5ex} 
         \caption{\textsc{Mutag}}
 	\end{subfigure}
@@ -328,18 +449,63 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\centering
 		\includegraphics[width=\textwidth]{Figures/heatmaps_IMDB-BINARY_single.pdf}
 		\vspace*{-5ex}
-        \caption{\textsc{Reddit-Binary}}
+        \caption{\textsc{Reddit-Binary}-MISSING}
 	\end{subfigure}
 	\par\bigskip
 	\begin{subfigure}[b]{0.6\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/colorbar.pdf}
 	\end{subfigure}
-	\caption{Visualizing the performance of the best-performing GNN models of each dataset in approximating node colors computed by the 1-WL algorithm.}
+	\caption{Visualizing the performance of the best-performing \gnn models of each dataset in approximating node colors computed by the \wl algorithm. Here we randomly sampled a single graph for each dataset and visualized the approximation performance. For each calculation of the \wl colors, we utilized the number of iterations of the \wl algorithm to be the same as the best-performing \wlnn model of each dataset. Specifically, this was 1 for all datasets except for \textsc{Nci1}, where it was 3.}
 \end{figure}
 
+\begin{table}[H]
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{2}{*}{\vspace*{4pt}\textbf{Property}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}           & 
+			{\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{1}{*}{}
+			& MAE & 0.49 \scriptsize $\pm 0.3$ & 0.14 \scriptsize $\pm 0.15$ & 0.42 \scriptsize $\pm 0.29$
+			& 0.42 \scriptsize $\pm 0.22$ & 0.49 \scriptsize $\pm 0.26$
+			\\
+			& Number of \wl colors & 230 & 64 & 32 & 27252 & 296 &
+			\\
+			\bottomrule
+		\end{tabular}}
+		\caption{MAE of the approximation performance of the best-perfoming \gnn in relation to the number of unique \wl colors for each dataset. In particular, in comparison to the colors computed by the \wl alogrithm with a single iteration.}
+        \label{tab:my_label4}     
+\end{table}
 
-\begin{figure}
+\begin{table}[H]
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{2}{*}{\vspace*{4pt}\textbf{Epsilon}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}           & 
+			{\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{4}{*}{\rotatebox{90}{F1-Score}}
+			& $\epsilon = 0.001$ & 52.55 & 60.97 & 62.01 &
+			\\
+			& $\epsilon = 0.01$ & 54.63 & 60.97 & 62.01 &
+			\\
+			& $\epsilon = 0.05$ & 62.33 & 71.68 & 62.01 & 
+			\\
+			& $\epsilon = 0.1$ & 70.45 & 78.66 & 62.01 &
+			\\
+			\cmidrule{2-8}
+			& Number of \wl colors & 230 & 64 & 32 & 27252 & 296 &
+			\\
+			\bottomrule
+		\end{tabular}}
+		\caption{MAE of the approximation performance of the best-perfoming \gnn in relation to the number of unique \wl colors for each dataset. In particular, in comparison to the colors computed by the \wl alogrithm with a single iteration.}
+        \label{tab:my_label4}     
+\end{table}
+
+\begin{figure}[H]
 	\begin{subfigure}[b]{0.3\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/train_test_diff_ENZYMES.pdf}
@@ -390,3 +556,33 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
 \end{figure}
 
+\chapter{These / Narrativ}
+\begin{enumerate}
+	\item \wlnn funktioniert nur sehr gut auf kleinen datasets:
+	\begin{itemize}
+		\item  Je größer das Dataset desto größer wird die 1-WL-Color ``Vielfalt'', schwierig für das MLP des \wlnn noch die richtigen Information rauszuziehen. -> These würde ich gerne noch überprüfen: Gibt es ein Classification Dataset das groß und gut ist? OGBG-Molhiv? MalNet Tiny?
+		\item Dagegenspricht aber das die performance von NCI1 deutlich besser ist von \wlnn.
+		\item Theorie warum \wlnn aktuell fast immer besser war, ist dass \wlnn viel weniger Parameter optimieren muss bei gleicher im Vergleich zu GNNs -> Optimum ist schneller gefunden!
+		\item \gnn generalisieren besser im Sinne, dass sie unabhängig von der größe des Datasets sind. Alchemy zeigt das ganz gut!
+		\item Difference in Training and Test Accuracy zeigt auch das die \wlnn Modelle stark overfitten -> Tendenz dazu dass mit größeren Datasets, generalisieren schwieriger wird.
+		\item Performance von den \wlnn Modellen ohne Embedding (Look-Up-Table) ist auch nur auf kleinen Datasets gut. Je größer das Dataset desto größer ist die Differenz zwischen beiden Modell Konfigurationen.
+	\end{itemize}
+	\item GNNs approximiert \wl Farben:
+	\begin{itemize}
+		\item Aprroximation ist vorhanden und ist nicht so schlecht: Error ist zwar so circa bei 50\% dafür ist die std aber auch sehr hoch (circa 25\%).
+		\item Vorallem approximierung von \wl mit nur einer Iteration (Node Degree!)
+		\item Performance von den GNNs mit Node-degree initialiserung sind bis jetzt immer besser gewesen (IMDB-Binary \& Reddit-Binary)
+	\end{itemize}
+	\item GNNs und \wlnn erlernen graph representation die gut clustern:
+	\begin{enumerate}
+		\item Sehr gute lineare Separierbarkeit bei allen Datsets (Ausnahme ist Mutag wegen Bug!)
+		\item k-NN clustering hoch für kleine k's bei beiden Modellen. Sehr ähnliche Accuracy Kurven!
+		\item (t-SNE plots zeigen auch, dass clustering vorhanden ist.)
+	\end{enumerate}
+\end{enumerate}
+
+		
+F1  metric oder ROC (watch out unbalanced dataset)
+
+-> intuition: gnn smoothen! (noise reduction)-> \gnn optimalere funktionen
+Setup: de-noising notwendig, CSWM Problem konzipieren -> erst de-noising befor gute prediction

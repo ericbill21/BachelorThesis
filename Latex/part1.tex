@@ -157,6 +157,7 @@ Commonly employed readout functions in this context often involve straightforwar
 
 Common readout functions for GNNs, often involve simple pooling techniques like elementwise summation, averaging or maximum extraction. These pooling operations are typically followed by a multilayer perceptron, which performs additional processing on the aggregated information. %There are, of course, more complex pooling operations like, for example, Set2Set developed by \cite{Vinyals2015}, however in the work of \cite{Xu2018}, the authors showed that given the correct configuration, the elementwise summation pooling function combined with a following multilayer perceptron suffices to create a GNN that is as expressive as the 1-WL algorithm in distinguishing non-isomorphism.
 
+\todo{Finish GNNs}
 
 \section{Theoretical Connection}\label{sec:theo_connections}
 This section is the main part of our theoretical investigation of the two frameworks. We will present four intriguing theorems, which will be proven separately afterward. In detail, the first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. In comparison, the last two theorems will go one step further and establish a connection for continuous functions computed by $\wlnn$ and GNNs and prove a somewhat weaker connection between them.
