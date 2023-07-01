@@ -8,10 +8,10 @@
 #SBATCH --output=output_%J.txt
 
 ### Ask for 10 GB memory
-#SBATCH --mem-per-cpu=32G   #M is the default and can therefore be omitted, but could also be K(ilo)|G(iga)|T(era)
+#SBATCH --mem-per-cpu=256   #M is the default and can therefore be omitted, but could also be K(ilo)|G(iga)|T(era)
 
 ### Request 4 CPU core
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=1
 
 ### Request the time you need for execution. The full format is D-HH:MM:SS
 ### You must at least specify minutes OR days and hours and may add or
@@ -39,5 +39,4 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-cd Code/
-python -m wandb agent eric-bill/BachelorThesisExperiments/1zkn3tt3
+python Code/test_theoretical_acc.py

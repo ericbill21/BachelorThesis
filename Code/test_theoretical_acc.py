@@ -44,7 +44,9 @@ def main():
     WL_CONVERGENCE = [False]
     WL_MAX_ITERATIONS = [0,1,2,3,4,5]
     SEED = 42
-    DATASET_NAMES = ["ENZYMES", "PROTEINS", "IMDB-BINARY", "IMDB-MULTI", "NCI1", 'MUTAG', 'REDDIT-BINARY', 'REDDIT-MULTI-5K', 'COLLAB']
+    DATASET_NAMES = ["ENZYMES", "PROTEINS", "IMDB-BINARY", "IMDB-MULTI", "NCI1", 'MUTAG', 'COLLAB', 'DD', 'PTC_MR',
+                        'REDDIT-BINARY', 'REDDIT-MULTI-5K', 'REDDIT-MULTI-12K', 'NCI109', 'FRANKENSTEIN', 'COX2', 'BZR',
+                        'DHFR', 'OHSU', 'AIDS', 'COIL-DEL',]
 
     # Initialize wandb
     run = wandb.init(

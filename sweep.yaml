@@ -2,7 +2,7 @@ method: random
 metric:
   goal: minimize
   name: test_error
-name: ZINC_WLNN_BASIC_POOL
+name: ALCHEMY_WLNN_BASIC_POOL
 parameters:
   encoding_kwargs:
     parameters:
