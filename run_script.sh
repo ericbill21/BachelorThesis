@@ -8,7 +8,7 @@
 #SBATCH --output=output_%J.txt
 
 ### Ask for 10 GB memory
-#SBATCH --mem-per-cpu=256   #M is the default and can therefore be omitted, but could also be K(ilo)|G(iga)|T(era)
+#SBATCH --mem-per-cpu=256G   #M is the default and can therefore be omitted, but could also be K(ilo)|G(iga)|T(era)
 
 ### Request 4 CPU core
 #SBATCH --cpus-per-task=1
@@ -39,4 +39,23 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-python Code/test_theoretical_acc.py
+python Code/test_theoretical_acc.py --dataset ENZYMES --max_iterations 5
+python Code/test_theoretical_acc.py --dataset PROTEINS --max_iterations 5
+python Code/test_theoretical_acc.py --dataset IMDB-BINARY --max_iterations 5
+python Code/test_theoretical_acc.py --dataset IMDB-MULTI --max_iterations 5
+python Code/test_theoretical_acc.py --dataset NCI1 --max_iterations 5
+python Code/test_theoretical_acc.py --dataset MUTAG --max_iterations 5
+python Code/test_theoretical_acc.py --dataset COLLAB --max_iterations 5
+python Code/test_theoretical_acc.py --dataset DD --max_iterations 5
+python Code/test_theoretical_acc.py --dataset PTC_MR --max_iterations 5
+python Code/test_theoretical_acc.py --dataset REDDIT-BINARY --max_iterations 5
+python Code/test_theoretical_acc.py --dataset REDDIT-MULTI-5K --max_iterations 5
+python Code/test_theoretical_acc.py --dataset REDDIT-MULTI-12K --max_iterations 5
+python Code/test_theoretical_acc.py --dataset NCI109 --max_iterations 5
+python Code/test_theoretical_acc.py --dataset FRANKENSTEIN --max_iterations 5
+python Code/test_theoretical_acc.py --dataset COX2 --max_iterations 5
+python Code/test_theoretical_acc.py --dataset BZR --max_iterations 5
+python Code/test_theoretical_acc.py --dataset DHFR --max_iterations 5
+python Code/test_theoretical_acc.py --dataset OHSU --max_iterations 5
+python Code/test_theoretical_acc.py --dataset AIDS --max_iterations 5
+python Code/test_theoretical_acc.py --dataset COIL-DEL --max_iterations 5

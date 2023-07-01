@@ -1,3 +1,5 @@
+import argparse
+
 import torch
 from sklearn.decomposition import PCA
 from torch_geometric.datasets import TUDataset
@@ -40,65 +42,61 @@ def calculate_max_accuracy(x, y):
 
 def main():
 
+    parser = argparse.ArgumentParser(description='BachelorThesisExperiments')
+    parser.add_argument('--dataset', type=str, help='Dataset')
+    parser.add_argument('--max_iterations', type=int, help='Maximum number of iterations for the Weisfeiler-Lehman algorithm')
+    args = parser.parse_args()
+
     # PARAMETERS
     WL_CONVERGENCE = [False]
-    WL_MAX_ITERATIONS = [0,1,2,3,4,5]
+    WL_MAX_ITERATIONS = list(range(0, args.max_iterations + 1))
     SEED = 42
-    DATASET_NAMES = ["ENZYMES", "PROTEINS", "IMDB-BINARY", "IMDB-MULTI", "NCI1", 'MUTAG', 'COLLAB', 'DD', 'PTC_MR',
-                        'REDDIT-BINARY', 'REDDIT-MULTI-5K', 'REDDIT-MULTI-12K', 'NCI109', 'FRANKENSTEIN', 'COX2', 'BZR',
-                        'DHFR', 'OHSU', 'AIDS', 'COIL-DEL',]
-
+ 
     # Initialize wandb
     run = wandb.init(
         project="BachelorThesisExperiments",
-        name=f"1WL+NN Theoretical Accuracy",
+        name=f"{args.dataset}: Theoretical Accuracy",
         tags=["Accuracy"],
         config={
             "seed": SEED,
             "wl_convergence": WL_CONVERGENCE,
             "wl_max_iterations": WL_MAX_ITERATIONS,
-            "dataset_names": DATASET_NAMES
+            "dataset": args.dataset
         },
     )
 
     # Load dataset
-    table_data = []
-    for dataset_name in DATASET_NAMES:
+    global_dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False)
 
-        global_dataset = TUDataset(root=f"Code/datasets", name=dataset_name, use_node_attr=False)
+    # Create constant node feature if there are no node features.
+    if global_dataset.data.x is None:
+        global_dataset.transform = Constant_Long(0)
 
-        # Create constant node feature if there are no node features.
-        if global_dataset.data.x is None:
-            global_dataset.transform = Constant_Long(0)
+    # We loop over all combinations of convergence and max_iterations
+    for convergence in WL_CONVERGENCE:
 
-        # We loop over all combinations of convergence and max_iterations
-        for convergence in WL_CONVERGENCE:
+        for k_wl in WL_MAX_ITERATIONS:
+            seed_everything(SEED)
 
-            for k_wl in WL_MAX_ITERATIONS:
-                seed_everything(SEED)
+            # Create dataset
+            dataset = Wrapper_WL_TUDataset(global_dataset, k_wl=k_wl, wl_convergence=convergence).shuffle()
+            wl_conv = dataset.wl_conv
 
-                # Create dataset
-                dataset = Wrapper_WL_TUDataset(global_dataset, k_wl=k_wl, wl_convergence=convergence).shuffle()
-                wl_conv = dataset.wl_conv
-
-                if k_wl > 0:
-                    x = torch.stack([wl_conv.histogram(data.x).squeeze() for data in dataset], dim=0)
+            if k_wl > 0:
+                x = torch.stack([wl_conv.histogram(data.x).squeeze() for data in dataset], dim=0)
+            else:
+                # Check if the original dataset has node features: 1. Case Features are one-hot encoded 2. Case Features are not one-hot encoded
+                if global_dataset.transform is None:
+                    x = torch.stack([data.x.sum(dim=0) for data in dataset], dim=0)
                 else:
-                    # Check if the original dataset has node features: 1. Case Features are one-hot encoded 2. Case Features are not one-hot encoded
-                    if global_dataset.transform is None:
-                        x = torch.stack([data.x.sum(dim=0) for data in dataset], dim=0)
-                    else:
-                        x = torch.stack([(data.x == 0).count_nonzero(dim=0) for data in dataset], dim=0)
+                    x = torch.stack([(data.x == 0).count_nonzero(dim=0) for data in dataset], dim=0)
 
-                y = torch.tensor([data.y for data in dataset])
-                
-                max_accuracy = calculate_max_accuracy(x, y).item()
-                table_data.append([dataset_name, convergence, k_wl, max_accuracy])
-                print(f"Dataset: {dataset_name}, Convergence: {convergence}, k_wl: {k_wl}, Max Accuracy: {max_accuracy}")
+            y = torch.tensor([data.y for data in dataset])
+            
+            max_accuracy = calculate_max_accuracy(x, y).item()
+            wandb.log({"max_acc": max_accuracy, 'k_wl': k_wl, 'convergence': convergence})
+            print(f"Dataset: {args.dataset}, Convergence: {convergence}, k_wl: {k_wl}, Max Accuracy: {max_accuracy}")
 
-    # Log the table
-    table_key = wandb.Table(data=table_data, columns=["Dataset", "Convergence", "k_wl", "Max Accuracy"])
-    wandb.log({"1-WL Accuracy": table_key})
     wandb.finish()
 
 
