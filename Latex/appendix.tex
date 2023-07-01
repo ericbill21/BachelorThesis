@@ -91,20 +91,37 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 			& & {0}  & {1}  & {2}  & {3} & {4}  & {5}
 			\\
 			\toprule
-			\multirow{6}{*}{} 	&
-			IDMB-Multi: $0$       &  81.4 & 60.6 & 93.1 & 91.3 & 91.9 & 83.9
-			\\ 
-			& Iterations: $1$    & 100.0 & 88.6 & 95.7 & 99.5 & 99.7 & 100.0
-			\\
-			& Iterations: $2$    & - & - & 99.5 & 99.8 & - & - 
-			\\
-			& Iterations: $3$   & - & - & 100.0 & 99.8 & - & - 
-			\\
-			& Iterations: $4$    & - & - & - & - & - & -
-			\\
-			\cmidrule{2-8}\morecmidrules\cmidrule{2-8}
-			& Max Accuracy     & 100.0 & 88.6 & 100.0 & 99.8 & 99.7 & 100.0      
-			\\
+
+			\multirow{4}{*}{\rotatebox{90}{Bioinformatics}}
+            & DD &1.00 & - & - & - & - & - \\
+            & ENZYMES &0.81 & 1.00 & - & - & - & - \\
+            & OSHU \\
+            & PROTEINS &0.92 & 1.00 & - & - & - & -\\
+
+            \cmidrule{2-8}
+            \multirow{1}{*}{\rotatebox{90}{C}}
+            & COIL-DEL \\
+
+            \cmidrule{2-8}
+            \multirow{9}{*}{\rotatebox{90}{Small molecules}}
+            & AIDS \\
+            & BZR \\
+            & COX2 \\
+            & DHFR \\
+            & FRANKENSTEIN \\
+            & MUTAG &0.93 & 0.96 & 0.99 & 1.00 & - & - \\
+            & NCI1 &0.91 & 1.00 & 1.00 & 1.00 & - & - \\
+            & NCI109 \\
+            & PTC\_MR &0.92 & 0.98 & 0.99 & - & - & - \\
+            \cmidrule{2-8}
+
+            \multirow{6}{*}{\rotatebox{90}{Social networks}}
+            & COLLAB &0.61 & 0.98 & - & - & - & - \\
+            & IMDB-BINARY &0.61 & 0.89 & - & - & - & - \\
+            & IMDB-MULTI &0.44 & 0.63 & - & - & - & - \\
+            & REDDIT-BINARY &0.84 & 1.00 & - & - & - & - \\
+            & REDDIT-MULTI-5K \\
+            & REDDIT-MULTI-12K \\
 			\bottomrule
 		\end{tabular}             
 \end{table}

@@ -39,23 +39,10 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate base
 
 ### Begin of executable commands
-python Code/test_theoretical_acc.py --dataset ENZYMES --max_iterations 5
-python Code/test_theoretical_acc.py --dataset PROTEINS --max_iterations 5
-python Code/test_theoretical_acc.py --dataset IMDB-BINARY --max_iterations 5
-python Code/test_theoretical_acc.py --dataset IMDB-MULTI --max_iterations 5
-python Code/test_theoretical_acc.py --dataset NCI1 --max_iterations 5
-python Code/test_theoretical_acc.py --dataset MUTAG --max_iterations 5
-python Code/test_theoretical_acc.py --dataset COLLAB --max_iterations 5
-python Code/test_theoretical_acc.py --dataset DD --max_iterations 5
-python Code/test_theoretical_acc.py --dataset PTC_MR --max_iterations 5
-python Code/test_theoretical_acc.py --dataset REDDIT-BINARY --max_iterations 5
-python Code/test_theoretical_acc.py --dataset REDDIT-MULTI-5K --max_iterations 5
-python Code/test_theoretical_acc.py --dataset REDDIT-MULTI-12K --max_iterations 5
-python Code/test_theoretical_acc.py --dataset NCI109 --max_iterations 5
-python Code/test_theoretical_acc.py --dataset FRANKENSTEIN --max_iterations 5
-python Code/test_theoretical_acc.py --dataset COX2 --max_iterations 5
-python Code/test_theoretical_acc.py --dataset BZR --max_iterations 5
-python Code/test_theoretical_acc.py --dataset DHFR --max_iterations 5
-python Code/test_theoretical_acc.py --dataset OHSU --max_iterations 5
-python Code/test_theoretical_acc.py --dataset AIDS --max_iterations 5
-python Code/test_theoretical_acc.py --dataset COIL-DEL --max_iterations 5
+python Code/test_theoretical_acc.py --dataset COIL-RAG --max_iterations 5
+python Code/test_theoretical_acc.py --dataset Fingerprint --max_iterations 5
+python Code/test_theoretical_acc.py --dataset Letter-high --max_iterations 5
+python Code/test_theoretical_acc.py --dataset Letter-low --max_iterations 5
+python Code/test_theoretical_acc.py --dataset Letter-med --max_iterations 5
+python Code/test_theoretical_acc.py --dataset KKI --max_iterations 5
+python Code/test_theoretical_acc.py --dataset Peking_1 --max_iterations 5
