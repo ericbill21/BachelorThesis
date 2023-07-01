@@ -69,7 +69,8 @@ def main():
     global_dataset = TUDataset(root=f"Code/datasets", name=args.dataset, use_node_attr=False)
 
     # Create constant node feature if there are no node features.
-    if global_dataset.data.x is None:
+    if global_dataset.data.x is None or global_dataset.data.x.numel() == 0:
+        global_dataset.data.x = None
         global_dataset.transform = Constant_Long(0)
 
     # We loop over all combinations of convergence and max_iterations
@@ -79,8 +80,11 @@ def main():
             seed_everything(SEED)
 
             # Create dataset
-            dataset = Wrapper_WL_TUDataset(global_dataset, k_wl=k_wl, wl_convergence=convergence).shuffle()
-            wl_conv = dataset.wl_conv
+            if k_wl > 0:
+                dataset = Wrapper_WL_TUDataset(global_dataset, k_wl=k_wl, wl_convergence=convergence).shuffle()
+                wl_conv = dataset.wl_conv
+            else:
+                dataset = global_dataset.copy().shuffle()
 
             if k_wl > 0:
                 x = torch.stack([wl_conv.histogram(data.x).squeeze() for data in dataset], dim=0)

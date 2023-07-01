@@ -44,5 +44,4 @@ python Code/test_theoretical_acc.py --dataset Fingerprint --max_iterations 5
 python Code/test_theoretical_acc.py --dataset Letter-high --max_iterations 5
 python Code/test_theoretical_acc.py --dataset Letter-low --max_iterations 5
 python Code/test_theoretical_acc.py --dataset Letter-med --max_iterations 5
-python Code/test_theoretical_acc.py --dataset KKI --max_iterations 5
-python Code/test_theoretical_acc.py --dataset Peking_1 --max_iterations 5
+python Code/test_theoretical_acc.py --dataset FRANKENSTEIN --max_iterations 5
