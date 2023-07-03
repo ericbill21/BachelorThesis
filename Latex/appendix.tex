@@ -84,10 +84,11 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 \subsection{Theoretical Maximum Accuracy Analysis}
 
 \begin{table}[H]
-	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. Additionally, datasets marked with a ``$*$'' indicates that these datasets do not have initial node features, such that we initialize their features with a constant for all nodes.}
+	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. ``\textsc{Oom}'' denotes out of memory error.}
+    \centering
 	\label{tab:max_accuracies_app}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Datasets}}&\multicolumn{6}{c}{\textbf{1-WL Iterations}}\\\cmidrule{3-8}
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Datasets}}&\multicolumn{6}{c}{\textbf{Number of iterations of the \wl algorithm}}\\\cmidrule{3-8}
 			& & {0}  & {1}  & {2}  & {3} & {4}  & {5}
 			\\
 			\toprule
@@ -97,20 +98,20 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
             & ENZYMES &0.81 & 1.00 & - & - & - & - \\
             & KKI & 1.00 & - & - & - & - & - \\
             & OHSU & 1.00 & - & - & - & - & - \\
-            & Peking_1 & 1.00 & - & - & - & - & - \\
+            & Peking\_1 & 1.00 & - & - & - & - & - \\
             & PROTEINS &0.92 & 1.00 & - & - & - & -\\
 
-            \cmidrule{2-8}
-            \multirow{1}{*}{\rotatebox{90}{C}}
-            & COIL-DEL \\
+            % \cmidrule{2-8}
+            % \multirow{1}{*}{\rotatebox{90}{C}}
+            % & COIL-DEL \\
 
             \cmidrule{2-8}
             \multirow{9}{*}{\rotatebox{90}{Small molecules}}
-            & AIDS \\
+            & AIDS & 1.00 & 1.00 & - & - & - & - \\
             & BZR & 0.96 & 0.99 & 1.00 & - & - & - \\
             & COX2 & 0.93 & 0.96 & 0.99 & 1.00 & - & - \\
             & DHFR & 0.92 & 0.95 & 1.00 & 1.00 & - & - \\
-            & FRANKENSTEIN \\
+            & FRANKENSTEIN & 0.63 & 0.77 & 0.88 & 0.89 & 0.89 & - \\
             & MUTAG &0.93 & 0.96 & 0.99 & 1.00 & - & - \\
             & NCI1 &0.91 & 1.00 & 1.00 & 1.00 & - & - \\
             & NCI109 & 0.92 & 1.00 & 1.00 & 1.00 & - & - \\
@@ -122,12 +123,74 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
             & IMDB-BINARY &0.61 & 0.89 & - & - & - & - \\
             & IMDB-MULTI &0.44 & 0.63 & - & - & - & - \\
             & REDDIT-BINARY &0.84 & 1.00 & - & - & - & - \\
-            & REDDIT-MULTI-5K \\
-            & REDDIT-MULTI-12K \\
+            & REDDIT-MULTI-5K & 0.55 & 1.00 & - & - & - & - \\
+            & REDDIT-MULTI-12K & 0.36 & \textsc{Oom} & \textsc{Oom} & \textsc{Oom} & \textsc{Oom} & \textsc{Oom} \\
 			\bottomrule
 		\end{tabular}             
 \end{table}
-IDMB-MULTI, REDDIT-MULTI-5K, COLAB, NCI109, DD, PPI  -> PIVOT TABLE, add the other datasets as well, do this when you have time, no need to make it super beatiful (maybe subcategories for types like socialz)
+
+\subsection{Hyperparameter Sweep}
+
+\begin{table}[H]
+	\caption{\wlnn!}
+	\label{tab:sweep_wlnn}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{6}{*}{}            
+            & Batch Size & 32 & 32 & 32 & 33 & 32 & 32\\
+            & Learning Rate & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ \\
+            & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
+            \midrule
+			& Number of \wl iterations & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3\}$ & $\{1, 3\}$ & $\{1, 2\}$ \\
+            & Use \wl-Convergence & False & False & False & False & False & False \\
+            \midrule
+            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ \\
+            & \mlp Dropout & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ \\
+            \midrule
+            & Embedding Dimension & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ \\
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+			\bottomrule
+		\end{tabular}}              
+\end{table}
+
+\begin{table}[H]
+	\caption{An Overview of hyperparameters we sweeped and tested each dataset with.}
+	\label{tab:sweep_gnn}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{6}{*}{}            
+            & Batch Size & 32 & 32 & 32 & $\{33, 129\}$ & 32 & 32\\
+            & Learning Rate & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ & $X \sim U(0.0001, 0.1)$ \\
+            & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
+            \midrule
+            & GNN Architecture & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ \\
+            & GNN Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
+            & GNN Dropout & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ \\
+            & GNN Hidden Dimension & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ \\
+            & GNN Jumping-Knowledge & cat & cat & cat & cat & cat & cat \\
+            & GNN Number of Layers & $5$ & $5$ & $5$ & $5$ & $5$ & $5$ \\
+            \midrule
+            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ \\
+            & \mlp Dropout & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ & $X \sim U(0, 0.2)$ \\
+            \midrule
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+			\bottomrule
+		\end{tabular}}              
+\end{table}
+
+
 
 \section{Visualization of the Approximation Performance of GNNs}
 \begin{figure}[!ht]

@@ -122,17 +122,17 @@ Note that in the following, we will restrict the definition only to consider nod
     \end{align*}
     where $f^{(t)}_{\text{merge}}$ is an arbitrary function that maps the aforementioned tuple to a vector, effectively ``merging'' them, while $f^{(t)}_{\text{agg}}$ is an arbitrary function that maps the multiset to a vector, effectively "aggregating" it.
     
-    The readout function, referred to as $\textsf{READOUT}$, is applied after the input graph has been passed subsequently through all layers and is defined as follows:
+    The readout function, referred to as $\textsf{Readout}$, is applied after the input graph has been passed subsequently through all layers and is defined as follows:
     \begin{align*}
-        \textsf{READOUT}(\MSopen f^{(t)}(v) \mid v \in V(G) \MSclose).
+        \textsf{Readout}(\MSopen f^{(t)}(v) \mid v \in V(G) \MSclose).
     \end{align*}
     This function pools the information from every node feature, processes it, and calculates a fixed-size output vector for the entire graph.
     
     In summary, a GNN model will compute the function $\cA$ as follows:
     \begin{align*}
-        \mathcal{A}: \cG \rightarrow \Rb^k, \ G \mapsto \textsf{READOUT}(\MSopen f^{(T)}(v) \mid v \in V(G) \MSclose),
+        \mathcal{A}: \cG \rightarrow \Rb^k, \ G \mapsto \textsf{Readout}(\MSopen f^{(T)}(v) \mid v \in V(G) \MSclose),
     \end{align*}
-    where $T$ is the number of layer of the GNN, and $k \in \Nb$ an arbitrary constant. To enable end-to-end training of a GNN, it is essential that all its components are differentiable. Therefore, we require all $f^{(t)}{\text{merge}}$ and $f^{(t)}{\text{agg}}$ functions, along with the final $\textsf{READOUT}$ function, to be differentiable.
+    where $T$ is the number of layer of the GNN, and $k \in \Nb$ an arbitrary constant. To enable end-to-end training of a GNN, it is essential that all its components are differentiable. Therefore, we require all $f^{(t)}{\text{merge}}$ and $f^{(t)}{\text{agg}}$ functions, along with the final $\textsf{Readout}$ function, to be differentiable.
 \end{definition}
 Note that, due to our definition of the ``aggregation'' function and the ``readout'' function to operate over multisets, both functions are permutation invariant by definition. With this, we can conclude that the total composition $\mathcal{A}$ is permutation-invariant, and with similar reasoning, it is also differentiable. This property enables us to train $\mathcal{A}$ like any other machine learning method in an end-to-end fashion, regardless of the underlying encoding used for graphs. The definition and notation used here are inspired by \cite{Morris2018} and \cite{Xu2018}.
 
@@ -358,7 +358,7 @@ We define the collection $C$ of functions computable by GNNs that is $\wldisc$ a
 \begin{align*}
     C \coloneqq \{ \cA: \cX \rightarrow \Rb, \ G \mapsto \textsf{Readout}_c(\MSopen f^{(n)}(v) \mid v \in V(G) \MSclose) \mid c \in \Nb \},
 \end{align*}
-where $\textsf{Readout}_c$ is the \textsf{READOUT} function that returns the number of nodes colored as $c$ in the coloring of $f^{(n)}$.
+where $\textsf{Readout}_c$ is the \textsf{Readout} function that returns the number of nodes colored as $c$ in the coloring of $f^{(n)}$.
 \end{proof}
 
 Similar to the proof in the previous section, we will use \cref{lem:composition_lemma_gnn} to introduce the ability to construct GNNs that take in as input multiple GNNs and then apply a multilayer perceptron to the combined output.
@@ -368,7 +368,7 @@ Similar to the proof in the previous section, we will use \cref{lem:composition_
 \end{lemma}
 
 \begin{proof}
-    Further, for any $x \in \Rb^d$, we will use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{READOUT} function and $f^{(0)}_i$ the input function of $\cA_i$.
+    Further, for any $x \in \Rb^d$, we will use the notation $x[i]$ to indicate the $i$.th element of the vector $x$. Additionally, we indicate the merge and aggregation function used in layer $t$ by $\cA_i$ as $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$. Similarly, does $\textsf{Readout}_i$ indicate the \textsf{Readout} function and $f^{(0)}_i$ the input function of $\cA_i$.
     
     We will prove the lemma by constructing $\hat{\cA}$. Let $T$ be the maximum number of layers of all $\cA_1, \dots, \cA_n$. We construct the GNN $\hat{\cA}$ with $T$ layers, with the input layer working as follows on an input graph $G$:
     \begin{align*}
@@ -396,12 +396,12 @@ Similar to the proof in the previous section, we will use \cref{lem:composition_
         f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v), \quad \text{and}\\
         f^{(t)}_{\text{agg}, i}(\MSopen f^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose) &\coloneqq 0.
     \end{align*}
-    These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. Finally, we construct the \textsf{READOUT} function of $\hat{\cA}$ as follows:
+    These functions do not change anything, and only forward the result of the actual computation of $\cA_i$ to the last layer. Finally, we construct the \textsf{Readout} function of $\hat{\cA}$ as follows:
     \begin{align*}
-        \textsf{READOUT}(\MSopen \hat{f}^{(T)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
-            \textsf{READOUT}_1(\MSopen \hat{f}^{(T)}(v)[1] \mid v \in V(G) \MSclose)\\
+        \textsf{Readout}(\MSopen \hat{f}^{(T)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp \circ \begin{bmatrix}
+            \textsf{Readout}_1(\MSopen \hat{f}^{(T)}(v)[1] \mid v \in V(G) \MSclose)\\
             \vdots\\
-            \textsf{READOUT}_n(\MSopen \hat{f}^{(T)}(v)[n] \mid v \in V(G) \MSclose)
+            \textsf{Readout}_n(\MSopen \hat{f}^{(T)}(v)[n] \mid v \in V(G) \MSclose)
         \end{bmatrix}.
     \end{align*}
 \end{proof}
