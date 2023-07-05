@@ -13,7 +13,7 @@ from torch_geometric.datasets import TUDataset
 from torch_geometric.loader import DataLoader
 from torch_geometric.transforms import OneHotDegree, ToDevice
 from torch_geometric.utils import degree
-from utils import Constant_Long, NormalizedDegree, WL_Transformer, Wrapper_WL_TUDataset
+from utils import Constant_Long, NormalizedDegree, Wrapper_WL_TUDataset
 
 import wandb
 

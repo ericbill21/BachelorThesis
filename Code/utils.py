@@ -143,58 +143,30 @@ class Constant_Long(BaseTransform):
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(value={self.value})'
 
-@functional_transform('wl_alogorithm')
-class WL_Transformer(BaseTransform):
 
-    def __init__(
-        self,
-        use_node_attr: bool = True,
-        max_iterations: int = -1,
-        check_convergence: bool = False,
-        device: str = 'cpu',
-    ):
-        self.wl_conv = WLConv().to(device)
-        self.use_node_attr = use_node_attr
-        self.max_iterations = max_iterations
-        self.check_convergence = check_convergence
+def weisfeiler_leman(data, wl_conv): 
+    data.x = data.x.squeeze()
 
-    def __call__(
-        self,
-        data: Union[Data, HeteroData],
-    ) -> Union[Data, HeteroData]:
-            
-        # If there are no node features, we create a constant feature vector
-        if data.x is None or not self.use_node_attr:
-            data.x = torch.zeros((data.num_nodes, 1), dtype=torch.long)
+    if data.x.dim() > 1:
+        assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
+        data.x = data.x.argmax(dim=-1)  # one-hot -> integer.
 
-        elif data.x.dim() > 1:
-            assert (data.x.sum(dim=-1) == 1).sum() == data.x.size(0), 'Check if it is one-hot encoded'
-            data.x = data.x.argmax(dim=-1)  # one-hot -> integer.:
-        
-        # If the max iterations is set to -1, we set it to the number of nodes
-        if self.max_iterations == -1:
-            self.max_iterations = data.num_nodes
+    # 1-WL Algorithm
+    old_coloring = data.x.squeeze()
+    new_coloring = wl_conv.forward(old_coloring, data.edge_index)
 
-        # 1-WL Algorithm
-        old_coloring = data.x.squeeze()
-        new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
+    iteration = 0
+    max_iterations = data.num_nodes  
+    while (not check_wl_convergence(old_coloring, new_coloring)) and iteration < max_iterations:
+        old_coloring = new_coloring
+        new_coloring = wl_conv.forward(old_coloring, data.edge_index)
 
-        iteration = 0     
-        while ((not self.check_convergence) or (not check_wl_convergence(old_coloring, new_coloring))) and iteration < self.max_iterations:
-            old_coloring = new_coloring
-            new_coloring = self.wl_conv.forward(old_coloring, data.edge_index)
+        iteration += 1
 
-            iteration += 1
+    data.x = old_coloring.unsqueeze(-1)
 
-        data.x = old_coloring.unsqueeze(-1)
+    return data
 
-        return data
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(use_node_attr={self.use_node_attr}, max_iterations={self.max_iterations}, check_convergence={self.check_convergence})'
-
-    def get_largest_color(self):
-        return len(self.wl_conv.hashmap)
 
 def check_wl_convergence(old_coloring, new_coloring):
     mapping = {}
@@ -229,9 +201,18 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
         
         # Apply k_wl times the 1-WL convolution
         self.wl_conv = WLConv().to(DEVICE)
-        for data in data_list:
-            for _ in range(k_wl):
-                data.x = self.wl_conv(data.x.squeeze(), data.edge_index)
+
+        # This is the case for standard 1-WL 
+        if k_wl == -1 and wl_convergence:
+            print("Applying 1-WL convergence")
+            for data in data_list:
+                data = weisfeiler_leman(data, self.wl_conv)
+
+        # Otherwise we apply k_wl times the 1-WL convolution
+        else:
+            for data in data_list:
+                for _ in range(k_wl):
+                    data.x = self.wl_conv(data.x.squeeze(), data.edge_index)
 
         self.data, self.slices = self.collate(data_list)
 

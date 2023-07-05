@@ -157,12 +157,19 @@ For the empirical testing, we took measures to ensure the reliability of our res
 
 \subsubsection{Testing Procedure}
 
-We started by conducting tests on the classification datasets, which serve as the basis for our evaluation. In our testing code, we employ a 10-fold cross-validation approach. Within this framework, we further partitioned the training data randomly, allocating 10% of it for validation purposes. Consequently, each training iteration consisted of 0.81% of the original dataset as the training set, 9% as the validation set, and 10% as the test set. We repeat this testing procedure five times to mitigate the influence of randomness on the model's performance. Ultimately, we recorded the mean accuracy on the test set along with its standard deviation as the primary performance metric of the model. Note that the use of standard cross-validation for generating the splits and the choice of mean accuracy as our primary metric is reasonable and justified as the datasets are highly balanced, as demonstrated in Section 2.
+We started by conducting tests on the classification datasets, which serve as the basis for our evaluation. In our testing code, we employ a 10-fold cross-validation approach. Within this framework, we further partitioned the training data randomly, allocating 10\% of it for validation purposes. Consequently, each training iteration consisted of 0.81\% of the original dataset as the training set, 9\% as the validation set, and 10\% as the test set. We repeat this testing procedure five times to mitigate the influence of randomness on the model's performance. Ultimately, we recorded the mean accuracy on the test set along with its standard deviation as the primary performance metric of the model. Note that the use of standard cross-validation for generating the splits and the choice of mean accuracy as our primary metric is reasonable and justified as the datasets are highly balanced, as demonstrated in Section 2.
 
 In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022speqnets}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10,000 samples for training, while the other split uses the entire training set.
 
+\subsubsection{Hyperparameter Sweeps}
+In order to limit the amount of hyperparameters that need testing and to make the results comparable to other works, we adhered to common pracitices when configurig the models.
+
+We listed all hyperparameter as well as the hyperparameter we sweeped over, in full detail in Table 2 for the \wlnn models used for classification tasks, Table 3 for the \gnn models used for classification tasks and Table 5 for \wlnn models employed for regression task in the Appendix. We will shortly discuss the most important parameters we sweep over.
+
+First of all, as a matter of fact and to make the \wlnn models even capable of learning something we adpated
+
 \subsubsection{Implementation}
-The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter sweeps. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://www.github.com/chrsmrrs/speqnets}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
+The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter sweeps. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
 
 \section{Results}
 Introduction to this section!
@@ -423,7 +430,7 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 	\begin{subfigure}[b]{0.19\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/k_wl_violin_IMDB-BINARY.pdf}
-        \caption{\textsc{Imdb-Binary}}
+        \caption{\scriptsize\textsc{Imdb-Binary}}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.19\textwidth}
@@ -473,6 +480,8 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc.pdf}
         \caption{\scriptsize\textsc{Zinc}}
 	\end{subfigure}
+	\caption{k\_wl dependence}
+	\label{fig:k_wl_dependence}
 \end{figure}
 
 \begin{figure}[H]

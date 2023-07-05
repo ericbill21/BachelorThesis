@@ -1,9 +1,19 @@
 method: random
+name: PROTEINS_WLNN_BASIC_POOL_MORE_K_WL
 metric:
-  goal: minimize
-  name: test_error
-name: ALCHEMY_WLNN_BASIC_POOL
+  goal: maximize
+  name: test_accuracy
 parameters:
+  batch_size:
+    value: 32
+  dataset:
+    values: 
+      - PROTEINS
+      - REDDIT-BINARY
+      - MUTAG
+      - IMDB-BINARY
+      - ENZYMES
+      - NCI1
   encoding_kwargs:
     parameters:
       embedding_dim:
@@ -12,13 +22,16 @@ parameters:
           - 32
           - 64
           - 128
-          - 256
+  k_fold:
+    value: 10
   k_wl:
-    values:
-      - 1
-      - 2
-      - 3
-      - 4
+    value: -1
+  lr:
+    distribution: uniform
+    max: 0.1
+    min: 0.0001
+  max_epochs:
+    value: 200
   mlp_kwargs:
     parameters:
       act:
@@ -34,15 +47,15 @@ parameters:
           - 3
           - 4
           - 5
-          - 6
-          - 7
   model:
     values:
       - 1WL+NN:Embedding-Sum
       - 1WL+NN:Embedding-Max
       - 1WL+NN:Embedding-Mean
+  num_repition:
+    value: 5
   tags:
     value: sweep_wlnn:basic_pool
   wl_convergence:
-    value: false
-program: main_alchemy_full.py
+    value: true
+program: Code/main.py
