@@ -130,7 +130,7 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 		\end{tabular}             
 \end{table}
 
-\subsection{Hyperparameter Sweep}
+\subsection{Hyperparameter Configuration and Optimization}
 
 \begin{table}[H]
 	\caption{\wlnn!}
@@ -145,6 +145,8 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
             & Batch Size & 32 & 32 & 32 & 33 & 32 & 32\\
             & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
             & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
+            & Optimizer & Adam & Adam & Adam & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
             \midrule
 			& Number of \wl iterations & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2\}$ \\
             & Use \wl-Convergence & False & False & False & False & False & False \\
@@ -173,6 +175,8 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
             & Batch Size & 32 & 32 & 32 & $\{33, 129\}$ & 32 & 32\\
             & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
             & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
+            & Optimizer & Adam & Adam & Adam & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
             \midrule
             & GNN Architecture & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ \\
             & GNN Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
@@ -191,6 +195,35 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 		\end{tabular}}              
 \end{table}
 
+\begin{table}[H]
+	\caption{\wlnn!}
+	\label{tab:sweep_wlnn_reg}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{4}{c}{\textbf{Dataset}}\\\cmidrule{3-6}
+			& & {\textsc{Alchemy}}         &  {\textsc{Alchemy(10k)}}  & {\textsc{Zinc}}           & {\textsc{Zinc(10k)}}
+			\\
+			\toprule
+			\multirow{6}{*}{}            
+            & Batch Size & 25 & 25 & 25 & 25\\
+            & Learning Rate & 0.001 & 0.001 & 0.001 & 0.001 \\
+            & Max Epochs & 1000 & 1000 & 1000 & 1000 \\
+            & Optimizer & Adam & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
+            \midrule
+			& Number of \wl iterations & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$\\
+            & Use \wl-Convergence & False & False & False & False \\
+            \midrule
+            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU\\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm\\ 
+            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$\\
+            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$\\
+            \midrule
+            & Embedding Dimension & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$\\
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+			\bottomrule
+		\end{tabular}}              
+\end{table}
 
 
 \section{Visualization of the Approximation Performance of GNNs}

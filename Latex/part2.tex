@@ -1,7 +1,7 @@
-\section{Setup}
-Introduction to this section! 
+The empirical part is divided into blbnalanb
 
-\blindtext
+\section{Testing Configuration}
+This section delves into the configuration and setup of our empirical testing. We begin by presenting our carefully selected datasets, which serve as the foundation for our evaluation. We highlight specific insights and characteristics of these datasets that make them compelling choices for our study. Afterward, we focus on the models we employ for testing and subsequent result comparison. We provide a comprehensive overview of the selected models, outlining their key features and motivations behind their inclusion in our evaluation. Subsequently, we provide a detailed description of the training pipeline and explain specific hyperparameters for which we will optimize these models.
 
 \subsection{Datasets}
 We will first explain our choice of datasets and introduce each dataset individually. Afterward, we will explore essential observations that are to be considered when assessing the actual empirical results.
@@ -83,7 +83,7 @@ To ensure the reliability and fairness of our evaluation, one of our initial ste
 		\end{tabular}}              
 \end{table}
 
-\Cref{tab:shannon_index} provides an overview of the normalized Shannon index computed for each selected dataset. Upon analyzing the data, we observed that all the datasets exhibit high balance, as all their values are close to $1$. This finding assures us that the datasets do not suffer significant class imbalances, which will remain important in the following section.
+\Cref{tab:shannon_index} provides an overview of the normalized Shannon index computed for each selected classification dataset. Upon analyzing the data, we observed that all the datasets exhibit high balance, as all their values are close to $1$. This finding assures us that the datasets do not suffer significant class imbalances, which will remain important in the following section.
 
 In addition to the balance of all datasets, another important aspect is understanding the upper bound of performance achievable by both \gnn and \wlnn models on these datasets. Unlike in other areas of machine learning where multilayer perceptron models can achieve near-perfect performance due to their universal approximation capabilities (\cite{Hornik1991}), \gnn and \wlnn models have inherent limitations on their expressiveness. This restriction stems from the fact that the expressiveness of the \wl algorithm limits the performance of both frameworks. In detail, if the \wl algorithm can not distinguish a pair of graphs in a dataset, then neither a \gnn nor a \wlnn model can.
 
@@ -119,8 +119,6 @@ While we have pointed out that the \wl algorithm is, in general, quite powerful 
 Upon examining the results, we observe that all datasets exhibit perfect or near-perfect theoretical classification accuracies. This result makes interpreting results obtained from actual \wlnn or \gnn models later on more straightforward. Additionally, the accuracy achievable after each number of iterations provides a theoretical lower limit on the number of message-passing layers a \gnn must be composed of to be even capable of achieving this accuracy. 
 
 We have conducted the same analyzes on additional datasets, as their results might be valuable to the reader. For these, see \cref{tab:max_accuracies_app} in the Appendix.
-
-
 
 
 \subsection{Choice of Models}
@@ -161,51 +159,20 @@ We started by conducting tests on the classification datasets, which serve as th
 
 In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022speqnets}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10,000 samples for training, while the other split uses the entire training set.
 
-\subsubsection{Hyperparameter Sweeps}
-In order to limit the amount of hyperparameters that need testing and to make the results comparable to other works, we adhered to common pracitices when configurig the models.
+\subsubsection{Hyperparameter Optimization}\cref{sec:hyperparam}
+To ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized, can be found in \cref{tab:sweep_wlnn} for the \wlnn models used in classification tasks, \cref{tab:sweep_gnn} for the \gnn models employed in classification tasks, and \cref{tab:sweep_wlnn_reg} for the \wlnn models utilized in the regression task in the Appendix. We will shortly discuss the most critical parameters we optimized for:
 
-We listed all hyperparameter as well as the hyperparameter we sweeped over, in full detail in Table 2 for the \wlnn models used for classification tasks, Table 3 for the \gnn models used for classification tasks and Table 5 for \wlnn models employed for regression task in the Appendix. We will shortly discuss the most important parameters we sweep over.
+Early in our investigations, we made a significant observation regarding the learning performance of \wlnn models. We noticed considerable performance discrepancies when comparing \wlnn models using the standard version of the \wl algorithm with the one from GNNs. Consequently, we investigated the possibility of parametrizing the \wl algorithm to enhance control over the expressiveness of the colorings it computes. Specifically, we focused on two crucial parameters: 1) the number of iterations and 2) the usage of its convergence behavior as an early termination criterion.
 
-First of all, as a matter of fact and to make the \wlnn models even capable of learning something we adpated
+The advantage of this more granular parametrization is that it enables us to apply the same number of \wl iterations to each graph processed by a \wlnn model by deactivating the convergence behavior and fixing the number of iterations. By deactivating this behavior and keeping the number of iterations minimal, we observed that the number of colors used by the \wl algorithm remained contained. As a result, the \mlp component of each \wlnn model seems to generalize better, significantly improving performance. Therefore, one of the most crucial hyperparameters we optimized for all \wlnn models was the number of \wl iterations. Additionally, if employed, the size of the dimension of the look-up table was another significant parameter to optimize.
 
-\subsubsection{Implementation}
+In contrast, the hyperparameter selection for the \gnn models was relatively less intricate. The key parameters of interest here are the number of message-passing layers and the size of the hidden dimensions used in each layer. The reason for this is that the number of layers directly corresponds to the expressiveness of the GNN, as demonstrated in the proof, while the size of the hidden dimensions enables easier learning by allowing the model to store more information during graph processing.
+
+\subsubsection{Implementation Details and Result Accessibility}
 The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter sweeps. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
 
-\section{Results}
-Introduction to this section!
-
-\subsection{Explain how results look like}
-Shortly explain, their performance and how they typically learn. Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
-
-\subsubsection{\wlnn}
-Explain most important parameters such as k-wl mit der wl accuracy on. Show how it relates to the datasets by showing the table of theoretical accuracies, 
-Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
-
-\subsubsection{\gnn}
-Show performance of different \gnn models -> Boxplot of different pooling functions
-Grafiken über das mean train\_acc, val\_acc, test\_acc vs. epochs.
-
-\subsection{Test Accuracy}
-Show a big table with all test-accuracies and its standard deviaton and highlight in bold face, the best one.
-Asses the std of both model types.
-
-\subsection{Overfitting Behaviour}
-Compare the difference between training data performance vs test accuracy accross both models
-
-\subsection{Aggregate Analysis}
-Explain what aggregates are and show tSNE with the of the best models with SVM
-
-Also use KNN to assess how good the actuall aggregates are differentiable. -> local clusters ?
-
-\section{Discusssion}
-\subsection{Learned Lessons}
-\subsection{Future Work}
-
-\section{Conclusion}
-
-\newpage
-
-
+\section{Empirical Testing}
+In this section we present our empirical findings. See Table 3 for an overview of the performance metric achieved by the best performing configuration of each model on each dataset. Furthermore, see Table 4 for a similiar overview for the regression datasets.
 
 \begin{table}[H]
 	\caption{Overview of the classification accuracies achieved by the best model of each configuration for each dataset in percent and standard deviation.}
@@ -262,33 +229,135 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 \end{table}
 
 \begin{table}[H]
-	\resizebox{0.49\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+	\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 	\newcommand{\seq}[2]{$(#1, #2)$\text{-}\textsf{SpeqNet}\xspace}
-		\begin{tabular}{@{}lcc@{}}	\toprule
-			\multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{2}{c}{\textbf{Dataset}}
+		\begin{tabular}{@{}lcccc@{}}	\toprule
+			\multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{4}{c}{\textbf{Dataset}}
 			\\
-			\cmidrule{2-3} 
-			& {\textsc{Alchemy (10k)}} & {\textsc{Zinc?}} 
+			\cmidrule{2-5} 
+			& {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
 			\\	
 			\toprule
-			\textsf{GINE-$\varepsilon^*$}\xspace        & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}
-			\\		
-			\text{\seq{2}{1}}$^*$   &  0.169 {\scriptsize $\pm 0.005$} -2.010    {\scriptsize $\pm 0.056$}
+			\textsf{GINE-$\varepsilon$}\xspace & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
 			\\
-			\text{\seq{2}{2}}$^*$    & \textbf{0.115} {\scriptsize $\pm 0.001$} -2.722  {\scriptsize $\pm 0.054$}
-
+			\midrule
+			\textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
 			\\
-			\cmidrule{1-3}
-			\textsf{Embedding-Max} & 0.409 {\scriptsize $\pm  0.003$} -1.023 {\scriptsize $\pm  0.009$}
+			\textsf{Embedding-Mean} & 0.617 {\scriptsize $\pm 0.003$} -0.564 {\scriptsize $\pm 0.005$} &	0.355 {\scriptsize $\pm 0.004$} -1.269 {\scriptsize $\pm 0.020$} &	\textbf{0.348} {\scriptsize $\pm 0.010$} &	0.484 {\scriptsize $\pm 0.009$}
 			\\
-			\textsf{Embedding-Mean} & 0.355 {\scriptsize $\pm  0.004$} -1.269  {\scriptsize $\pm  0.020$}
-			\\
-			\textsf{Embedding-Sum} & \textbf{0.305} {\scriptsize $\pm  0.001$} -1.740 {\scriptsize $\pm  0.042$}
+			\textsf{Embedding-Sum} & \textbf{0.600} {\scriptsize $\pm 0.004$} -0.625 {\scriptsize $\pm 0.032$} & \textbf{0.305} {\scriptsize $\pm 0.001$} -1.740 {\scriptsize $\pm 0.042$} &	0.384 {\scriptsize $\pm 0.004$} &	\textbf{0.465} {\scriptsize $\pm 0.009$}
 			\\
 			\bottomrule
 	\end{tabular}}
-	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results of the models marked $^*$ are taken from \cite{Morris2022}}
+	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results marked by $^1$ are adopted from \cite{Mor+2020} and by $^2$ from \cite{Morris2022}.}
 \end{table}
+
+As an eraly interpretation one can see that the best \wlnn models are capable of achieving the a very similiar performance in comparison to \gnn (e.g. IMDB) or even better in all other case a better performance, with some examples having a huge difference compared to the \gnn model. But only on the classification datasets. In the regression datasets, we see that all \wlnn models perform quite poorly compared to the \gnn model. Also interesting is the differnece we record between the two regression datasets. While there is a signifcant performance difference between the using the entire dataset or just a subset for the dataset Alchemy, this difference seems not to exist for Zinc.
+
+In the following sections we will build up on these results an provide furhter insights and analyses into \wlnn and \gnn models.
+
+\subsection{WL too expressive?}
+As already outlined in \cref{sec:hyperparam} we investigated early on to limit the expressiveness the \wl alogorithm offers by trying to contain the number of colors this alogrithm uses. In particular we allowed to fix the number of iterations of the \wl alogrithm in a \wlnn model. The idea was that every graph processed by such a model, would be than mapped to a coloring which is in a similar color range as all the other graphs. Thereby limiting the total number of colors, such that no oultier cases are created. 
+
+If we compare the results of \wlnn models utilizing the standard \wl alogorithm compared to the parametrized version of our see a signifcant difference in performance accross all classification datasets. See Table 5, for an overview of the best accuracy achieved by these models in comparison to our parametrized models. The data confirms our believes, that the \wl alogirhtm is for some task to expressive, as there is a signifcant performance difference between the two types.
+
+\begin{table}[H]
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
+			& \multirow{2}{*}{\vspace*{4pt}\textbf{Property}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}           & 
+			{\textsc{Reddit-Binary}}
+			\\
+			\toprule
+			\multirow{1}{*}{}
+			& Standard \wl & 34.2 \scriptsize $\pm 6.7$	& 67.0 \scriptsize $\pm 4.3$ & 76.3 \scriptsize $\pm 9.4$ & & 71.4 \scriptsize $\pm 4.9$ & 70.9 \scriptsize $\pm 3.8$
+			\\
+			& Parametrized \wl & 48.3 \scriptsize $\pm 8.1$	& 72.4 \scriptsize $\pm 4.1$ & 85.1 \scriptsize $\pm 8.6$ & 83.6 \scriptsize $\pm 2.2$ & 75.2 \scriptsize $\pm 3.9$	& 78.4 \scriptsize $\pm 2.7$
+			\\
+			\bottomrule
+		\end{tabular}}
+		\caption{Comparison between the best performing \wlnn models using the standard \wl algorithm and the one employing the parametrized version of it in percent.}
+        \label{tab:my_label4}     
+\end{table}
+
+Following the insights, another interesting observation is than to investigate which number of \wl iteration in particular leads to the best performing models. To put this into perspective, we created Figure 2 where over all models we tested, we plotted for each the performance achieved grouped by the number of iterations. 
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_ENZYMES.pdf}
+        \caption{\scriptsize\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_IMDB-BINARY.pdf}
+        \caption{\scriptsize\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_MUTAG.pdf}
+        \caption{\scriptsize\textsc{Mutag}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_NCI1.pdf}
+        \caption{\scriptsize\textsc{Nci1}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_PROTEINS.pdf}
+        \caption{\scriptsize\textsc{Proteins}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_REDDIT-BINARY.pdf}
+        \caption{\scriptsize \textsc{Reddit-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Alchemy10K.pdf}
+        \caption{\scriptsize\textsc{Alchemy (10k)}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Alchemy.pdf}
+        \caption{\scriptsize\textsc{Alchemy}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc 10k.pdf}
+        \caption{\scriptsize\textsc{Zinc (10k)}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.19\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc.pdf}
+        \caption{\scriptsize\textsc{Zinc}}
+	\end{subfigure}
+	\caption{k\_wl dependence}
+	\label{fig:k_wl_dependence}
+\end{figure}
+
+
+\subsection{Explain how results look like}
+
+\section{Discusssion}
+\subsection{Learned Lessons}
+\subsection{Future Work}
+
+\section{Conclusion}
+
+\newpage
+
 
 \begin{table}[H]
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
@@ -417,71 +486,6 @@ Also use KNN to assess how good the actuall aggregates are differentiable. -> lo
 		\caption{\textsc{Reddit-Binary}- MISSING!}
 	\end{subfigure}
 	\caption{Visualization of the decision boundary of each Support Vector Machine with a linear kernel using t-SNE.}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_ENZYMES.pdf}
-        \caption{\scriptsize\textsc{Enzymes}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_IMDB-BINARY.pdf}
-        \caption{\scriptsize\textsc{Imdb-Binary}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_MUTAG.pdf}
-        \caption{\scriptsize\textsc{Mutag}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_NCI1.pdf}
-        \caption{\scriptsize\textsc{Nci1}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_PROTEINS.pdf}
-        \caption{\scriptsize\textsc{Proteins}}
-	\end{subfigure}
-	\par\bigskip
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_REDDIT-BINARY.pdf}
-        \caption{\scriptsize \textsc{Reddit-Binary}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Alchemy10K.pdf}
-        \caption{\scriptsize\textsc{Alchemy(10K)}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Alchemy.pdf}
-        \caption{\scriptsize\textsc{Alchemy}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc 10k.pdf}
-        \caption{\scriptsize\textsc{Zinc(10K)}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.19\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc.pdf}
-        \caption{\scriptsize\textsc{Zinc}}
-	\end{subfigure}
-	\caption{k\_wl dependence}
-	\label{fig:k_wl_dependence}
 \end{figure}
 
 \begin{figure}[H]
