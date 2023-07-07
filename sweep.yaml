@@ -1,19 +1,13 @@
 method: random
-name: PROTEINS_WLNN_BASIC_POOL_MORE_K_WL
 metric:
   goal: maximize
   name: test_accuracy
+name: NCI1_STANDARD_WL
 parameters:
   batch_size:
-    value: 32
+    value: 33
   dataset:
-    values: 
-      - PROTEINS
-      - REDDIT-BINARY
-      - MUTAG
-      - IMDB-BINARY
-      - ENZYMES
-      - NCI1
+    value: NCI1
   encoding_kwargs:
     parameters:
       embedding_dim:

@@ -159,7 +159,7 @@ We started by conducting tests on the classification datasets, which serve as th
 
 In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022speqnets}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10,000 samples for training, while the other split uses the entire training set.
 
-\subsubsection{Hyperparameter Optimization}\cref{sec:hyperparam}
+\subsubsection{Hyperparameter Optimization}\label{sec:hyperparam}
 To ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized, can be found in \cref{tab:sweep_wlnn} for the \wlnn models used in classification tasks, \cref{tab:sweep_gnn} for the \gnn models employed in classification tasks, and \cref{tab:sweep_wlnn_reg} for the \wlnn models utilized in the regression task in the Appendix. We will shortly discuss the most critical parameters we optimized for:
 
 Early in our investigations, we made a significant observation regarding the learning performance of \wlnn models. We noticed considerable performance discrepancies when comparing \wlnn models using the standard version of the \wl algorithm with the one from GNNs. Consequently, we investigated the possibility of parametrizing the \wl algorithm to enhance control over the expressiveness of the colorings it computes. Specifically, we focused on two crucial parameters: 1) the number of iterations and 2) the usage of its convergence behavior as an early termination criterion.
@@ -172,10 +172,21 @@ In contrast, the hyperparameter selection for the \gnn models was relatively les
 The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter sweeps. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
 
 \section{Empirical Testing}
-In this section we present our empirical findings. See Table 3 for an overview of the performance metric achieved by the best performing configuration of each model on each dataset. Furthermore, see Table 4 for a similiar overview for the regression datasets.
+In this section we finally present our empirical findings. In total we conducted 5581 runs, where each run is specific model configuration tested on a dataset. In detail, these runs took a total of 1644 hours of pure computation time to derive. See Table 3 for an overview of the classification accuracy achieved by the best-performing configuration of each model on each classification dataset. Furthermore, see Table 4 for a similiar overview where we recorded the best-performing configurations for each model in terms of the mean absolut error (MAE). Note, that we for the regression dataset size, experiments conducted on these required a lot of time. For these reasons, we utilized existing trainingpipelinse such that we can compare our results of the tested \wlnn models, to already existing results for \gnn models. In particular, we used GINE-$\epsilon$ here as the a good comparison, as this is just an model utilizing the GIN architecture for its message passing layers, Mean as its pooling function and at last a MLP for the subprocedding processing. For these reasons, these results provide a good comparison to the results of our \wlnn models.
+
+
+An first interpretation, we observe that \wlnn models are indeed capable of demonstrating a comparable performance to \gnn models, and are even able to outperform them. In particular, for all datasets \wlnn model 
+
+As an eraly interpretation one can see that the best \wlnn models are capable 
+
+
+of achieving the a very similiar performance in comparison to \gnn (e.g. IMDB) or even better in all other case a better performance, with some examples having a huge difference compared to the \gnn model. But only on the classification datasets. In the regression datasets, we see that all \wlnn models perform quite poorly compared to the \gnn model. Also interesting is the differnece we record between the two regression datasets. While there is a significant performance difference between the using the entire dataset or just a subset for the dataset Alchemy, this difference seems not to exist for Zinc.
+
+In the following sections we will build up on these results an provide furhter insights and analyses into \wlnn and \gnn models.
+
 
 \begin{table}[H]
-	\caption{Overview of the classification accuracies achieved by the best model of each configuration for each dataset in percent and standard deviation.}
+	\caption{Overview of the classification accuracies achieved by the best configuratio of each model for each dataset in percent and standard deviation.}
 	\label{tab:my_label}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
@@ -192,37 +203,34 @@ In this section we present our empirical findings. See Table 3 for an overview o
 			& \textsf{Sum} & 18.0 \scriptsize $\pm 6.2$	 & 57.5 \scriptsize $\pm 5.1$ & 66.8 \scriptsize $\pm 13.9$ & 56.9 \scriptsize $\pm 3.8$ & 65.6 \scriptsize $\pm 4.8$ & 73.0 \scriptsize $\pm 5.1$   
 			\\  
 			\cmidrule{2-8}  		
-			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 81.1 \scriptsize $\pm 11.2$	 & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$        
+			& \textsf{Embedding-Max} & 40.5  \scriptsize	$\pm 7.4$         & 69.4  \scriptsize $\pm 4.9$             & 81.1 \scriptsize $\pm 11.2$	 & 82.7  \scriptsize $\pm 2.0$          & \textbf{75.2} \scriptsize $\pm 3.9$ & 71.1 \scriptsize $\pm 3.9$    
 			\\ 
-			& \textsf{Embedding-Mean}     & 42.6 \scriptsize	$\pm 9.0$ & \textbf{72.4}     \scriptsize $\pm 4.1 $         & 84.1 \scriptsize $\pm 9.1$	       & 83.1   \scriptsize $\pm 1.9$         & 72.3  \scriptsize $\pm 4.2$         &  0.0 \scriptsize $\pm 0.0$                     
+			& \textsf{Embedding-Mean}     & 42.6 \scriptsize	$\pm 9.0$ & \textbf{72.4}     \scriptsize $\pm 4.1 $         & 84.1 \scriptsize $\pm 9.1$	       & 83.1   \scriptsize $\pm 1.9$         & 72.3  \scriptsize $\pm 4.2$ & 75.4 \scriptsize $\pm 2.8$
 			\\ 
-			& \textsf{Embedding-Sum} & \textbf{48.3} \scriptsize	$\pm 8.1$          & 72.0  \scriptsize $\pm 3.8$             & \textbf{85.1} \scriptsize $\pm 8.6$	     & \textbf{83.6}   \scriptsize $\pm 2.2$         & 75.2  \scriptsize $\pm 4.5$   	& 0.0  \scriptsize $\pm 0.0$                     
+			& \textsf{Embedding-Sum} & \textbf{48.3} \scriptsize	$\pm 8.1$          & 72.0  \scriptsize $\pm 3.8$             & \textbf{85.1} \scriptsize $\pm 8.6$	     & \textbf{83.6}   \scriptsize $\pm 2.2$         & 75.2  \scriptsize $\pm 4.5$ & \textbf{78.4} \scriptsize $\pm 2.7$    
 			\\ 
 			\cmidrule{2-8}
 			\multirow{9}{*}{\rotatebox{90}{Graph Neural Networks}} 
-			& \textsf{GAT:Max}                    & 31.2 \scriptsize $\pm 6.0$        & 70.7 \scriptsize $\pm 4.8$          & 71.1 \scriptsize $\pm 12.2$ & 58.0 \scriptsize $\pm 4.2$          & 72.5 \scriptsize $\pm 5.1$         & 0.0 \scriptsize $\pm 0.0$  
+			& \textsf{GAT:Max}                    & 31.2 \scriptsize $\pm 6.0$        & 70.7 \scriptsize $\pm 4.8$          & 71.1 \scriptsize $\pm 12.2$ & 58.0 \scriptsize $\pm 4.2$          & 72.5 \scriptsize $\pm 5.1$         & 77.7 \scriptsize $\pm 5.0$ 
 			\\ 
-			& \textsf{GAT:Mean}    & 28.9 \scriptsize $\pm 5.9$          & 70.9 \scriptsize $\pm 3.7$           & 74.8 \scriptsize $\pm 9.1$            & 66.1 \scriptsize $\pm 2.8$         & 64.9 \scriptsize $\pm 6.4$       & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GAT:Mean}    & 28.9 \scriptsize $\pm 5.9$          & 70.9 \scriptsize $\pm 3.7$           & 74.8 \scriptsize $\pm 9.1$            & 66.1 \scriptsize $\pm 2.8$         & 64.9 \scriptsize $\pm 6.4$  & 70.0 \scriptsize $\pm 6.9$
 			\\ 
-			& \textsf{GAT:Sum}                  & \textbf{34.4} \scriptsize $\pm 7.0$          & 72.2 \scriptsize $\pm 4.5$	            & 82.1 \scriptsize $\pm 11.2$            & 69.8 \scriptsize $\pm 2.6$	          & 73.4 \scriptsize $\pm 3.9$
-			& 0.0 \scriptsize $\pm 0.0$          
+			& \textsf{GAT:Sum}                  & \textbf{34.4} \scriptsize $\pm 7.0$          & 72.2 \scriptsize $\pm 4.5$	            & 82.1 \scriptsize $\pm 11.2$            & 69.8 \scriptsize $\pm 2.6$	          & 73.4 \scriptsize $\pm 3.9$ & 78.1 \scriptsize $\pm 4.2$        
 			\\
-			
 			\cmidrule{2-8}
-					
-			& \textsf{GCN:Max} & 33.1 \scriptsize $\pm 7.5$ &	73.5 \scriptsize $\pm 4.1$	& 74.5 \scriptsize $\pm 11.3$ & 61.1 \scriptsize $\pm 3.6$ &	69.8 \scriptsize $\pm 5.9$ & 0.0 \scriptsize $\pm 0.0$  
+			& \textsf{GCN:Max} & 33.1 \scriptsize $\pm 7.5$ &	73.5 \scriptsize $\pm 4.1$	& 74.5 \scriptsize $\pm 11.3$ & 61.1 \scriptsize $\pm 3.6$ &	69.8 \scriptsize $\pm 5.9$ & 74.3 \scriptsize $\pm 4.5$
 			\\ 
-			& \textsf{GCN:Mean} & 29.9 \scriptsize $\pm 5.7$ &	\textbf{74.7} \scriptsize $\pm 3.8$ & 75.0 \scriptsize $\pm 10.4$ &	68.9 \scriptsize $\pm 2.4$ &	70.9 \scriptsize $\pm 5.2$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GCN:Mean} & 29.9 \scriptsize $\pm 5.7$ &	\textbf{74.7} \scriptsize $\pm 3.8$ & 75.0 \scriptsize $\pm 10.4$ &	68.9 \scriptsize $\pm 2.4$ &	70.9 \scriptsize $\pm 5.2$ & 82.3 \scriptsize $\pm 3.3$
 			\\ 
-			& \textsf{GCN:Sum} & 31.7 \scriptsize $\pm 7.2$ &	73.0 \scriptsize $\pm 4.4$	& 81.5 \scriptsize $\pm 10.3$ & 70.4 \scriptsize $\pm 2.1$ & 3.5 \scriptsize $\pm 3.9$ & 0.0 \scriptsize $\pm 0.0$                        
+			& \textsf{GCN:Sum} & 31.7 \scriptsize $\pm 7.2$ &	73.0 \scriptsize $\pm 4.4$	& 81.5 \scriptsize $\pm 10.3$ & 70.4 \scriptsize $\pm 2.1$ & 3.5 \scriptsize $\pm 3.9$ & \textbf{86.9} \scriptsize $\pm 3.2$                       
 			\\
 			\cmidrule{2-8}	
 						
-			& \textsf{GIN:Max} & 29.2 \scriptsize $\pm 6.2$	& 70.8 \scriptsize $\pm 4.7$ & 77.3 \scriptsize $\pm 10.7$ & \textbf{79.9} \scriptsize $\pm 2.2$ & \textbf{74.3} \scriptsize $\pm 5.1$ & 0.0 \scriptsize $\pm 0.0$   
+			& \textsf{GIN:Max} & 29.2 \scriptsize $\pm 6.2$	& 70.8 \scriptsize $\pm 4.7$ & 77.3 \scriptsize $\pm 10.7$ & \textbf{79.9} \scriptsize $\pm 2.2$ & \textbf{74.3} \scriptsize $\pm 5.1$ & 76.1 \scriptsize $\pm 3.6$  
 			\\ 
-			& \textsf{GIN:Mean}  & 31.7 \scriptsize $\pm 6.7$	& 71.1 \scriptsize $\pm 5.4$ & 82.4 \scriptsize $\pm 9.8$ & 	70.8 \scriptsize $\pm 2.2$ & 72.0 \scriptsize $\pm 4.0$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GIN:Mean}  & 31.7 \scriptsize $\pm 6.7$	& 71.1 \scriptsize $\pm 5.4$ & 82.4 \scriptsize $\pm 9.8$ & 	70.8 \scriptsize $\pm 2.2$ & 72.0 \scriptsize $\pm 4.0$ & 73.5 \scriptsize $\pm 3.8$
 			\\ 
-			& \textsf{GIN:Sum} & 28.9 \scriptsize $\pm 8.7$ & 	69.5 \scriptsize $\pm 4.8$	& \textbf{84.6} \scriptsize $\pm 8.7$ & 70.8 \scriptsize $\pm 2.3$ &	73.2 \scriptsize $\pm 4.3$ & 0.0 \scriptsize $\pm 0.0$
+			& \textsf{GIN:Sum} & 28.9 \scriptsize $\pm 8.7$ & 	69.5 \scriptsize $\pm 4.8$	& \textbf{84.6} \scriptsize $\pm 8.7$ & 70.8 \scriptsize $\pm 2.3$ & 74.0 \scriptsize $\pm 4.3$ & 74.0 \scriptsize $\pm 4.3$
 			\\
 			\bottomrule
 		\end{tabular}}            
@@ -252,12 +260,9 @@ In this section we present our empirical findings. See Table 3 for an overview o
 	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results marked by $^1$ are adopted from \cite{Mor+2020} and by $^2$ from \cite{Morris2022}.}
 \end{table}
 
-As an eraly interpretation one can see that the best \wlnn models are capable of achieving the a very similiar performance in comparison to \gnn (e.g. IMDB) or even better in all other case a better performance, with some examples having a huge difference compared to the \gnn model. But only on the classification datasets. In the regression datasets, we see that all \wlnn models perform quite poorly compared to the \gnn model. Also interesting is the differnece we record between the two regression datasets. While there is a signifcant performance difference between the using the entire dataset or just a subset for the dataset Alchemy, this difference seems not to exist for Zinc.
-
-In the following sections we will build up on these results an provide furhter insights and analyses into \wlnn and \gnn models.
 
 \subsection{WL too expressive?}
-As already outlined in \cref{sec:hyperparam} we investigated early on to limit the expressiveness the \wl alogorithm offers by trying to contain the number of colors this alogrithm uses. In particular we allowed to fix the number of iterations of the \wl alogrithm in a \wlnn model. The idea was that every graph processed by such a model, would be than mapped to a coloring which is in a similar color range as all the other graphs. Thereby limiting the total number of colors, such that no oultier cases are created. 
+As already outlined in \cref{sec:hyperparam} we investigated early on to limit the expressiveness the \wl alogorithm offers by trying to contain the number of colors this alogrithm uses. In particular we allowed to fix the number of iterations of the \wl alogrithm in a \wlnn model. The idea was that every graph processed by such a model, would be than mapped to a coloring which is in a similar color range as all the other graphs. Thereby limiting the total number of colors, such that no oultier cases are created. Theoretically speaking, fixing the number of \wl iterations a \wlnn model $\cA$ to $n \in \Nb$ does only limit the expressiveness of the model: For example, if we have an input graph that on which the standard \wl alogirthm convergese after $n' < n$ steps, the coloring computed after applying $n$ steps is as expressive as the one computed by the standard \wl, as the coloring convergence. Furthermore, it only limts the expressiveness, because in the contrary case where the standard \wl alogrithm would converge after $n' > n$ steps on an input graph, the coloring computed after $n$ steps is less expressiveness. It therefore only contains less information than the coloring would if it had been computed by the standard \wl algorithm. Therefore is this parametrization okay.
 
 If we compare the results of \wlnn models utilizing the standard \wl alogorithm compared to the parametrized version of our see a signifcant difference in performance accross all classification datasets. See Table 5, for an overview of the best accuracy achieved by these models in comparison to our parametrized models. The data confirms our believes, that the \wl alogirhtm is for some task to expressive, as there is a signifcant performance difference between the two types.
 
@@ -343,7 +348,7 @@ Following the insights, another interesting observation is than to investigate w
 		\includegraphics[width=\textwidth]{Figures/k_wl_violin_Zinc.pdf}
         \caption{\scriptsize\textsc{Zinc}}
 	\end{subfigure}
-	\caption{k\_wl dependence}
+	\caption{Impact on performance by the number of itertations of the \wl alogirhtm.}
 	\label{fig:k_wl_dependence}
 \end{figure}
 

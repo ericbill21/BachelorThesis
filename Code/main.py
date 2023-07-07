@@ -39,7 +39,7 @@ parser.add_argument('--num_repition', type=int, default=1, help='Number of repit
 parser.add_argument('--transformer_kwargs', type=str, default='{}', help='Arguments for the transformer. For example, for the OneHotDegree transformer, the argument is the maximum degree.')
 parser.add_argument('--encoding_kwargs', type=str, default='{}', help='Arguments for the encoding function. For example, for Embedding, the argument is the embedding dimension with the key "embedding_dim".')
 parser.add_argument('--mlp_kwargs', type=str, default='{}', help='Arguments for the MLP. For example, for the MLP, the argument is the number of hidden layers with the key "num_layers".')
-parser.add_argument('--gnn_kwargs', type=str, default='{}', help='Number of GNN layers.')
+parser.add_argument('--gnn_kwargs', type=str, default='{}', help='Arguments for the GNN. For example, for GIN, the argument is the number of MLP layers with the key "num_layers".')
 args = parser.parse_args()
 
 # Convert arguments
