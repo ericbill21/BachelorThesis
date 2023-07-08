@@ -2,7 +2,6 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: NCI1_STANDARD_WL
 parameters:
   batch_size:
     value: 33
@@ -19,7 +18,7 @@ parameters:
   k_fold:
     value: 10
   k_wl:
-    value: -1
+    value: 4
   lr:
     distribution: uniform
     max: 0.1
@@ -48,8 +47,10 @@ parameters:
       - 1WL+NN:Embedding-Mean
   num_repition:
     value: 5
+  seed:
+    value: 42
   tags:
     value: sweep_wlnn:basic_pool
   wl_convergence:
-    value: true
+    value: false
 program: Code/main.py

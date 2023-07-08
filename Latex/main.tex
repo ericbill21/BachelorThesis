@@ -11,11 +11,14 @@
 \usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{url}
+\usepackage{xurl}
 \usepackage[export]{adjustbox}
 \usepackage{tabularx}
 \usepackage{tabulary}
 \usepackage{tikz}
+\usepackage{siunitx}
+\usepackage[section]{placeins}
+
 \usetikzlibrary{patterns,decorations.pathreplacing}
 \usetikzlibrary{arrows.meta,arrows}
 \usetikzlibrary{calc}
@@ -144,8 +147,10 @@ pdfcreator={pdflatex}
 \newcommand{\gcn}{\textsf{GCN}\xspace}
 \newcommand{\gin}{\textsf{GIN}\xspace}
 \newcommand{\gnn}{\textsf{GNN}\xspace}
+\newcommand{\gineeps}{\textsf{GINE-$\varepsilon$}\xspace}
 
-
+% SI UNIT
+\newcommand{\perc}[1]{\SI{#1}{\percent}}
 
 % Bold. 
 \newcommand{\mF}{\mathbf{F}}
@@ -204,6 +209,7 @@ pdfcreator={pdflatex}
 \newcommand{\wldisc}{\text{1-\!WL-Discriminating}}
 \newcommand{\wl}{\textsf{1-WL}\xspace}
 \newcommand{\mlp}{\textsf{MLP}\xspace}
+\newcommand{\nwl}{n_{\textsf{wl}}}
 
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
 \def\samples{2}

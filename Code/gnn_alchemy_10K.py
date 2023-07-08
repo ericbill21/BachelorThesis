@@ -34,7 +34,7 @@ args.gnn_kwargs = ast.literal_eval(args.gnn_kwargs)
 wandb.init(project="BachelorThesisExperiments",
             name=f"{args.model}: {time.strftime('%d.%m.%Y %H:%M:%S')}",
             config={
-                "dataset": "Alchemy10k",
+                "dataset": "Alchemy10K",
                 "model": args.model} | args.gnn_kwargs | args.mlp_kwargs
 )
 

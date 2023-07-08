@@ -3,7 +3,7 @@ The empirical part is divided into blbnalanb
 \section{Testing Configuration}
 This section delves into the configuration and setup of our empirical testing. We begin by presenting our carefully selected datasets, which serve as the foundation for our evaluation. We highlight specific insights and characteristics of these datasets that make them compelling choices for our study. Afterward, we focus on the models we employ for testing and subsequent result comparison. We provide a comprehensive overview of the selected models, outlining their key features and motivations behind their inclusion in our evaluation. Subsequently, we provide a detailed description of the training pipeline and explain specific hyperparameters for which we will optimize these models.
 
-\subsection{Datasets}
+\subsection{Datasets}\label{sec:datasets}
 We will first explain our choice of datasets and introduce each dataset individually. Afterward, we will explore essential observations that are to be considered when assessing the actual empirical results.
 
 \subsubsection{Choice of Datasets}
@@ -38,7 +38,7 @@ As a result of considering these two principles, we selected the following datas
 
 \textsc{Zinc}, provided by \cite{Bresson2019} and \cite{Irwin2012}, consists of molecular graphs where each node represents a heavy atom, and the corresponding node feature specifies its type. The edges in the graph encode the bonds between atoms, and their features further describe the type of bond. The task is to calculate a molecular property known as constrained solubility ($\log P - \text{SA} - \text{cycle}$).\newline
 
-\begin{table}[]
+\begin{table}[!htb]
 	\begin{center}
 		\caption{Dataset statistics and properties for graph-level prediction tasks. This table has been adapted from \cite{Morris2022}.}
 		\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
@@ -67,7 +67,7 @@ As a result of considering these two principles, we selected the following datas
 \subsubsection{Analysis of the Datasets}
 To ensure the reliability and fairness of our evaluation, one of our initial steps was to assess the balance of our selected datasets for classification. We employed the normalized Shannon index to evaluate the balance of a dataset, where a value close to $0$ indicates maximum imbalance, while a value close to $1$ signifies perfect balance. See \cref{sec:definition_shannon_index} in the Appendix for a formal definition of this metric.
 
-\begin{table}[H]
+\begin{table}[!htb]
 	\caption{An overview of the normalized Shannon index calculated for each dataset.}
 	\label{tab:shannon_index}
 	\centering
@@ -89,7 +89,7 @@ In addition to the balance of all datasets, another important aspect is understa
 
 While we have pointed out that the \wl algorithm is, in general, quite powerful in distinguishing pairs of graphs in \cref{sec:related_work}; we also explained that it is not complete. Therefore, assuming that \gnn or \wlnn models exist that can achieve almost perfect accuracy on all classification datasets is not reasonable. Thus, we calculated the theoretical maximum accuracy achievable by the perfect model for each dataset. In detail, we even investigated how many iterations of the \wl algorithm it takes to achieve this accuracy. For a comprehensive overview of the accuracies achievable on all datasets, please refer to \cref{tab:max_accuracies}. In this table, we have included the accuracy achievable when running the \wl algorithm for $0$ iterations, which essentially means taking the initial node features as the coloring for iteration $0$ and assessing the expressiveness of this initial coloring.
 
-\begin{table}[H]
+\begin{table}[!htb]
 	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of \wl iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy.}
 	\label{tab:max_accuracies}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
@@ -155,39 +155,38 @@ For the empirical testing, we took measures to ensure the reliability of our res
 
 \subsubsection{Testing Procedure}
 
-We started by conducting tests on the classification datasets, which serve as the basis for our evaluation. In our testing code, we employ a 10-fold cross-validation approach. Within this framework, we further partitioned the training data randomly, allocating 10\% of it for validation purposes. Consequently, each training iteration consisted of 0.81\% of the original dataset as the training set, 9\% as the validation set, and 10\% as the test set. We repeat this testing procedure five times to mitigate the influence of randomness on the model's performance. Ultimately, we recorded the mean accuracy on the test set along with its standard deviation as the primary performance metric of the model. Note that the use of standard cross-validation for generating the splits and the choice of mean accuracy as our primary metric is reasonable and justified as the datasets are highly balanced, as demonstrated in Section 2.
+We started by conducting tests on the classification datasets, which serve as the basis for our evaluation. In our testing code, we employ a 10-fold cross-validation approach. Within this framework, we further partitioned the training data randomly, allocating \perc{10} of it for validation purposes. Consequently, each training iteration consisted of \perc{81} of the original dataset as the training set, \perc{9} as the validation set, and \perc{10} as the test set. We repeat this testing procedure five times to mitigate the influence of randomness on the model's performance. Ultimately, we recorded the mean accuracy on the test set along with its standard deviation as the primary performance metric of the model. Note that the use of standard cross-validation for generating the splits and the choice of mean accuracy as our primary metric is reasonable and justified as the datasets are highly balanced, as demonstrated in Section 2.
 
-In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022speqnets}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10,000 samples for training, while the other split uses the entire training set.
+In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10\,000 samples for training, while the other split uses the entire training set.
 
 \subsubsection{Hyperparameter Optimization}\label{sec:hyperparam}
 To ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized, can be found in \cref{tab:sweep_wlnn} for the \wlnn models used in classification tasks, \cref{tab:sweep_gnn} for the \gnn models employed in classification tasks, and \cref{tab:sweep_wlnn_reg} for the \wlnn models utilized in the regression task in the Appendix. We will shortly discuss the most critical parameters we optimized for:
 
-Early in our investigations, we made a significant observation regarding the learning performance of \wlnn models. We noticed considerable performance discrepancies when comparing \wlnn models using the standard version of the \wl algorithm with the one from GNNs. Consequently, we investigated the possibility of parametrizing the \wl algorithm to enhance control over the expressiveness of the colorings it computes. Specifically, we focused on two crucial parameters: 1) the number of iterations and 2) the usage of its convergence behavior as an early termination criterion.
+Early in our investigations, we made a significant observation regarding the learning performance of \wlnn models. We noticed considerable performance discrepancies when comparing \wlnn models using the standard version of the \wl algorithm with the one from \gnn's. Consequently, we investigated the possibility of parametrizing the \wl algorithm to enhance control over the expressiveness of the colorings it computes. Specifically, we focused on two crucial parameters: 1) the number of iterations and 2) the usage of its convergence behavior as an early termination criterion.
 
 The advantage of this more granular parametrization is that it enables us to apply the same number of \wl iterations to each graph processed by a \wlnn model by deactivating the convergence behavior and fixing the number of iterations. By deactivating this behavior and keeping the number of iterations minimal, we observed that the number of colors used by the \wl algorithm remained contained. As a result, the \mlp component of each \wlnn model seems to generalize better, significantly improving performance. Therefore, one of the most crucial hyperparameters we optimized for all \wlnn models was the number of \wl iterations. Additionally, if employed, the size of the dimension of the look-up table was another significant parameter to optimize.
 
-In contrast, the hyperparameter selection for the \gnn models was relatively less intricate. The key parameters of interest here are the number of message-passing layers and the size of the hidden dimensions used in each layer. The reason for this is that the number of layers directly corresponds to the expressiveness of the GNN, as demonstrated in the proof, while the size of the hidden dimensions enables easier learning by allowing the model to store more information during graph processing.
+In contrast, the hyperparameter selection for the \gnn models was relatively less intricate. The key parameters of interest here are the number of message-passing layers and the size of the hidden dimensions used in each layer. The reason for this is that the number of layers directly corresponds to the expressiveness of the \gnn, as demonstrated in the proof, while the size of the hidden dimensions enables easier learning by allowing the model to store more information during graph processing.
 
 \subsubsection{Implementation Details and Result Accessibility}
-The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{Open source machine learning framework that was originally developed by Meta AI and does now belong to the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{Open source library that acts as an extension to PyTorch and allows for easy writing and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter sweeps. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
+The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{A free and open-source machine learning framework that was originally developed by Meta AI and is now part of the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{An open-source library that extends \textsc{PyTorch} and allows for easy development and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter optimization. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
 
 \section{Empirical Testing}
-In this section we finally present our empirical findings. In total we conducted 5581 runs, where each run is specific model configuration tested on a dataset. In detail, these runs took a total of 1644 hours of pure computation time to derive. See Table 3 for an overview of the classification accuracy achieved by the best-performing configuration of each model on each classification dataset. Furthermore, see Table 4 for a similiar overview where we recorded the best-performing configurations for each model in terms of the mean absolut error (MAE). Note, that we for the regression dataset size, experiments conducted on these required a lot of time. For these reasons, we utilized existing trainingpipelinse such that we can compare our results of the tested \wlnn models, to already existing results for \gnn models. In particular, we used GINE-$\epsilon$ here as the a good comparison, as this is just an model utilizing the GIN architecture for its message passing layers, Mean as its pooling function and at last a MLP for the subprocedding processing. For these reasons, these results provide a good comparison to the results of our \wlnn models.
+In this section, we present the empirical findings of our study. A total of 5\,581 runs were conducted, with each run testing a specific model configuration on a designated dataset. These runs required a substantial amount of computation time, totaling 1\,644 hours (over 70 days). To examine the classification accuracy achieved by the best-performing configuration of each model on each classification dataset, please refer to \cref{tab:results_classification}. For regression datasets, \cref{tab:results_regression} provides an overview of the mean absolute error (MAE) for the best-performing configurations.
 
+Due to the significantly larger size of the regression datasets compared to the classification datasets, running regression experiments required considerable time for each configuration. As a result, we had to limit the number of different configurations tested. For this reason, we employed existing training pipelines, as mentioned in the previous section, which allowed us to include the results of the \gineeps model proposed by \cite{Mor+2020} and \cite{Morris2022} in \cref{tab:results_regression}.
+The \gineeps model utilizes the \gin architecture for message-passing layers, \textsf{Mean} as its pooling function, and a two-layer \mlp for the final processing of its input graph. This design closely resembles our \textsf{GIN:Mean} model, with the crucial distinction being that \gineeps incorporates edge features in its computations.
 
-An first interpretation, we observe that \wlnn models are indeed capable of demonstrating a comparable performance to \gnn models, and are even able to outperform them. In particular, for all datasets \wlnn model 
+The decision to exclude edge features from all our models, including all \wlnn models, was driven by two key factors. Firstly, our focus primarily revolved around the classification datasets, all of which do not encode any information in their edge features (refer to \cref{tab:overview_datasets}). Secondly, the regression datasets we utilized in our evaluation include continuous edge features, making the application of the \wl algorithm more complex. Although some work exists on modifying the \wl algorithm to incorporate continuous features, we opted for a more straightforward and more scalable approach by not considering edge features in the computations of all our models. Nonetheless, this limitation does not compromise the integrity of our results, as our main objective is to compare similar \gnn and \wlnn models. The inclusion of \gineeps showcases the potential and highlights the significance of edge feature information for solving the dataset tasks of \textsc{Alchemy} and \textsc{Zinc}.
 
-As an eraly interpretation one can see that the best \wlnn models are capable 
+A notable finding when analyzing the presented results is that the performance of \wlnn models is comparable to that of \gnn models. In fact, the best \wlnn models even outperform the \gnn models in all classification datasets, with the exception of \textsc{Imdb-Binary} and \textsc{Reddit-Binary}. These two datasets stand out among the classification datasets as they lack node features. We will investigate this insight later on in more detail. 
+Moreover, our results align with the empirical findings of other \gnn models in various studies. The accuracy reported here falls within a similar range as observed in works by \cite{Xu2018,Morris2022,Mor+2020,Zhang2018}. 
 
+In the subsequent subsection, we will further analyze these results. Specifically, we will investigate the tradeoff between generality and expressiveness in \wlnn models, the learned aggregation functions of each model, the ability of \gnn models to approximate \wlnn models, the differences in their learning behaviors, and the impact of \gnn models performance by preprocessing the data.
 
-of achieving the a very similiar performance in comparison to \gnn (e.g. IMDB) or even better in all other case a better performance, with some examples having a huge difference compared to the \gnn model. But only on the classification datasets. In the regression datasets, we see that all \wlnn models perform quite poorly compared to the \gnn model. Also interesting is the differnece we record between the two regression datasets. While there is a significant performance difference between the using the entire dataset or just a subset for the dataset Alchemy, this difference seems not to exist for Zinc.
-
-In the following sections we will build up on these results an provide furhter insights and analyses into \wlnn and \gnn models.
-
-
-\begin{table}[H]
-	\caption{Overview of the classification accuracies achieved by the best configuratio of each model for each dataset in percent and standard deviation.}
-	\label{tab:my_label}
+\begin{table}[!htb]
+	\caption{Overview of the mean classification accuracies achieved by the best configuration of each model for each dataset in percent and standard deviation.}
+	\label{tab:results_classification}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
@@ -236,7 +235,8 @@ In the following sections we will build up on these results an provide furhter i
 		\end{tabular}}            
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!htb]
+	\caption{Overview of the mean absolute error and the standard deviation (logMAE) on large-scale (multi-target) molecular regression tasks. The results marked by $^1$ are adopted from \cite{Mor+2020} and by $^2$ from \cite{Morris2022}.}
 	\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 	\newcommand{\seq}[2]{$(#1, #2)$\text{-}\textsf{SpeqNet}\xspace}
 		\begin{tabular}{@{}lcccc@{}}	\toprule
@@ -246,7 +246,9 @@ In the following sections we will build up on these results an provide furhter i
 			& {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
 			\\	
 			\toprule
-			\textsf{GINE-$\varepsilon$}\xspace & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
+			\textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
+			\\
+			\textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & & 0.341 {\scriptsize $\pm 0.037$}
 			\\
 			\midrule
 			\textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
@@ -257,16 +259,19 @@ In the following sections we will build up on these results an provide furhter i
 			\\
 			\bottomrule
 	\end{tabular}}
-	\caption{Mean MAE (mean std.\ MAE, logMAE) on large-scale (multi-target) molecular regression tasks. The results marked by $^1$ are adopted from \cite{Mor+2020} and by $^2$ from \cite{Morris2022}.}
+	\label{tab:results_regression}
 \end{table}
 
 
-\subsection{WL too expressive?}
-As already outlined in \cref{sec:hyperparam} we investigated early on to limit the expressiveness the \wl alogorithm offers by trying to contain the number of colors this alogrithm uses. In particular we allowed to fix the number of iterations of the \wl alogrithm in a \wlnn model. The idea was that every graph processed by such a model, would be than mapped to a coloring which is in a similar color range as all the other graphs. Thereby limiting the total number of colors, such that no oultier cases are created. Theoretically speaking, fixing the number of \wl iterations a \wlnn model $\cA$ to $n \in \Nb$ does only limit the expressiveness of the model: For example, if we have an input graph that on which the standard \wl alogirthm convergese after $n' < n$ steps, the coloring computed after applying $n$ steps is as expressive as the one computed by the standard \wl, as the coloring convergence. Furthermore, it only limts the expressiveness, because in the contrary case where the standard \wl alogrithm would converge after $n' > n$ steps on an input graph, the coloring computed after $n$ steps is less expressiveness. It therefore only contains less information than the coloring would if it had been computed by the standard \wl algorithm. Therefore is this parametrization okay.
+\subsection{Fixed \wl Iterations: Tradeoff between Expressiveness and Generality}
+As discussed in Section \ref{sec:hyperparam}, we explored constraining the expressiveness of the \wl algorithm by fixing the number of iterations it is applied to each graph in a \wlnn model. The intention behind this was to ensure that the resulting colorings of graphs computed using a fixed \wl algorithm would fall within a similar color range, thereby limiting the total number of colors and avoiding outlier cases.
 
-If we compare the results of \wlnn models utilizing the standard \wl alogorithm compared to the parametrized version of our see a signifcant difference in performance accross all classification datasets. See Table 5, for an overview of the best accuracy achieved by these models in comparison to our parametrized models. The data confirms our believes, that the \wl alogirhtm is for some task to expressive, as there is a signifcant performance difference between the two types.
+From a theoretical perspective, fixing the number of \wl iterations in a \wlnn model only limits its expressiveness. For the remainder of this section, we will denote the number of \wl iterations by $\nwl \in \Nb$.
+For instance, let $\nwl \in \Nb$ now be fixed. If the standard \wl algorithm converges on an input graph $G$ after $k' < k$ iterations, the coloring computed after $\nwl$ iterations is as expressive as the one obtained from the standard \wl algorithm since the coloring convergence after $k'$ iterations. On the contrary, if the standard \wl algorithm converges after $k' > k$ iterations on an input graph $G$, the coloring obtained after $\nwl$ iterations is less expressive and contains less information than the coloring derived from the standard \wl algorithm.
 
-\begin{table}[H]
+Comparing the performance of \wlnn models utilizing the standard \wl algorithm to those using the parametrized version reveals a significant difference across all classification datasets, as seen in \cref{tab:wl_parametrization}. This data confirms our belief that the standard \wl algorithm can be overly expressive for specific tasks, as evidenced by the considerable performance gap between the two types of the algorithm. Additionally, we included the mean number of iterations of the \wl algorithm applied on each dataset graph in the brackets in Table 4. This number remains a fixed constant for the models utilizing the parametrized version.
+
+\begin{table}[!htb]
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
 			& \multirow{2}{*}{\vspace*{4pt}\textbf{Property}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
@@ -275,19 +280,27 @@ If we compare the results of \wlnn models utilizing the standard \wl alogorithm 
 			\\
 			\toprule
 			\multirow{1}{*}{}
-			& Standard \wl & 34.2 \scriptsize $\pm 6.7$	& 67.0 \scriptsize $\pm 4.3$ & 76.3 \scriptsize $\pm 9.4$ & & 71.4 \scriptsize $\pm 4.9$ & 70.9 \scriptsize $\pm 3.8$
+			& Standard \wl & 34.2 {\scriptsize $\pm 6.7$} $(3.0)$	& 67.0 {\scriptsize $\pm 4.3$} $(1.2)$ & 76.3 {\scriptsize $\pm 9.4$} $(4.2)$ & $(3.9)$ & 71.4 {\scriptsize $\pm 4.9$} $(3.0)$ & 70.9 {\scriptsize $\pm 3.8$} $(4.1)$
 			\\
-			& Parametrized \wl & 48.3 \scriptsize $\pm 8.1$	& 72.4 \scriptsize $\pm 4.1$ & 85.1 \scriptsize $\pm 8.6$ & 83.6 \scriptsize $\pm 2.2$ & 75.2 \scriptsize $\pm 3.9$	& 78.4 \scriptsize $\pm 2.7$
+			& Parametrized \wl & 48.3 {\scriptsize $\pm 8.1$} $(1)$ & 72.4 {\scriptsize $\pm 4.1$} $(1)$ & 85.1 {\scriptsize $\pm 8.6$} $(1)$ & 83.6 {\scriptsize $\pm 2.2$} $(3)$ & 75.2 {\scriptsize $\pm 3.9$} $(1)$ & 78.4 {\scriptsize $\pm 2.7$} $(1)$
 			\\
 			\bottomrule
 		\end{tabular}}
-		\caption{Comparison between the best performing \wlnn models using the standard \wl algorithm and the one employing the parametrized version of it in percent.}
-        \label{tab:my_label4}     
+		\caption{Comparison between the best performing \wlnn models using the standard \wl algorithm and the one employing the parametrized version of it in percent and standard deviation. Additionally, we put the average number of iterations of the \wl algorithm in brackets for each model.}
+        \label{tab:wl_parametrization}     
 \end{table}
 
-Following the insights, another interesting observation is than to investigate which number of \wl iteration in particular leads to the best performing models. To put this into perspective, we created Figure 2 where over all models we tested, we plotted for each the performance achieved grouped by the number of iterations. 
+Building on these insights, investigating the optimal number of \wl iterations that lead to the best-performing models is another interesting observation. To illustrate its effect, we created \cref{fig:k_wl_dependence}, which showcases the performance achieved by all models and configurations grouped by the number of \wl iterations for each dataset in a violin graph. Note that both classification and regression datasets are included in this figure. Depending on the dataset type, the y-axis represents either classification accuracy or test error, where higher accuracies imply better performance for classification tasks, and higher test errors imply poorer performance for regression tasks (and vice versa).
 
-\begin{figure}
+In general, the results indicate that the performance of \wlnn models tends to improve as the number of \wl iterations decreases, except for \textsc{NCI1}, \textsc{Alchemy} and \textsc{Zinc} datasets. 
+
+Notably, for \textsc{NCI1}, the optimal number of iterations coincides with the number of \wl iterations needed for the maximum achievable accuracy (refer to \cref{tab:max_accuracies}). This correlation holds for all other classification datasets, except for \textsc{Mutag}. However, the behavior observed in \textsc{Mutag} can potentially be attributed to the fact that according to the introduced taxonomy (\cite{Liu2022}) in Section \ref{sec:datasets}, \textsc{Mutag} can be effectively solved by simply replacing its node features with an encoding of the node degree. Since, from a theoretical perspective, the coloring computed after the first iteration of the \wl algorithm is usually an encoding of the node degree, this might explain the observed pattern.
+
+Interpreting the results of the \textsc{Zinc} dataset is more complex and somewhat peculiar. While the smaller subset of the dataset, \textsc{Zinc10K}, clearly indicates that fewer \wl iterations yield better results, the overall \textsc{Zinc} dataset suggests the opposite. This discrepancy could be attributed to the limited number of runs conducted on the entire dataset, which were restricted due to scalability and time constraints. Therefore, these results should be interpreted with caution.
+
+In conclusion, reducing the number of \wl iterations leads to improved generability and overall better performance of the models, with the clear exception of \textsc{NCI1}. However, as our results indicate, most \wlnn models achieve optimal performance when employing only a single iteration of the \wl algorithm, which is essentially equivalent to encoding the node degree. This observation demonstrates that \wlnn models do not require the full expressiveness of the \wl algorithm to achieve comparable performance to \gnn models, which raises the question of whether \gnn models, despite their theoretical ability to be highly expressive, also tend to rely primarily on node degree information for computation. We will explore this question further in Section TODO.
+
+\begin{figure}[!htb]
 	\centering
 	\begin{subfigure}[b]{0.19\textwidth}
 		\centering
@@ -352,8 +365,82 @@ Following the insights, another interesting observation is than to investigate w
 	\label{fig:k_wl_dependence}
 \end{figure}
 
+\subsection{Difference in Learning behavior}
 
-\subsection{Explain how results look like}
+
+A problem with the \wlnn models is that the \wl alogirhtm in particular is too expresives and this has an direct impact on the learning performance.
+
+In order to grasp how expressive it is, we calculated for each dataset the ratio of unique colors compared to total amount of colors. For example, the dataset Mutag consists of of 188 graphs in total. If we sum up the number of nodes of each graph, we end up with 3371 nodes in total. This is the upperbound of the total amount of colors the wl alogirghtm can apply use for calculating the colorings. If we now apply the wl alogirhm with a fixed number of wl iterations of 1 on Mutag, we end up with a coloring of each graph. If we now count the number of unique colors used we end up with 231 unique colors, which in comparison to the number of total nodes if very considerable, such that the ratio of used colors for the first iteration is \perc{11.8}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.975\textwidth]{Figures/wl_unique_colors.pdf}
+	\vspace*{-2ex} 
+	\caption{Overview of the colors}
+	\label{fig:wl_unique_colors}
+\end{figure}
+
+
+
+
+
+\begin{figure}[!htb]
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_IMDB-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_MUTAG.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_REDDIT-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
+		\vspace*{-4ex} 
+	\end{subfigure}
+	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
+\end{figure}
+
+
+\subsection{Aggregation Differnces}
+
+\subsection{GNN Approximating 1-WL}
+
+\subsection{Preprocessing Data for GNNs}
 
 \section{Discusssion}
 \subsection{Learned Lessons}
@@ -589,85 +676,3 @@ Following the insights, another interesting observation is than to investigate w
 		\caption{MAE of the approximation performance of the best-perfoming \gnn in relation to the number of unique \wl colors for each dataset. In particular, in comparison to the colors computed by the \wl alogrithm with a single iteration.}
         \label{tab:my_label4}     
 \end{table}
-
-\begin{figure}[H]
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_ENZYMES.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Enzymes}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_IMDB-BINARY.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Imdb-Binary}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_MUTAG.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Mutag}}
-	\end{subfigure}
-	\par\bigskip
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_NCI1.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Nci1}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_PROTEINS.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Proteins}}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_REDDIT-BINARY.pdf}
-		\vspace*{-4ex} 
-		\caption{\textsc{Reddit-Binary}}
-	\end{subfigure}
-	\centering
-	\begin{subfigure}[b]{0.3\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
-		\vspace*{-4ex} 
-	\end{subfigure}
-	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
-\end{figure}
-
-\chapter{These / Narrativ}
-\begin{enumerate}
-	\item \wlnn funktioniert nur sehr gut auf kleinen datasets:
-	\begin{itemize}
-		\item  Je größer das Dataset desto größer wird die 1-WL-Color ``Vielfalt'', schwierig für das MLP des \wlnn noch die richtigen Information rauszuziehen. -> These würde ich gerne noch überprüfen: Gibt es ein Classification Dataset das groß und gut ist? OGBG-Molhiv? MalNet Tiny?
-		\item Dagegenspricht aber das die performance von NCI1 deutlich besser ist von \wlnn.
-		\item Theorie warum \wlnn aktuell fast immer besser war, ist dass \wlnn viel weniger Parameter optimieren muss bei gleicher im Vergleich zu GNNs -> Optimum ist schneller gefunden!
-		\item \gnn generalisieren besser im Sinne, dass sie unabhängig von der größe des Datasets sind. Alchemy zeigt das ganz gut!
-		\item Difference in Training and Test Accuracy zeigt auch das die \wlnn Modelle stark overfitten -> Tendenz dazu dass mit größeren Datasets, generalisieren schwieriger wird.
-		\item Performance von den \wlnn Modellen ohne Embedding (Look-Up-Table) ist auch nur auf kleinen Datasets gut. Je größer das Dataset desto größer ist die Differenz zwischen beiden Modell Konfigurationen.
-	\end{itemize}
-	\item GNNs approximiert \wl Farben:
-	\begin{itemize}
-		\item Aprroximation ist vorhanden und ist nicht so schlecht: Error ist zwar so circa bei 50\% dafür ist die std aber auch sehr hoch (circa 25\%).
-		\item Vorallem approximierung von \wl mit nur einer Iteration (Node Degree!)
-		\item Performance von den GNNs mit Node-degree initialiserung sind bis jetzt immer besser gewesen (IMDB-Binary \& Reddit-Binary)
-	\end{itemize}
-	\item GNNs und \wlnn erlernen graph representation die gut clustern:
-	\begin{enumerate}
-		\item Sehr gute lineare Separierbarkeit bei allen Datsets (Ausnahme ist Mutag wegen Bug!)
-		\item k-NN clustering hoch für kleine k's bei beiden Modellen. Sehr ähnliche Accuracy Kurven!
-		\item (t-SNE plots zeigen auch, dass clustering vorhanden ist.)
-	\end{enumerate}
-\end{enumerate}
-
-		
-F1  metric oder ROC (watch out unbalanced dataset)
-
--> intuition: gnn smoothen! (noise reduction)-> \gnn optimalere funktionen
-Setup: de-noising notwendig, CSWM Problem konzipieren -> erst de-noising befor gute prediction
