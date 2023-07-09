@@ -157,7 +157,7 @@ For the empirical testing, we took measures to ensure the reliability of our res
 
 We started by conducting tests on the classification datasets, which serve as the basis for our evaluation. In our testing code, we employ a 10-fold cross-validation approach. Within this framework, we further partitioned the training data randomly, allocating \perc{10} of it for validation purposes. Consequently, each training iteration consisted of \perc{81} of the original dataset as the training set, \perc{9} as the validation set, and \perc{10} as the test set. We repeat this testing procedure five times to mitigate the influence of randomness on the model's performance. Ultimately, we recorded the mean accuracy on the test set along with its standard deviation as the primary performance metric of the model. Note that the use of standard cross-validation for generating the splits and the choice of mean accuracy as our primary metric is reasonable and justified as the datasets are highly balanced, as demonstrated in Section 2.
 
-In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10\,000 samples for training, while the other split uses the entire training set.
+In the case of the regression datasets, we adopted a slightly different testing procedure. Due to their larger scale compared to the classification datasets, we opted for a more time-efficient approach. To achieve this, we utilized pre-existing training pipelines developed in \cite{Mor+2020} and \cite{Morris2022}. These pipelines use a fixed training, validation, and test split, accelerating the testing process. Similar to the classification datasets, we performed five runs for each model configuration and conducted a hyperparameter sweep for all model configurations. We record the mean absolute error and its standard deviation, as well as the mean logarithmic absolute error and its standard deviation across all runs. Furthermore, we test two splits for each regression dataset: one utilizing only 10\,000 samples for training, while the other split uses the entire training set. \todo{Say that due to these reasons our main focus in testing is on the classification datasets!}
 
 \subsubsection{Hyperparameter Optimization}\label{sec:hyperparam}
 To ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized, can be found in \cref{tab:sweep_wlnn} for the \wlnn models used in classification tasks, \cref{tab:sweep_gnn} for the \gnn models employed in classification tasks, and \cref{tab:sweep_wlnn_reg} for the \wlnn models utilized in the regression task in the Appendix. We will shortly discuss the most critical parameters we optimized for:
@@ -239,23 +239,27 @@ In the subsequent subsection, we will further analyze these results. Specificall
 	\caption{Overview of the mean absolute error and the standard deviation (logMAE) on large-scale (multi-target) molecular regression tasks. The results marked by $^1$ are adopted from \cite{Mor+2020} and by $^2$ from \cite{Morris2022}.}
 	\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 	\newcommand{\seq}[2]{$(#1, #2)$\text{-}\textsf{SpeqNet}\xspace}
-		\begin{tabular}{@{}lcccc@{}}	\toprule
-			\multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{4}{c}{\textbf{Dataset}}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{4}{c}{\textbf{Dataset}}
 			\\
-			\cmidrule{2-5} 
-			& {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
+			\cmidrule{3-6}
+			& & {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
 			\\	
 			\toprule
-			\textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
+			\multirow{3}{*}{\rotatebox{90}{\gnn}} 
+			& \textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
 			\\
-			\textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & & 0.341 {\scriptsize $\pm 0.037$}
+			& \textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & 0.110 {\scriptsize $\pm 0.005$} & 0.341 {\scriptsize $\pm 0.037$}
 			\\
-			\midrule
-			\textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
+			& \textsf{GIN:Sum} &
 			\\
-			\textsf{Embedding-Mean} & 0.617 {\scriptsize $\pm 0.003$} -0.564 {\scriptsize $\pm 0.005$} &	0.355 {\scriptsize $\pm 0.004$} -1.269 {\scriptsize $\pm 0.020$} &	\textbf{0.348} {\scriptsize $\pm 0.010$} &	0.484 {\scriptsize $\pm 0.009$}
+			\cmidrule{2-6}
+			\multirow{3}{*}{\rotatebox{90}{\scriptsize \wlnn}} 
+			& \textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
 			\\
-			\textsf{Embedding-Sum} & \textbf{0.600} {\scriptsize $\pm 0.004$} -0.625 {\scriptsize $\pm 0.032$} & \textbf{0.305} {\scriptsize $\pm 0.001$} -1.740 {\scriptsize $\pm 0.042$} &	0.384 {\scriptsize $\pm 0.004$} &	\textbf{0.465} {\scriptsize $\pm 0.009$}
+			& \textsf{Embedding-Mean} & 0.617 {\scriptsize $\pm 0.003$} -0.564 {\scriptsize $\pm 0.005$} &	0.355 {\scriptsize $\pm 0.004$} -1.269 {\scriptsize $\pm 0.020$} &	\textbf{0.348} {\scriptsize $\pm 0.010$} &	0.484 {\scriptsize $\pm 0.009$}
+			\\
+			& \textsf{Embedding-Sum} & \textbf{0.600} {\scriptsize $\pm 0.004$} -0.625 {\scriptsize $\pm 0.032$} & \textbf{0.305} {\scriptsize $\pm 0.001$} -1.740 {\scriptsize $\pm 0.042$} &	0.384 {\scriptsize $\pm 0.004$} &	\textbf{0.465} {\scriptsize $\pm 0.009$}
 			\\
 			\bottomrule
 	\end{tabular}}
@@ -366,23 +370,24 @@ In conclusion, reducing the number of \wl iterations leads to improved generabil
 \end{figure}
 
 \subsection{Difference in Learning behavior}
+The learning behavior of \wlnn models presents a challenge due to the expressiveness of the \wl algorithm, which directly impacts their performance. One notable distinction between \wlnn and \gnn models is the significant discrepancy observed between their training and test performance. While it is typical to witness higher training performance compared to testing performance in various machine learning applications, this difference is particularly pronounced in \wlnn models. Figure 5 illustrates this discrepancy across all classification datasets. We considered different subsets from the best-performing models, ranging from the top \perc{1} to the top \perc{100}. Each bar represents the mean difference between the training accuracy and the test accuracy of the respective quantile of runs. The models trained with \wlnn are depicted in blue, while those trained with \gnn are represented in orange. The height of each bar indicates the degree of overfitting, with taller bars suggesting more substantial overfitting and poor generalization, while shorter or even negative bars indicate better generalization, where the performance on the training set aligns more closely with the performance on the testing set. The black line denotes the standard error.
+
+Analyzing the figure reveals that \wlnn models tend to exhibit more significant overfitting compared to \gnn models, particularly in datasets such as Enzymes, Mutag, Proteins, and Reddit Binary. For instance, in the case of Enzymes, the top \perc{1} of best-performing \wlnn models display, on average, a \perc{27} higher training accuracy than their test accuracy, highlighting the extent of overfitting with \wlnn models.
+
+While \gnn models also experience some overfitting, mainly observed in the NCI1 dataset, it is not as prevalent across all datasets and not as dramatic as in the case of \wlnn models. Moreover, in datasets like Mutag or Reddit Binary, it demonstrates the superior generalization capability of \gnn models. In these cases, the difference in performance is close to \perc{0}, and in the case of Mutag, it is even negative. This indicates that \gnn models were able to learn general patterns in these datasets rather than memorizing the data.
+
+This raises the question of why \wlnn models tend to exhibit such dramatic overfitting. We hypothesize that the \wl algorithm's excessive expressiveness leads to the computation of highly detailed colorings of the input graphs.
+
+To gain insight into the algorithm's expressiveness, we calculated the ratio of unique colors compared to the total number of possible colors for each dataset. For example, the ENZYMES dataset consists of 600 graphs, with a total of 19,580 nodes. This number represents an upperbound on the number of different colors that can be used in the colorings computed by the \wl algorithm when applied to Enzymes. After a single iteration, all colorings consist of only 231 colors, accounting for less than \perc{0.01} of the total number of colors that could be used. However, after another iteration, resulting in a total of two iterations of the \wl algorithm, this number has already increased to 10,416, comprising \perc{53.2} of the total available colors. This clearly demonstrates the significant expressiveness of the colorings after just a few iterations.
+
+Figure 9 illustrates this ratio of unique colors used compared to the total possible colors (total number of nodes in each dataset). As expected, the ratio converges with additional \wl iterations due to the convergence behavior of the algorithm. However, it is evident that the ratio rises rapidly and dramatically for all datasets. We included an enlarged section of the initial part of the plot to emphasize that even a small ratio around \perc{10} signifies a large number of unique colors in the colorings computed by the \wl algorithm. To contextualize each value, refer to Table 2 to estimate the total number of nodes in each dataset or consult Table 4 in the Appendix, which lists the number of unique values for each dataset.
+
+Another point to emphasis is that the colors have nothing to do with antoher in a wl coloring have almost nothing to do with another. Meaning, for example if two nodes are colored by two distinct integers which are close thogher, this does not mean that both nodes are in anyway similar to another structurally. Allthoug, we use in our expermirements an implementation of the \wl alogrithm that assings each node alwasy the smallest unused colors, a connection between colors is still not really existend.
+
+After seeing how the number for colors for wl iteration greater equal to two almost explodes and we see this as the primary reason for the overfitting behavior it begs the question if this can also be seen in our data. For this reasons we plotted figure 11, which is the exact same graphic as used before, with the differnec that now, we do not compare both framewokrs, bit only consider \wlnn models and compare the different number of \wl iterations. With the clear exception of ENzymes, we see that the overfitting behvaior compared to using only a sinle iteration of the \wl algorithm is more substantial. Thebery configrming our believes. Also as expected in the majority of datasets we even see that with an increased \wl iterations the overftiiting behvaior gets worse.
 
 
-A problem with the \wlnn models is that the \wl alogirhtm in particular is too expresives and this has an direct impact on the learning performance.
-
-In order to grasp how expressive it is, we calculated for each dataset the ratio of unique colors compared to total amount of colors. For example, the dataset Mutag consists of of 188 graphs in total. If we sum up the number of nodes of each graph, we end up with 3371 nodes in total. This is the upperbound of the total amount of colors the wl alogirghtm can apply use for calculating the colorings. If we now apply the wl alogirhm with a fixed number of wl iterations of 1 on Mutag, we end up with a coloring of each graph. If we now count the number of unique colors used we end up with 231 unique colors, which in comparison to the number of total nodes if very considerable, such that the ratio of used colors for the first iteration is \perc{11.8}.
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.975\textwidth]{Figures/wl_unique_colors.pdf}
-	\vspace*{-2ex} 
-	\caption{Overview of the colors}
-	\label{fig:wl_unique_colors}
-\end{figure}
-
-
-
-
+In conclusions this shows that \wlnn models are only good in generalization when keeping the number of \wl iterations to 1. Otherwise this overfitting behvaior sets in. This insight shows that the expressivesness of \wl is too much, and that in comparisoon gnn are able to learn a very good and genral represetntion of tgheir graphs.
 
 \begin{figure}[!htb]
 	\begin{subfigure}[b]{0.3\textwidth}
@@ -435,6 +440,63 @@ In order to grasp how expressive it is, we calculated for each dataset the ratio
 	\caption{Mean absolute difference of the classification accuracies of the training and testing set of each dataset. In detail, we compared the different quantiles of each performance.}
 \end{figure}
 
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[width=0.975\textwidth]{Figures/wl_unique_colors.pdf}
+	\vspace*{-2ex} 
+	\caption{Overview of the colors}
+	\label{fig:wl_unique_colors}
+\end{figure}
+
+\begin{figure}[!htb]
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_ENZYMES.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Enzymes}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_IMDB-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Imdb-Binary}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_MUTAG.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Mutag}}
+	\end{subfigure}
+	\par\bigskip
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_NCI1.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Nci1}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_PROTEINS.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Proteins}}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_REDDIT-BINARY.pdf}
+		\vspace*{-4ex} 
+		\caption{\textsc{Reddit-Binary}}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_legend.pdf}
+		\vspace*{-4ex} 
+	\end{subfigure}
+\end{figure}
 
 \subsection{Aggregation Differnces}
 

@@ -82,7 +82,6 @@ We calculate the normalized Shannon index as follows:
 where $n$ is the total number of samples of the dataset, $C$ is the set of all classes, and $n_i$ is the number of samples of the class $i \in C$. As an example, for the dataset \textsc{Proteins} the variables are set to be the following: $C = \{0, 1\}$ with $n_0 = 663$ and $n_1 = 450$, so that $n = 1113$, yielding a rounded value of $0.973$.
 
 \subsection{Theoretical Maximum Accuracy Analysis}
-\blindtext
 
 \begin{table}[H]
 	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. ``\textsc{Oom}'' denotes out of memory error.}
@@ -225,6 +224,28 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 		\end{tabular}}              
 \end{table}
 
+\section{Analysis}
+
+\begin{table}[H]
+    \label{tab:unique_colors}
+    \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the upper bound of the number of unique colors that can be used in the colorings.}
+    \centering
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+    \begin{tabular}{lrrrrrrrrrrr | r}
+    \toprule
+        \multirow{3}{*}{\vspace*{4pt}\textbf{Dataset}}&\multicolumn{11}{c}{\textbf{Number of \wl Iterations}}\\\cmidrule{2-13}
+        & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & \# Nodes\\
+        \midrule
+        {\textsc{Enzymes}}  & 2 & 231 & 10\,416 & 15\,208 & 16\,029 & 16\,450 & 16\,722 & 16\,895 & 17\,026 & 17\,130 & 17\,204 & 195\,80\\
+        {\textsc{Imdb-Binary}} & 1 & 65 & 2\,931 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 19\,773 \\
+        {\textsc{Mutag}}  & 2 & 33 & 174 & 572 & 1\,197 & 1\,766 & 2\,167 & 2\,403 & 2\,511 & 2\,560 & 2\,579 & 3\,371 \\
+        {\textsc{NCI1}} & 2 & 292 & 4\,058 & 22\,948 & 44\,508 & 58\,948 & 68\,632 & 75\,754 & 81\,263 & 85\,590 & 88\,968 & 122\,747\\
+        {\textsc{Proteins}} & 2 & 297 & 20\,962 & 35\,676 & 37\,940 & 38\,653 & 38\,926 & 39\,064 & 39\,141 & 39\,180 & 39\,203 & 43\,471\\
+        {\textsc{Reddit-Binary}} & 1 & 566 & 71\,893 & 244\,529 & 317\,728 & 333\,258 & 335\,961 & 336\,412 & 336\,490 & 336\,506 & 336\,507 & 859\,254 \\
+        \bottomrule
+    \end{tabular}}
+\end{table}
+
 
 \section{Visualization of the Approximation Performance of GNNs}
 \begin{figure}[!ht]
@@ -311,3 +332,6 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
     \hfill
     \caption{Visualizing the performance of the best performing GNN on the \textsc{Proteins} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.49 \pm 0.26$.}
 \end{figure}
+
+
+    
