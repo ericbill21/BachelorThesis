@@ -246,7 +246,7 @@ In the subsequent subsection, we will further analyze these results. Specificall
 			& & {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
 			\\	
 			\toprule
-			\multirow{3}{*}{\rotatebox{90}{\gnn}} 
+			\multirow{4}{*}{\rotatebox{90}{\gnn}} 
 			& \textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
 			\\
 			\cmidrule{2-6}
@@ -452,6 +452,7 @@ In conclusions this shows that \wlnn models are only good in generalization when
 \end{figure}
 
 \begin{figure}[!htb]
+	\centering
 	\begin{subfigure}[b]{0.3\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_ENZYMES.pdf}
@@ -493,7 +494,6 @@ In conclusions this shows that \wlnn models are only good in generalization when
 		\vspace*{-4ex} 
 		\caption{\textsc{Reddit-Binary}}
 	\end{subfigure}
-	\centering
 	\begin{subfigure}[b]{0.3\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{Figures/train_test_diff_k_wl_legend.pdf}
@@ -507,7 +507,7 @@ In conclusions this shows that \wlnn models are only good in generalization when
 
 \subsection{Preprocessing Data for GNNs}
 
-\section{Discusssion}
+\section{Discusssion}\label{sec:discussion}
 \subsection{Learned Lessons}
 \subsection{Future Work}
 

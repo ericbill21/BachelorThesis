@@ -2,12 +2,12 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: MUTAG_WLNN_MORE_K_WL
+name: ENZYMES_WLNN_MORE_K_WL
 parameters:
   batch_size:
     value: 32
   dataset:
-    value: MUTAG
+    value: ENZYMES
   encoding_kwargs:
     parameters:
       embedding_dim:
@@ -19,9 +19,7 @@ parameters:
   k_fold:
     value: 10
   k_wl:
-    values:
-      - 3
-      - 4
+    value: 1
   lr:
     distribution: uniform
     max: 0.1
@@ -42,7 +40,8 @@ parameters:
           - 2
           - 3
           - 4
-          - 5
+          - 4
+          - 4
   model:
     values:
       - 1WL+NN:Embedding-Sum
