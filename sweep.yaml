@@ -2,11 +2,12 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
+name: MUTAG_WLNN_MORE_K_WL
 parameters:
   batch_size:
-    value: 33
+    value: 32
   dataset:
-    value: NCI1
+    value: MUTAG
   encoding_kwargs:
     parameters:
       embedding_dim:
@@ -18,7 +19,9 @@ parameters:
   k_fold:
     value: 10
   k_wl:
-    value: 4
+    values:
+      - 3
+      - 4
   lr:
     distribution: uniform
     max: 0.1

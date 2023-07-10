@@ -249,9 +249,12 @@ In the subsequent subsection, we will further analyze these results. Specificall
 			\multirow{3}{*}{\rotatebox{90}{\gnn}} 
 			& \textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
 			\\
+			\cmidrule{2-6}
+			& \textsf{GIN:Max} & 
+			\\
 			& \textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & 0.110 {\scriptsize $\pm 0.005$} & 0.341 {\scriptsize $\pm 0.037$}
 			\\
-			& \textsf{GIN:Sum} &
+			& \textsf{GIN:Sum} & 0.523 {\scriptsize $\pm 0.016$} -0.705 {\scriptsize $\pm 0.035$} &	0.282 {\scriptsize $\pm 0.002$} -1.890 {\scriptsize $\pm 0.031$} &	& 0.298 {\scriptsize $\pm 0.034$}
 			\\
 			\cmidrule{2-6}
 			\multirow{3}{*}{\rotatebox{90}{\scriptsize \wlnn}} 
@@ -278,15 +281,15 @@ Comparing the performance of \wlnn models utilizing the standard \wl algorithm t
 \begin{table}[!htb]
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
-			& \multirow{2}{*}{\vspace*{4pt}\textbf{Property}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
+			& \multirow{2}{*}{\vspace*{4pt}\textbf{Algorithm Type}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
 			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}      & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}           & 
 			{\textsc{Reddit-Binary}}
 			\\
 			\toprule
 			\multirow{1}{*}{}
-			& Standard \wl & 34.2 {\scriptsize $\pm 6.7$} $(3.0)$	& 67.0 {\scriptsize $\pm 4.3$} $(1.2)$ & 76.3 {\scriptsize $\pm 9.4$} $(4.2)$ & $(3.9)$ & 71.4 {\scriptsize $\pm 4.9$} $(3.0)$ & 70.9 {\scriptsize $\pm 3.8$} $(4.1)$
+			& Standard \wl & 34.2 {\scriptsize $\pm 6.7$} $(\varnothing\nwl : 3.0)$	& 67.0 {\scriptsize $\pm 4.3$} $(\varnothing\nwl :1.2)$ & 76.3 {\scriptsize $\pm 9.4$} $(\varnothing\nwl :4.2)$ & 78.9 {\scriptsize $\pm 2.1$} $(\varnothing\nwl :3.9)$ & 71.4 {\scriptsize $\pm 4.9$} $(\varnothing\nwl :3.0)$ & 70.9 {\scriptsize $\pm 3.8$} $(\varnothing\nwl :4.1)$
 			\\
-			& Parametrized \wl & 48.3 {\scriptsize $\pm 8.1$} $(1)$ & 72.4 {\scriptsize $\pm 4.1$} $(1)$ & 85.1 {\scriptsize $\pm 8.6$} $(1)$ & 83.6 {\scriptsize $\pm 2.2$} $(3)$ & 75.2 {\scriptsize $\pm 3.9$} $(1)$ & 78.4 {\scriptsize $\pm 2.7$} $(1)$
+			& Parametrized \wl & 48.3 {\scriptsize $\pm 8.1$} $(\nwl :1)$ & 72.4 {\scriptsize $\pm 4.1$} $(\nwl :1)$ & 85.1 {\scriptsize $\pm 8.6$} $(\nwl :1)$ & 83.6 {\scriptsize $\pm 2.2$} $(\nwl :3)$ & 75.2 {\scriptsize $\pm 3.9$} $(\nwl :1)$ & 78.4 {\scriptsize $\pm 2.7$} $(\nwl :1)$
 			\\
 			\bottomrule
 		\end{tabular}}
