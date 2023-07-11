@@ -19,7 +19,12 @@ parameters:
   k_fold:
     value: 10
   k_wl:
-    value: 1
+    values:
+      - 2
+      - 3
+      - 4
+      - 4
+      - 4
   lr:
     distribution: uniform
     max: 0.1
@@ -39,8 +44,6 @@ parameters:
         values:
           - 2
           - 3
-          - 4
-          - 4
           - 4
   model:
     values:

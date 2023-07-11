@@ -133,7 +133,7 @@ In more detail, the optional preprocessing step involves a simple look-up table.
 \end{equation*}
 where ``Embedding'' indicates the use of the optional preprocessing step.
 
-\subsubsection{\gnn Models}
+\subsubsection{\gnn Models}\label{sec:gnn_model_choice}
 As mentioned in the introduction to this section, our focus is on keeping the models basic. Hence, we opted for \gin by \cite{Xu2018}, \gcn by \cite{Kip+2017}, and \gat by \cite{Velivckovic2017} as the base architecture for the message-passing layers. Each of these architectures was chosen for specific reasons.
 
 Firstly, we included \gin as an obvious candidate because it has been proven to be as expressive as the 1-WL algorithm. This characteristic makes it interesting when comparing it to \wlnn models.
@@ -250,11 +250,11 @@ In the subsequent subsection, we will further analyze these results. Specificall
 			& \textsf{$\gineeps^{1,2}$} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}$^1$ & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}$^2$ & - & 0.084 {\scriptsize $\pm  0.004$}$^1$
 			\\
 			\cmidrule{2-6}
-			& \textsf{GIN:Max} & 
+			& \textsf{GIN:Max} & 0.604 {\scriptsize $\pm 0.004$} -0.578 {\scriptsize $\pm 0.009$} &	0.353 {\scriptsize $\pm 0.003$} -1.228 {\scriptsize $\pm 0.006$} &	0.124 {\scriptsize $\pm 0.004$} &	0.427 {\scriptsize $\pm 0.009$}
 			\\
 			& \textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & 0.110 {\scriptsize $\pm 0.005$} & 0.341 {\scriptsize $\pm 0.037$}
 			\\
-			& \textsf{GIN:Sum} & 0.523 {\scriptsize $\pm 0.016$} -0.705 {\scriptsize $\pm 0.035$} &	0.282 {\scriptsize $\pm 0.002$} -1.890 {\scriptsize $\pm 0.031$} &	& 0.298 {\scriptsize $\pm 0.034$}
+			& \textsf{GIN:Sum} & \textbf{0.523} {\scriptsize $\pm 0.016$} -0.705 {\scriptsize $\pm 0.035$} & \textbf{0.282} {\scriptsize $\pm 0.002$} -1.890 {\scriptsize $\pm 0.031$} & \textbf{0.104} {\scriptsize $\pm 0.005$} & \textbf{0.298} {\scriptsize $\pm 0.034$}
 			\\
 			\cmidrule{2-6}
 			\multirow{3}{*}{\rotatebox{90}{\scriptsize \wlnn}} 
