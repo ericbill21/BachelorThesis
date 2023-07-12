@@ -18,6 +18,8 @@
 \usepackage{tikz}
 \usepackage{siunitx}
 \usepackage[section]{placeins}
+\usepackage{multirow}
+
 
 \usetikzlibrary{patterns,decorations.pathreplacing}
 \usetikzlibrary{arrows.meta,arrows}
@@ -29,6 +31,7 @@
 \newcommand{\CC}[1][]{$\text{C\hspace{-.25ex}}^{_{_{_{++}}}}
 \ifthenelse{\equal{#1}{}}{}{\text{\hspace{-.625ex}#1}}$}
 
+\usepackage[usestackEOL]{stackengine}
 \usepackage{bm}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -142,6 +145,18 @@ pdfcreator={pdflatex}
     }
 }
 
+\newcommand{\nnsum}[1][1.2]{% only for \displaystyle
+    \mathop{%
+        \raisebox
+            {-#1\depthofsumsign+1\depthofsumsign}
+            {\scalebox
+                {#1}
+                {$\displaystyle\sum$}%
+            }
+    }
+}
+
+
 % GNNs
 \newcommand{\gat}{\textsf{GAT}\xspace}
 \newcommand{\gcn}{\textsf{GCN}\xspace}
@@ -213,7 +228,7 @@ pdfcreator={pdflatex}
 \newcommand{\nwl}{n_{\textsf{wl}}}
 
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
-\def\samples{2}
+\def\samples{2000}
 
 
 \usepackage[auth-lg]{authblk}
@@ -254,9 +269,9 @@ pdfcreator={pdflatex}
 \endgroup
 
 
-\input{abstract.tex}
-\clearpage
-\input{acknowledgement.tex}
+%\input{abstract.tex}
+%\clearpage
+%\input{acknowledgement.tex}
 
 \cleardoubleoddstandardpage
 \tableofcontents
@@ -265,7 +280,7 @@ pdfcreator={pdflatex}
 \cleardoubleoddstandardpage
 \pagenumbering{arabic}
 
-\input{intro.tex}
+%\input{intro.tex}
 \input{related_work.tex}
 
 \part{Theoretical Equivalence}\label{part1}
@@ -273,7 +288,7 @@ pdfcreator={pdflatex}
 \input{part1.tex}
 
 \part{Empirical Testing}\label{part2}
-\input{part2.tex}
+%\input{part2.tex}
 
 \cleardoubleoddstandardpage
 \setcitestyle{numbers}
@@ -281,7 +296,8 @@ pdfcreator={pdflatex}
 \bibliography{references}
 
 \cleardoubleoddstandardpage
-\input{appendix.tex}
+\input{appendix1.tex}
+%\input{appendix2.tex}
 
 
 \end{document}

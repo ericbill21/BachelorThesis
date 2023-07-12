@@ -1,14 +1,27 @@
 \begin{tikzpicture}
-    \begin{axis}[legend style={font=\small},
-        legend cell align=left,
-        legend pos=north east]
+    \begin{axis}[
+        grid=both,
+        grid style={dashed, gray!50},
+        inner axis line style={=>},
+        ytick={0, 0.2, 0.4, 0.6, 0.8, 1.0},
+        xtick={-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6},
+        ymin=-0.1,
+        ymax=1.1,
+        xmin=-5,
+        xmax=5,
+        yscale=0.7,
+        xlabel={\large $x$},
+        ylabel={\large $\psi_a(x)$},
+        every axis y label/.style={at={(current axis.west)},left=7mm},
+        legend style={font=\small, at={(1.4,0.9)},anchor=north east},
+        legend cell align=right,]
 
-    \addlegendimage{line legend, blue}\addlegendentry{$a:=1$}
-    \addlegendimage{line legend, red}\addlegendentry{$a:=2$}
-    \addlegendimage{line legend, teal}\addlegendentry{$a:=3$}
+    \addlegendimage{line legend, blue, thick}\addlegendentry{$a:=1$}
+    \addlegendimage{line legend, red, thick}\addlegendentry{$a:=2$}
+    \addlegendimage{line legend, teal, thick}\addlegendentry{$a:=3$}
 
-    \addplot[domain=-6:6, samples=\samples, color=blue,]{max(x-1,0) + max(x+1,0) - 2*max(x,0)};
-    \addplot[domain=-6:6, samples=\samples, color=red,]{max(x/2-1,0) + max(x/2+1,0) - 2*max(x/2,0)};
-    \addplot[domain=-6:6, samples=\samples, color=teal,]{max(x/3-1,0) + max(x/3+1,0) - 2*max(x/3,0)};
+    \addplot[domain=-5:5, samples=\samples, color=blue, thick]{max(x-1,0) + max(x+1,0) - 2*max(x,0)};
+    \addplot[domain=-5:5, samples=\samples, color=red, thick]{max(x/2-1,0) + max(x/2+1,0) - 2*max(x/2,0)};
+    \addplot[domain=-5:5, samples=\samples, color=teal, thick]{max(x/3-1,0) + max(x/3+1,0) - 2*max(x/3,0)};
     \end{axis}
 \end{tikzpicture}
