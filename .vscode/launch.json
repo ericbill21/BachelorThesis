@@ -17,6 +17,7 @@
             "name": "Python: WLNN",
             "type": "python",
             "request": "launch",
+            "cwd": "${workspaceFolder}/Code",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,

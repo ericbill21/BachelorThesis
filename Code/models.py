@@ -59,7 +59,13 @@ class generic_gnn(torch.nn.Module):
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
+        if x.dim() == 1:
+            x = x.reshape(-1, 1).float()
+
         x = self.gnn(x, edge_index)
+
+        x = x.squeeze()
+
         x = self.pool(x, batch)
         x = self.mlp(x)
         x = self.softmax(x)
@@ -140,8 +146,12 @@ def create_model(
     mlp_kwargs: dict = {},
     gnn_kwargs: dict = {},
     encoding_kwargs: dict = {},
-    is_classification: bool = True,
-):
+    is_classification: bool = True):
+    
+    # Special Case for the 1WL+NN:GNN models
+    if model_name.startswith("1WL+NN:GIN") or model_name.startswith("1WL+NN:GAT") or model_name.startswith("1WL+NN:GCN"):
+        model_name = model_name.replace("1WL+NN:", "")
+
     # Check if the model is a 1WL+NN model
     if model_name.startswith("1WL+NN:"):
         # Retrieve the correct encoding function
