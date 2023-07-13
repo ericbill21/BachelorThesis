@@ -58,14 +58,11 @@ class generic_gnn(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
-
-        if x.dim() == 1:
-            x = x.reshape(-1, 1).float()
+        
+        if x.dtype == torch.long:
+            x = x.float()
 
         x = self.gnn(x, edge_index)
-
-        x = x.squeeze()
-
         x = self.pool(x, batch)
         x = self.mlp(x)
         x = self.softmax(x)
