@@ -40,10 +40,12 @@ parser.add_argument('--transformer_kwargs', type=str, default='{}', help='Argume
 parser.add_argument('--encoding_kwargs', type=str, default='{}', help='Arguments for the encoding function. For example, for Embedding, the argument is the embedding dimension with the key "embedding_dim".')
 parser.add_argument('--mlp_kwargs', type=str, default='{}', help='Arguments for the MLP. For example, for the MLP, the argument is the number of hidden layers with the key "num_layers".')
 parser.add_argument('--gnn_kwargs', type=str, default='{}', help='Arguments for the GNN. For example, for GIN, the argument is the number of MLP layers with the key "num_layers".')
+parser.add_argument('--use_one_hot', type=str, choices=['True','False'], default='False', help='Whether to use one-hot encoding for the node features. Only for 1-WL+NN:GNN models.')
 args = parser.parse_args()
 
 # Convert arguments
 args.wl_convergence = args.wl_convergence == "True"
+args.use_one_hot = args.use_one_hot == "True"
 args.encoding_kwargs = ast.literal_eval(args.encoding_kwargs)
 args.gnn_kwargs = ast.literal_eval(args.gnn_kwargs)
 args.mlp_kwargs = ast.literal_eval(args.mlp_kwargs)
@@ -131,7 +133,11 @@ for i in range(args.num_repition):
 
     # Precalculate the Weisfeiler-Lehman coloring for the dataset.
     if args.model.startswith("1WL+NN"):
-        dataset_current = Wrapper_WL_TUDataset(dataset_original, args.k_wl, args.wl_convergence, DEVICE)
+        dataset_current = Wrapper_WL_TUDataset(dataset=dataset_original,
+                                                k_wl=args.k_wl,
+                                                wl_convergence=args.wl_convergence,
+                                                one_hot=args.use_one_hot,
+                                                DEVICE=DEVICE)
         args.encoding_kwargs["max_node_feature"] = dataset_current.max_node_feature + 1
 
     else:

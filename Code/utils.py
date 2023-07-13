@@ -191,7 +191,11 @@ class NormalizedDegree(object):
         return data
 
 class Wrapper_WL_TUDataset(InMemoryDataset):
-    def __init__(self, dataset: torch_geometric.datasets, k_wl: int, wl_convergence: bool, DEVICE: torch.device = torch.device("cpu")):
+    def __init__(self, 
+                 dataset: torch_geometric.datasets, k_wl: int,
+                 wl_convergence: bool,
+                 one_hot: bool = False,
+                 DEVICE: torch.device = torch.device("cpu")):
         super().__init__(root=None, transform=None, pre_transform=None, pre_filter=None, log=None)
 
         # First we copy the given Dataset with respect to the current ordering
@@ -221,6 +225,11 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
 
         # Save the maximum node feature as attribute
         self.max_node_feature = self._data.x.max().item()
+
+        # One hot encoding
+        if one_hot:
+            self._data.x = torch.nn.functional.one_hot(self._data.x)
+
 
 def get_agg_data(model, dataset): 
     data_aggregate, data_y = [], []

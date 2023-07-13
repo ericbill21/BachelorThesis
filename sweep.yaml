@@ -78,4 +78,6 @@ parameters:
     value: false
   k_wl:
     value: 1
+  use_one_hot:
+    value: True
 program: Code/main.py
