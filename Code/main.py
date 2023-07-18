@@ -20,7 +20,7 @@ import wandb
 # GLOBAL VARIABLES
 LOG_INTERVAL = 50
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-SAVE_MODEL = False
+SAVE_MODEL = True
 K_MAX = 150
 
 # Parse arguments

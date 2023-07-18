@@ -165,7 +165,7 @@ def weisfeiler_leman(data, wl_conv):
 
     data.x = old_coloring.unsqueeze(-1)
 
-    return data
+    return data, iteration
 
 
 def check_wl_convergence(old_coloring, new_coloring):
@@ -209,8 +209,17 @@ class Wrapper_WL_TUDataset(InMemoryDataset):
         # This is the case for standard 1-WL 
         if k_wl == -1 and wl_convergence:
             print("Applying 1-WL convergence")
+
+            total_iterations = []
+
             for data in data_list:
-                data = weisfeiler_leman(data, self.wl_conv)
+                data, iter = weisfeiler_leman(data, self.wl_conv)
+
+                total_iterations.append(iter)
+            
+            total_iterations = torch.tensor(total_iterations).float()
+            print(f"Total iterations: {total_iterations.mean().item()} +- {total_iterations.std().item()}")
+
 
         # Otherwise we apply k_wl times the 1-WL convolution
         else:

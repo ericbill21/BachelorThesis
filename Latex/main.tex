@@ -227,6 +227,14 @@ pdfcreator={pdflatex}
 \newcommand{\mlp}{\textsf{MLP}\xspace}
 \newcommand{\nwl}{n_{\textsf{wl}}}
 
+% Datasets
+\newcommand{\enzymes}{\textsc{Enzymes}\xspace}
+\newcommand{\nci}{\textsc{Nci1}\xspace}
+\newcommand{\mutag}{\textsc{Mutag}\xspace}
+\newcommand{\proteins}{\textsc{Proteins}\xspace}
+\newcommand{\imdb}{\textsc{Imdb-Binary}\xspace}
+\newcommand{\reddit}{\textsc{Reddit-Binary}\xspace}
+
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
 \def\samples{2}
 
@@ -242,8 +250,7 @@ pdfcreator={pdflatex}
 \setcounter{Maxaffil}{2}
 
 \title{A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm\\
-\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science approved for the purpose of obtaining the academic degree of Bachelor of Sciences.}
-}
+\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science approved for the purpose of obtaining the academic degree of Bachelor of Sciences.}}
 \author{\textbf{Eric Tillmann Bill}}
 \affil{\vspace{100pt}}
 
@@ -257,20 +264,17 @@ pdfcreator={pdflatex}
 \begin{document}
 \pagenumbering{Roman}
 
-% Title
-\maketitle
-\clearpage % end title page
-
-% Add empty page after title
-\begingroup
-  \pagestyle{empty}
-  \null
-  \newpage
-\endgroup
+\begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north east,inner sep=20pt, shift={(-10pt,0)}] (logo) at (current page.north east)
+               {\includegraphics[scale=0.2]{Figures/rwth_log_en_blau_rgb.png}};
+\end{tikzpicture}
+%{The present work was submitted to the Computer Science 6: Machine Learning on Graphs\hfill}
+\vspace{50pt}
+{\let\newpage\relax\maketitle}
 
 
-%\input{abstract.tex}
-%\clearpage
+\input{abstract.tex}
+\clearpage
 \input{acknowledgement.tex}
 
 \cleardoubleoddstandardpage
@@ -296,8 +300,8 @@ pdfcreator={pdflatex}
 \bibliography{references}
 
 \cleardoubleoddstandardpage
-\input{appendix1.tex}
-\input{appendix2.tex}
+% \input{appendix1.tex}
+% \input{appendix2.tex}
 
 
 \end{document}
