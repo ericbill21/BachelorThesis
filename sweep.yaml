@@ -2,12 +2,14 @@ method: random
 metric:
   goal: maximize
   name: test_accuracy
-name: WLNN:GNN
+name: NCI1_WLNN:GNN
 parameters:
   batch_size:
-    value: 32
-  dataset:
     values: 
+      - 33
+      - 129
+  dataset:
+    values:
       - MUTAG
       - PROTEINS
       - REDDIT-BINARY
@@ -36,6 +38,8 @@ parameters:
         value: 5
   k_fold:
     value: 10
+  k_wl:
+    value: 1
   lr:
     distribution: uniform
     max: 0.1
@@ -74,10 +78,8 @@ parameters:
     value: 42
   tags:
     value: sweep_wlnn_gnn
+  use_one_hot:
+    value: true
   wl_convergence:
     value: false
-  k_wl:
-    value: 1
-  use_one_hot:
-    value: True
 program: Code/main.py

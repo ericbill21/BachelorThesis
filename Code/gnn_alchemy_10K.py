@@ -43,10 +43,11 @@ plot_all = []
 results = []
 results_log = []
 for _ in range(5):
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     plot_it = []
     path = osp.join(osp.dirname(osp.realpath(__file__)), '.', 'datasets', "alchemy_full")
+
+    print(__file__)
 
     infile = open("train_al_10.index", "r")
     for line in infile:

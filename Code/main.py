@@ -9,6 +9,7 @@ import torch_geometric.transforms as T
 import utils
 from models import create_model
 from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler
 from torch_geometric.datasets import TUDataset
 from torch_geometric.loader import DataLoader
 from torch_geometric.transforms import OneHotDegree, ToDevice
@@ -228,7 +229,12 @@ for i in range(args.num_repition):
                 knn_acc = utils.test_knn(data_aggregate, train_index=train_index, test_index=test_index, k=k+1) * 100.0
                 knn_accuracies[k].append(knn_acc)
 
-            svm_acc_linear = utils.test_svm(data_aggregate, train_index=train_index, test_index=test_index, kernel='linear', max_iter=100000) * 100.0
+            scaler = StandardScaler()
+            scaler.fit(data_aggregate[train_index][:,:-1])
+            lin_data_aggregate = scaler.transform(data_aggregate[:,:-1])
+            lin_data_aggregate = np.concatenate([lin_data_aggregate, data_aggregate[:,-1].unsqueeze(-1)], axis=-1)
+            
+            svm_acc_linear = utils.test_svm(lin_data_aggregate, train_index=train_index, test_index=test_index, kernel='linear', max_iter=100000) * 100.0
             print(svm_acc_linear)
             svm_lin_accuracies.append(svm_acc_linear)
 

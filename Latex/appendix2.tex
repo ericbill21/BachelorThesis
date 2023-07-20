@@ -1,11 +1,16 @@
 \chapter{Appendix Part II}
 \section{Definitions}
-\subsection{Definition of the normalized Shannon Index}\label{sec:definition_shannon_index}
-We calculate the normalized Shannon index as follows:
-\begin{equation}
-	- \frac{1}{\log_2(|C|)} \cdot \nsum_{i \in C} \frac{n_i}{n} \cdot \log_2 (\frac{n_i}{n})
-\end{equation}
-where $n$ is the total number of samples of the dataset, $C$ is the set of all classes, and $n_i$ is the number of samples of the class $i \in C$. As an example, for the dataset \textsc{Proteins} the variables are set to be the following: $C = \{0, 1\}$ with $n_0 = 663$ and $n_1 = 450$, so that $n = 1113$, yielding a rounded value of $0.973$.
+\subsection{Definition of the Normalized \textsf{Shannon-Index}}\label{sec:definition_shannon_index}
+We used the following definition of the \textsf{Normalized Shannon-Index}.
+
+\begin{definition}[\textsf{Normalized Shannon-Index}]\label{def:shannon_index}
+    The metric is computed as follows:
+    \begin{equation}
+        - \frac{1}{\log_2(|C|)} \cdot \nsum_{i \in C} \frac{n_i}{n} \cdot \log_2 (\frac{n_i}{n})
+    \end{equation}
+    where $n$ is the total number of samples of the dataset, $C$ is the set of all classes, and $n_i$ is the number of samples of the class $i \in C$.
+\end{definition}
+As an example, for the dataset \textsc{Proteins} the variables are set to be the following: $C = \{0, 1\}$ with $n_0 = 663$ and $n_1 = 450$, so that $n = 1113$, yielding a rounded value of $0.973$.
 
 \subsection{Theoretical Maximum Accuracy Analysis}
 
@@ -146,24 +151,67 @@ where $n$ is the total number of samples of the dataset, $C$ is the set of all c
 		\end{tabular}}              
 \end{table}
 
+\begin{table}[H]
+    \caption{Number of runs}
+    \label{tab:num_runs}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+
+    \begin{tabular}{llrrrrrrrrrr}
+        \toprule
+        &  & \multicolumn{10}{r}{test\_accuracy} \\
+        & dataset & Alchemy & Alchemy10K & ENZYMES & IMDB-BINARY & MUTAG & NCI1 & PROTEINS & REDDIT-BINARY & Zinc & Zinc 10k \\
+        model\_type & pool\_type &  &  &  &  &  &  &  &  &  &  \\
+        \midrule
+        \multirow[t]{6}{*}{1-WL+NN} & Embedding:Max & 3 & 95 & 338 & 282 & 290 & 79 & 245 & 45 & 6 & 33 \\
+        & Embedding:Mean & 6 & 77 & 288 & 271 & 299 & 109 & 216 & 50 & 8 & 24 \\
+        & Embedding:Sum & 5 & 273 & 296 & 293 & 302 & 79 & 215 & 48 & 7 & 18 \\
+        & Max & 0 & 0 & 86 & 70 & 150 & 26 & 35 & 40 & 0 & 0 \\
+        & Mean & 0 & 0 & 76 & 67 & 120 & 19 & 27 & 40 & 0 & 0 \\
+        & Sum & 0 & 0 & 85 & 67 & 130 & 14 & 29 & 41 & 0 & 0 \\
+        \cline{1-12}
+        \multirow[t]{3}{*}{1-WL+NN:GNN} & Max & 0 & 0 & 4 & 10 & 8 & 0 & 13 & 5 & 0 & 0 \\
+        & Mean & 0 & 0 & 5 & 11 & 11 & 0 & 19 & 9 & 0 & 0 \\
+        & Sum & 0 & 0 & 10 & 8 & 10 & 0 & 11 & 9 & 0 & 0 \\
+        \cline{1-12}
+        \multirow[t]{3}{*}{GNN} & Max & 1 & 1 & 69 & 56 & 101 & 53 & 40 & 18 & 1 & 1 \\
+        & Mean & 2 & 2 & 78 & 50 & 86 & 49 & 52 & 20 & 2 & 2 \\
+        & Sum & 1 & 1 & 82 & 55 & 100 & 52 & 41 & 25 & 1 & 1 \\
+        \cline{1-12}
+        \bottomrule
+    \end{tabular}
+
+    }
+\end{table}
+
+
+
+
+
 \section{Analysis}
 
 \begin{table}[H]
     \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the maximum number of unique colors that can be appear in the colorings.}
     \label{tab:unique_colors}
     \centering
-    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
-    \begin{tabular}{lrrrrrrrrrrr | r}
+    \resizebox{\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+    \begin{tabular}{@{}c <{\enspace}@{}lrrrrrrrrrrr | r}
     \toprule
-        \multirow{3}{*}{\vspace*{4pt}\textbf{Dataset}}&\multicolumn{11}{c}{\textbf{Number of \wl Iterations}}\\\cmidrule{2-13}
-        & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & \# Nodes\\
+        & \multirow{3}{*}{\vspace*{4pt}\textbf{Dataset}}&\multicolumn{11}{c}{\textbf{Number of \wl Iterations}}\\\cmidrule{3-14}
+        & & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & \# Nodes\\
         \midrule
-        {\textsc{Enzymes}}  & 2 & 231 & 10\,416 & 15\,208 & 16\,029 & 16\,450 & 16\,722 & 16\,895 & 17\,026 & 17\,130 & 17\,204 & 195\,80\\
-        {\textsc{Imdb-Binary}} & 1 & 65 & 2\,931 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 19\,773 \\
-        {\textsc{Mutag}}  & 2 & 33 & 174 & 572 & 1\,197 & 1\,766 & 2\,167 & 2\,403 & 2\,511 & 2\,560 & 2\,579 & 3\,371 \\
-        {\textsc{NCI1}} & 2 & 292 & 4\,058 & 22\,948 & 44\,508 & 58\,948 & 68\,632 & 75\,754 & 81\,263 & 85\,590 & 88\,968 & 122\,747\\
-        {\textsc{Proteins}} & 2 & 297 & 20\,962 & 35\,676 & 37\,940 & 38\,653 & 38\,926 & 39\,064 & 39\,141 & 39\,180 & 39\,203 & 43\,471\\
-        {\textsc{Reddit-Binary}} & 1 & 566 & 71\,893 & 244\,529 & 317\,728 & 333\,258 & 335\,961 & 336\,412 & 336\,490 & 336\,506 & 336\,507 & 859\,254 \\
+        \multirow{6}{*}{\rotatebox{90}{Classification}}
+        & \enzymes & 2 & 231 & 10\,416 & 15\,208 & 16\,029 & 16\,450 & 16\,722 & 16\,895 & 17\,026 & 17\,130 & 17\,204 & 195\,80\\
+        & \imdb & 1 & 65 & 2\,931 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 3\,595 & 19\,773 \\
+        & \mutag & 2 & 33 & 174 & 572 & 1\,197 & 1\,766 & 2\,167 & 2\,403 & 2\,511 & 2\,560 & 2\,579 & 3\,371 \\
+        & \nci & 2 & 292 & 4\,058 & 22\,948 & 44\,508 & 58\,948 & 68\,632 & 75\,754 & 81\,263 & 85\,590 & 88\,968 & 122\,747\\
+        & \proteins & 2 & 297 & 20\,962 & 35\,676 & 37\,940 & 38\,653 & 38\,926 & 39\,064 & 39\,141 & 39\,180 & 39\,203 & 43\,471\\
+        & \reddit & 1 & 566 & 71\,893 & 244\,529 & 317\,728 & 333\,258 & 335\,961 & 336\,412 & 336\,490 & 336\,506 & 336\,507 & 859\,254 \\
+        \cmidrule{2-14}
+        \multirow{4}{*}{\rotatebox{90}{Regress.}}
+        & \alchemy & 2 & 70 & 4\,782 & 164\,224 & 620\,332 & 995\,264 & 1\,166\,951 & 1\,216\,094 & 1\,225\,861 & 1\,227\,632 & 1\,227\,904 & 2\,046\,329\\
+        & \alchemyten & 2 & 70 & 2\,764 & 33\,903 & 76\,822 & 98\,394 & 104\,687 & 105\,907 & 106\,109 & 106\,149 & 106\,166 & 121\,422\\
+        & \zinc & 2 & 773 & 288\,74 & 290\,473 & 1\,000\,917 & 1\,977\,437 & 2\,921\,087 & 3\,690\,341 & 4\,270\,959 & 4\,681\,881 & 4\,945\,363 & 5\,775\,257 \\
+        & \zincten & 2 & 392 & 9\,818 & 61\,198 & 132\,862 & 185\,699 & 216\,210 & 233\,484 & 242\,866 & 247\,688 & 249\,971 & 278\,179 \\
         \bottomrule
     \end{tabular}}
 \end{table}

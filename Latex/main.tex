@@ -234,6 +234,13 @@ pdfcreator={pdflatex}
 \newcommand{\proteins}{\textsc{Proteins}\xspace}
 \newcommand{\imdb}{\textsc{Imdb-Binary}\xspace}
 \newcommand{\reddit}{\textsc{Reddit-Binary}\xspace}
+\newcommand{\zinc}{\textsc{Zinc}\xspace}
+\newcommand{\zincten}{\textsc{Zinc (10k)}\xspace}
+\newcommand{\alchemy}{\textsc{Alchemy}\xspace}
+\newcommand{\alchemyten}{\textsc{Alchemy (10k)}\xspace}
+
+
+
 
 %Parameter for sampling, keep low for fast compile times, and inrease when submitting the work
 \def\samples{2}
@@ -300,8 +307,9 @@ pdfcreator={pdflatex}
 \bibliography{references}
 
 \cleardoubleoddstandardpage
-% \input{appendix1.tex}
-% \input{appendix2.tex}
+\appendix
+\input{appendix1.tex}
+\input{appendix2.tex}
 
 
 \end{document}
