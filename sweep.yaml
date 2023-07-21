@@ -10,11 +10,7 @@ parameters:
       - 129
   dataset:
     values:
-      - MUTAG
-      - PROTEINS
-      - REDDIT-BINARY
-      - ENZYMES
-      - IMDB-BINARY
+      - NCI1
   gnn_kwargs:
     parameters:
       act:

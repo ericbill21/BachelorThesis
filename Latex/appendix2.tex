@@ -1,5 +1,6 @@
 \chapter{Appendix Part II}
-\section{Definitions}
+
+\section{Testing Configuration}
 \subsection{Definition of the Normalized \textsf{Shannon-Index}}\label{sec:definition_shannon_index}
 We used the following definition of the \textsf{Normalized Shannon-Index}.
 
@@ -58,8 +59,10 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 \subsection{Hyperparameter Configuration and Optimization}
 
+\todo{Update table and highlight best parameters}
+
 \begin{table}[H]
-	\caption{\wlnn!}
+	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_wlnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
@@ -88,8 +91,9 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
+\todo{Update table and highlight best parameters}
 \begin{table}[H]
-	\caption{An Overview of hyperparameters we sweeped and tested each dataset with.}
+	\caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_gnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
@@ -121,8 +125,9 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
+\todo{Update table and highlight best parameters}
 \begin{table}[H]
-	\caption{\wlnn!}
+	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each regression dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_wlnn_reg}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
@@ -151,8 +156,11 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
+\todo{Table for \gnn and regression is missing!}
+
+
 \begin{table}[H]
-    \caption{Number of runs}
+    \caption{Overview of the number of different configurations tested for each model type and each dataset. TODO: Format once all experimtents are finished!}
     \label{tab:num_runs}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 
@@ -179,7 +187,6 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
         \cline{1-12}
         \bottomrule
     \end{tabular}
-
     }
 \end{table}
 
@@ -187,7 +194,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 
 
-\section{Analysis}
+\section{Empirical Testing}
 
 \begin{table}[H]
     \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the maximum number of unique colors that can be appear in the colorings.}
@@ -216,8 +223,6 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
     \end{tabular}}
 \end{table}
 
-
-\section{Visualization of the Approximation Performance of GNNs}
 \begin{figure}[!ht]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}

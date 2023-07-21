@@ -189,7 +189,7 @@ The \gineeps model utilizes the \gin architecture for message-passing layers, \t
 			{\reddit}
 			\\
 			\toprule
-			\multirow{6}{*}{\rotatebox{90}{$\wlnn$}} 	&
+			\multirow{6}{*}{\rotatebox{90}{\wlnn}} 	&
 			\textsf{Max} & 16.7 \scriptsize $\pm 4.2$ & 52.0 \scriptsize $\pm 5.3$	&73.8 \scriptsize $\pm 12.4$ &	58.6 \scriptsize $\pm 3.3$ & 62.9 \scriptsize $\pm 4.9$  & 	69.2 \scriptsize $\pm 4.0$
 			\\ 
 			& \textsf{Mean} & 18.2 \scriptsize $\pm 4.8$  &	59.4 \scriptsize $\pm 5.8$ &	77.1 \scriptsize $\pm 11.5$	 & 64.0 \scriptsize $\pm 3.3$ &	60.9 \scriptsize $\pm 4.5$ & 66.1 \scriptsize $\pm 3.2$   
@@ -816,26 +816,52 @@ We conducted the same hyperparameter optimization routines as for the normal \gn
 Upon analyzing the best accuracies achieved by each \wl:\gnn model in comparison to the other model types, we observed that its performance is not significantly better than any of the \gnn or \wlnn models. While it does show minor improvements compared to the \gnn models, such as in the \enzymes and \proteins datasets, these improvements are not significant. However, it is important to note that the number of runs conducted for \wl:\gnn models, 143 runs in total, is considerably smaller compared to the 5\,422 runs conducted for \wlnn models and 1\,043 runs for \gnn models. As a result, the limited number of runs might have impacted the statistical robustness of the results. For a full list of the number of runs condcuted, refer to \cref{tab:num_runs} in the Appendix. Further investigation with a larger number of runs could provide more conclusive insights into the performance of \wl:\gnn models.
 
 \FloatBarrier
-\subsection{Size of datasets}
-Another improtant observation, similiar to our analysis of why \wlnn models with higher number of \wl iterations fail to generalize. Even by fixing the number of \wl iterations to one, \wlnn models still do not scale well for very large datasets. This
+\subsection{Impact of the Size of Datasets on the Performance of \wlnn}
+At the beginning of our empirical investigation, an initial idea emerged when observing the first results achieved by \wlnn models on the classification datasets that indicated good performance. We speculated that these results could be attributed to the small sizes of the datasets, making them particularly suitable for \wlnn models. This idea also raised a question about the scalability of \wlnn models on larger datasets, potentially limiting their performance compared to \gnn models, which might scale more effectively. To explore this hypothesis, we sought to investigate significantly larger datasets and selected the well-known regression datasets \alchemy and \zinc. Additionally, we utilized a fixed split, significantly smaller than the original dataset, for both \alchemy and \zinc. Consequently, we tested \wlnn models on both the entire dataset and the smaller split to examine potential differences in performance. An overview of the results is provided in \cref{tab:results_regression} at the beginning of this section.
 
-Reddit 3032 -> many colors
-Regresson datasets
+Similar to the classification datasets, we conducted a hyperparameter optimization for both \wlnn and \gnn models. The primary question of interest here was whether we would observe performance differences between the various splits for each dataset and if there would be discrepancies between the two types of models.
+
+Upon analyzing these results, the first notable observation is that the best performances were achieved entirely by \gnn models, specifically the \gin:\textsf{Sum} model. However, in comparison to the \textsf{\gineeps} model by \cite{Mor+2020}, which we included as a reference to showcase the performance achieved by a different \gnn model than ours, both our \gnn and \wlnn models demonstrated inferior performance. We conjecture that this discrepancy can be attributed to \textsf{\gineeps} utilizing the edge features of its input graph in its computation, while our models do not.
+
+Regarding the differences in performance between the various splits for each dataset, the evidence is not straightforward. While \wlnn models performed better on the smaller split \alchemyten than the full split, \gnn models demonstrated a similar margin of improvement. Moreover, we observed the opposite phenomenon, with \wlnn and \gnn models achieving better performance on the larger \zinc split than the smaller \zincten split.
+
+One reason why such differences were not evident for the \wlnn models may be because, although the number of graphs in each dataset is significantly larger than in the classification datasets, the best performing configuration still utilized only a single iteration of the \wl algorithm for both \alchemy splits, two for \zincten, and three for \zinc. Consequently, the number of unique colors was limited. See \cref{tab:unique_colors} for an overview of the number of unique colors for various numbers of \wl iterations. In the case of the models for \alchemy, the number of unique colors remained constant at 70 for both splits, indicating that the larger number of graphs between the splits does not have an impact when employing only a single iteration of the \wl algorithm. However, the number of unique colors varied more dramatically for the models on the \zinc datasets, with the best model for \zincten dealing with 9\,818 unique colors and the best model on \zinc encountering 290\,473 unique colors.
+
+This discrepancy can also be attributed to the splits used for \zinc and \zincten, as opposed to the alchemy split, where the number of unique colors after a single iteration of the \wl algorithm is not equal. Specifically, for \zinc, there are 773 unique colors, and for \zincten, there are only 392 unique colors. Further, it is important to note that due to time constraints and the immense time required, especially for training models on the entire \alchemy or \zinc dataset, the number of configurations we tested is relatively low compared to \zincten and \alchemyten. For a complete overview of the number of runs for each dataset and each model, refer to \cref{tab:num_runs} in the Appendix.
+
+In conclusion, the impact of the size of a dataset on the performance of \wlnn models must be investigated more thoroughly. In detail, further research needs to investigate datasets of large sizes as well as consisting of large graphs, such that the number of unique colors is already relatively high even after a single iteration of the \wl algorithm. A good example of such a dataset is the \reddit dataset, where the number of unique colors after a single iteration of the \wl algorithm is 566. For this dataset, a performance gap between \wlnn and \gnn models can be observed, with the best \gnn model achieving up to an \perc{8} higher accuracy than the best \wlnn model. However, it is also essential to acknowledge that the reasons for such a performance gap are not solely attributable to the dataset's size, as other factors are at play, as discussed in the preceding sections.
 
 \FloatBarrier
 \section{Discusssion}\label{sec:discussion}
+Introdcution for this section!
+
+\subsection{Learned Lessons}
 \begin{itemize}
 	\item \wlnn is a very good tool for investigating \gnns
 	\begin{itemize}
-		\item many imperical simalarities
+		\item many imperical simalarities:
+		\begin{itemize}
+			\item Similiar accuracy performance
+			\item approximation of coloring / node representations
+			\item linear separability and clustering
+			\item equivalent expressiveness
+		\end{itemize}
+		\item However point out that this is simply a lab tool -> not suited for real world applications due to a absence of a global \wl alogirhtm  -> \gnns are in this regard way more flexible
+	\end{itemize}
+	\item Summarize all \gnn insights:
+	\begin{itemize}
+		\item 
 	\end{itemize}
 \end{itemize}
 
-\subsection{Learned Lessons}
 \subsection{Future Work}
+\begin{itemize}
+	\item other \gnn architectures
+	\item more datasets -> In particular larger dataset for classficaiton like MalNet
+	\item Noising von datasets schauen wie \wlnn and \gnn damit copen
+	\item More investigation in \wl:\gnn, seems promising!
+\end{itemize}
 
-\section{Conclusion}
-
-\newpage
-
+\subsection{Conclusion}
+Conclude the Thesis!
 
