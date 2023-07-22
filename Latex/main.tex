@@ -22,6 +22,11 @@
 \usepackage{pdflscape}
 
 
+\usepackage[multiple]{footmisc}
+\usepackage{tablefootnote}
+\def\tablefootnotemark#1{\textsuperscript{\getrefnumber{#1}}}
+
+
 
 \usetikzlibrary{patterns,decorations.pathreplacing}
 \usetikzlibrary{arrows.meta,arrows}
@@ -115,7 +120,8 @@ pdftitle={},
 pdfsubject={},
 pdfkeywords={},
 pdfproducer={Latex with the hyperref package},
-pdfcreator={pdflatex}
+pdfcreator={pdflatex},
+hyperfootnotes=true
 ]{hyperref}
 
 \usepackage[capitalise,noabbrev]{cleveref}   
@@ -220,7 +226,7 @@ pdfcreator={pdflatex}
 \newcommand{\MSclose}{\}\!\!\}}
 
 % 1-WL+NN
-\newcommand{\wlnn}{\textsf{1-WL+NN}\xspace}
+\newcommand{\wlnn}{\textsf{1-WL$+$NN}\xspace}
 \newcommand{\wliso}{\simeq_{\text{1WL}}}
 \newcommand{\knn}{K^{n \times n}}
 \newcommand{\gapp}{\textsf{\gnn-Approximating}\xspace}
@@ -310,7 +316,7 @@ pdfcreator={pdflatex}
 
 \cleardoubleoddstandardpage
 \appendix
-\input{appendix1.tex}
+%\input{appendix1.tex}
 \input{appendix2.tex}
 
 

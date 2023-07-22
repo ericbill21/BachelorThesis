@@ -159,38 +159,53 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 \todo{Table for \gnn and regression is missing!}
 
 
-\begin{table}[H]
-    \caption{Overview of the number of different configurations tested for each model type and each dataset. TODO: Format once all experimtents are finished!}
-    \label{tab:num_runs}
-    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
-
-    \begin{tabular}{llrrrrrrrrrr}
-        \toprule
-        &  & \multicolumn{10}{r}{test\_accuracy} \\
-        & dataset & Alchemy & Alchemy10K & ENZYMES & IMDB-BINARY & MUTAG & NCI1 & PROTEINS & REDDIT-BINARY & Zinc & Zinc 10k \\
-        model\_type & pool\_type &  &  &  &  &  &  &  &  &  &  \\
-        \midrule
-        \multirow[t]{6}{*}{1-WL+NN} & Embedding:Max & 3 & 95 & 338 & 282 & 290 & 79 & 245 & 45 & 6 & 33 \\
-        & Embedding:Mean & 6 & 77 & 288 & 271 & 299 & 109 & 216 & 50 & 8 & 24 \\
-        & Embedding:Sum & 5 & 273 & 296 & 293 & 302 & 79 & 215 & 48 & 7 & 18 \\
-        & Max & 0 & 0 & 86 & 70 & 150 & 26 & 35 & 40 & 0 & 0 \\
-        & Mean & 0 & 0 & 76 & 67 & 120 & 19 & 27 & 40 & 0 & 0 \\
-        & Sum & 0 & 0 & 85 & 67 & 130 & 14 & 29 & 41 & 0 & 0 \\
-        \cline{1-12}
-        \multirow[t]{3}{*}{1-WL+NN:GNN} & Max & 0 & 0 & 4 & 10 & 8 & 0 & 13 & 5 & 0 & 0 \\
-        & Mean & 0 & 0 & 5 & 11 & 11 & 0 & 19 & 9 & 0 & 0 \\
-        & Sum & 0 & 0 & 10 & 8 & 10 & 0 & 11 & 9 & 0 & 0 \\
-        \cline{1-12}
-        \multirow[t]{3}{*}{GNN} & Max & 1 & 1 & 69 & 56 & 101 & 53 & 40 & 18 & 1 & 1 \\
-        & Mean & 2 & 2 & 78 & 50 & 86 & 49 & 52 & 20 & 2 & 2 \\
-        & Sum & 1 & 1 & 82 & 55 & 100 & 52 & 41 & 25 & 1 & 1 \\
-        \cline{1-12}
-        \bottomrule
-    \end{tabular}
-    }
+\begin{table}[!htb]
+	\caption{Overview of the number of different configurations tested for each model type and each dataset.}
+	\label{tab:num_runs}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccccccc}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{10}{c}{\textbf{Dataset}}\\\cmidrule{3-12}
+            & & \multicolumn{6}{c}{\textbf{Classification}} & \multicolumn{4}{c}{\textbf{Regression}}\\\cmidrule(lr){3-8}\cmidrule(lr){9-12}
+			& & {\enzymes} & {\imdb} & {\mutag} & {\nci} & {\proteins} & {\reddit} & \alchemy & \alchemyten & \zinc & \zincten
+			\\
+			\toprule
+			\multirow[c]{6}{*}{\rotatebox{90}{\wlnn}} 	&
+			\textsf{Max} & 86 & 70 & 150 & 26 & 35 & 40 & 0 & 0 & 0 & 0 \\
+			& \textsf{Mean} & 76 & 67 & 120 & 19 & 27 & 40 & 0 & 0 & 0 & 0 \\
+			& \textsf{Sum} &  85 & 67 & 130 & 14 & 29 & 41 & 0 & 0 & 0 & 0 \\  
+			\cmidrule{2-12}  		
+			& \textsf{Embedding-Max} & 338 & 282 & 290 & 79 & 245 & 45 & 3 & 95 & 6 & 33 \\
+			& \textsf{Embedding-Mean} & 288 & 271 & 299 & 109 & 216 & 50 & 6 & 77 & 8 & 24 \\ 
+			& \textsf{Embedding-Sum} & 296 & 293 & 302 & 79 & 215 & 48 & 5 & 273 & 7 & 18 \\ 
+			\cmidrule{1-12}
+			\multirow[c]{9}{*}{\rotatebox{90}{Graph Neural Networks}} 
+			& \textsf{GAT:Max} & 17 & 17 & 36 & 11 & 10 & 6 & 0 & 0 & 0 & 0 \\
+			& \textsf{GAT:Mean} & 28 & 15 & 29 & 12 & 10 & 6 & 0 & 0 & 0 & 0 \\
+			& \textsf{GAT:Sum} & 26 & 17 & 37 & 15 & 16 & 6 & 0 & 0 & 0 & 0 \\
+			\cmidrule{2-12}
+			& \textsf{GCN:Max} & 31 & 22 & 37 & 17 & 10 & 9 & 0 & 0 & 0 & 0 \\
+			& \textsf{GCN:Mean} & 19 & 26 & 26 & 19 & 16 & 5 & 0 & 0 & 0 & 0 \\
+			& \textsf{GCN:Sum} & 30 & 29 & 27 & 17 & 14 & 10 & 0 & 0 & 0 & 0 \\  
+			\cmidrule{2-12}	
+			& \textsf{GIN:Max} & 21 & 17 & 28 & 25 & 20 & 3 & 1 & 1 & 1 & 1 \\
+			& \textsf{GIN:Mean} & 31 & 9 & 31 & 18 & 26 & 9 & 2 & 2 & 2 & 2 \\
+			& \textsf{GIN:Sum} & 26 & 9 & 36 & 20 & 11 & 9 & 1 & 1 & 1 & 1 \\
+            \cmidrule{1-12}
+            \multirow[c]{9}{*}{\rotatebox{90}{\wl:\gnn}} 
+			& \textsf{GAT:Max} & 2 & 4 & 1 & 9 & 4 & 2 & 0 & 0 & 0 & 0 \\
+			& \textsf{GAT:Mean} & 3 & 4 & 6 & 6 & 7 & 4 & 0 & 0 & 0 & 0 \\
+			& \textsf{GAT:Sum} & 5 & 5 & 6 & 9 & 4 & 4 & 0 & 0 & 0 & 0 \\
+			\cmidrule{2-12}
+			& \textsf{GCN:Max} & 2 & 6 & 4 & 12 & 6 & 3 & 0 & 0 & 0 & 0 \\
+			& \textsf{GCN:Mean} & 3 & 5 & 3 & 10 & 8 & 2 & 0 & 0 & 0 & 0 \\
+			& \textsf{GCN:Sum} & 6 & 2 & 3 & 5 & 5 & 3 & 0 & 0 & 0 & 0 \\
+			\cmidrule{2-12}	
+			& \textsf{GIN:Max} & 3 & 4 & 4 & 9 & 7 & 5 & 0 & 0 & 0 & 0 \\
+			& \textsf{GIN:Mean} & 2 & 6 & 2 & 10 & 7 & 3 & 0 & 0 & 0 & 0 \\
+			& \textsf{GIN:Sum} & 4 & 2 & 4 & 11 & 4 & 4 & 0 & 0 & 0 & 0 \\
+			\bottomrule
+		\end{tabular}}            
 \end{table}
-
-
 
 
 
