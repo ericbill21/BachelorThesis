@@ -28,16 +28,16 @@
     \path[line] (x2) to (x4);
     \path[line] (x3) to (x4);
 
-    \draw [|-latex, thick] (5.2,0) -- node [text width=2.5cm,midway,above,align=center ] {$h_{G, C_\infty}$} (6.7, 0);
+    \draw [|-latex, thick] (5.2,0) -- node [text width=2.5cm,midway,above,align=center ] {$\hist_{G, C_\infty}$} (6.7 + 0.3, 0);
     
-    \filldraw[draw=black, fill=cyan, thick] (6.2 + 1.0, -0.5) rectangle (6.4 + 1.0, 0.9);
-    \filldraw[draw=black, fill=orange, thick] (6.6 + 1.0, -0.5) rectangle (6.8 + 1.0, 0.2);
-    \filldraw[draw=black, fill=green, thick] (7.0 + 1.0, -0.5) rectangle (7.2 + 1.0, 0.2);
+    \filldraw[draw=black, fill=cyan, thick] (6.2 + 1.0+ 0.3, -0.5) rectangle (6.4 + 1.0+ 0.3, 0.9);
+    \filldraw[draw=black, fill=orange, thick] (6.6 + 1.0+ 0.3, -0.5) rectangle (6.8 + 1.0+ 0.3, 0.2);
+    \filldraw[draw=black, fill=green, thick] (7.0 + 1.0+ 0.3, -0.5) rectangle (7.2 + 1.0+ 0.3, 0.2);
 
-    \draw[arrow, thick] (6.0 + 1.0, -0.5) to (7.6 + 1.0, -0.5);
-    \draw[arrow, thick] (6.0 + 1.0, -0.5) to (6.0 + 1.0, 1.1);
+    \draw[arrow, thick] (6.0 + 1.0+ 0.3, -0.5) to (7.6 + 1.0+ 0.3, -0.5);
+    \draw[arrow, thick] (6.0 + 1.0+ 0.3, -0.5) to (6.0 + 1.0+ 0.3, 1.1);
 
-    \draw (7.8, -1.0) node {$\MSopen \sqbox{cyan}, \sqbox{cyan}, \sqbox{orange}, \sqbox{green} \MSclose$};
+    \draw (7.8+ 0.3, -1.0) node {$\MSopen \sqbox{cyan}, \sqbox{cyan}, \sqbox{orange}, \sqbox{green} \MSclose$};
 
 
     \end{tikzpicture}

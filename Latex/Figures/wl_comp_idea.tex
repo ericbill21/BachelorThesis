@@ -1,0 +1,11 @@
+\begin{tikzpicture}
+    \node (graph) at (0.0, 0.0) {$G$};
+    \node[align=center] (multiset) at (4.0, 0.0) {$M_G :=$\\$\MSopen \wl(G)(v) \mid v \in V(G) \MSclose$};
+    \node (encoding) at (8.0, 0.0) {$\begin{bmatrix}f_1(M_G)\\ \vdots \\f_n(M_G)\end{bmatrix}$};
+    \node (mlp) at (13.0, 0.0) {$\text{MLP}^\bullet\Bigl( \begin{bmatrix}\text{MLP}_1 (f_1(M_G)) \\ \vdots \\\text{MLP}_n (f_n(M_G))\end{bmatrix} \Bigr)$};
+    
+    \draw[-stealth, thick] (graph.east) -- node [text width=2.5cm,midway,above,align=center ] {$\wl$} (multiset.west);
+    \draw[-stealth, thick] (multiset.east) -- node [text width=2.5cm,midway,above,align=center ] {$f^*$} (encoding.west);
+    \draw[-stealth, thick] (encoding.east) -- node [text width=2.5cm,midway,above,align=center ] {$\mlp^*$} (mlp.west);
+    
+\end{tikzpicture}

@@ -22,11 +22,10 @@
 \usepackage{pdflscape}
 
 
+
 \usepackage[multiple]{footmisc}
 \usepackage{tablefootnote}
 \def\tablefootnotemark#1{\textsuperscript{\getrefnumber{#1}}}
-
-
 
 \usetikzlibrary{patterns,decorations.pathreplacing}
 \usetikzlibrary{arrows.meta,arrows}
@@ -53,6 +52,7 @@
 \usepackage[noend]{algpseudocode}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
+\DeclareMathOperator{\hist}{hist}
 
 \usepackage{dsfont} % For the indicator function: \mathds{1}
 
@@ -275,6 +275,7 @@ hyperfootnotes=true
 \date{\vspace{30pt}\today}
 
 \renewcommand{\thesection}{\arabic{section}}
+\numberwithin{equation}{section}
 
 \begin{document}
 \pagenumbering{Roman}
