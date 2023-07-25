@@ -1,5 +1,23 @@
 \chapter{Appendix Part I}
 
+\section{Preliminaries}
+\subsection{Graph Attention Network}
+The
+\begin{definition}\label{def:gat}
+    \begin{align*}
+        f^{(t)}_{\text{merge}} &= \sigma (\alpha_{vv} \cdot f^{(t)}(v) + f^{(t)}_{\text{agg}} )\\
+        f^{(t)}_{\text{agg}} &= \nnsum_{u \in \cN(v)} \alpha_{vu} \cdot W^{(t)} \cdot f^{(t-1)}(u)
+    \end{align*}
+    with the attention matrix learned as follows
+    \begin{equation*}
+        \alpha_{vu} = \frac{\exp\left(\text{LeakyReLU}\left(\vec{ a}^T \cdot  \textsf{concat}[{ W^{(t)}}f^{(t-1)}(v), \ { W^{(t)}}f^{(t-1)}(u)]\right)\right)}{\nnsum_{k\in\mathcal{N}(v) \cup \{v\}} \exp\left(\text{LeakyReLU}\left(\vec{ a}^T \cdot \textsf{concat}[{ W^{(t)}}f^{(t-1)}(v), \ { W^{(t)}}f^{(t-1)}(k)]\right)\right)},
+    \end{equation*}
+    where $\vec{a}$ is a learnable parameter.
+\end{definition}
+
+
+
+
 \section{Theoretical Connection}
 
 \subsection{\cref{lem:composition_lemma}: Composition Lemma for $\wlnn$}\label{app:composition_proof}

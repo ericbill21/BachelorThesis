@@ -226,7 +226,7 @@ hyperfootnotes=true
 \newcommand{\MSclose}{\}\!\!\}}
 
 % 1-WL+NN
-\newcommand{\wlnn}{\textsf{1-WL$+$NN}\xspace}
+\newcommand{\wlnn}{\text{\textsf{1-WL+NN}}\xspace}
 \newcommand{\wliso}{\simeq_{\text{1WL}}}
 \newcommand{\knn}{K^{n \times n}}
 \newcommand{\gapp}{\textsf{\gnn-Approximating}\xspace}
@@ -269,8 +269,8 @@ hyperfootnotes=true
 \author{\textbf{Eric Tillmann Bill}}
 \affil{\vspace{100pt}}
 
-\author{Supervision:\\Prof. Dr. rer. nat. Christopher Morris}
-\affil{Informatik 6\\RWTH Aachen University}
+\author{Supervisor:\\Prof. Dr. rer. nat. Christopher Morris}
+\affil{Machine Learning on Graphs Group\\RWTH Aachen University}
 
 \date{\vspace{30pt}\today}
 
@@ -284,8 +284,9 @@ hyperfootnotes=true
     \node[anchor=north east,inner sep=20pt, shift={(-10pt,0)}] (logo) at (current page.north east)
                {\includegraphics[scale=0.2]{Figures/rwth_log_en_blau_rgb.png}};
 \end{tikzpicture}
-%{The present work was submitted to the Computer Science 6: Machine Learning on Graphs\hfill}
-\vspace{50pt}
+{\vspace{5pt}\\\fontfamily{phv}\selectfont \textbf{The present work was submitted to the Machine Learning on Graphs Group at the
+Chair of Computer Science 6, RWTH Aachen University\hspace*{\fill}}}
+\vspace{40pt}
 {\let\newpage\relax\maketitle}
 
 
@@ -317,7 +318,7 @@ hyperfootnotes=true
 
 \cleardoubleoddstandardpage
 \appendix
-%\input{appendix1.tex}
+\input{appendix1.tex}
 \input{appendix2.tex}
 
 
