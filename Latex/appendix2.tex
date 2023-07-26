@@ -59,8 +59,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 \subsection{Hyperparameter Configuration and Optimization}
 
-\todo{Update table and highlight best parameters}
-
+\subsubsection{Overview of Hyperparameters: \wlnn on the Classification Datasets}
 \begin{table}[H]
 	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_wlnn}
@@ -91,7 +90,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
-\todo{Update table and highlight best parameters}
+\subsubsection{Overview of Hyperparameters: \gnn on the Classification Datasets}
 \begin{table}[H]
 	\caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_gnn}
@@ -125,7 +124,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
-\todo{Update table and highlight best parameters}
+\subsubsection{Overview of Hyperparameters: \wlnn on the Regression Datasets}
 \begin{table}[H]
 	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each regression dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_wlnn_reg}
@@ -156,17 +155,140 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 		\end{tabular}}              
 \end{table}
 
-\todo{Table for \gnn and regression is missing!}
+\subsubsection{Overview of Hyperparameters: \gnn on the Regression Datasets}
+\begin{table}[H]
+    \caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
+    \label{tab:sweep_gnn}
+    \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+        \begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
+            & \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{4}{c}{\textbf{Dataset}}\\\cmidrule{3-6}
+            & & \alchemy & \alchemyten & \zinc & \zincten
+            \\
+            \toprule
+            \multirow{6}{*}{}            
+            & Batch Size & 25 & 25 & 25 & 25\\
+            & Learning Rate & 0.001 & 0.001 & 0.001 & 0.001 \\
+            & Max Epochs & 1000 & 1000 & 1000 & 1000 \\
+            & Optimizer & Adam & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
+            \midrule
+            & GNN Architecture & \gin & \gin & \gin & \gin \\
+            & GNN Activation Function & ReLU & ReLU & ReLU & ReLU \\
+            & GNN Dropout & 0.0 &  0.0 &  0.0 &  0.0 \\
+            & GNN Hidden Dimension & 256 &  256 & 256 & 256 \\
+            & GNN Jumping-Knowledge & cat & cat & cat & cat \\
+            & GNN Number of Layers & $5$ & $5$ & $5$ & $5$ \\
+            \midrule
+            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & 4 & 4 & 4 & 4 \\
+            & \mlp Dropout & 0.0 &  0.0 &  0.0 &  0.0 \\
+            \midrule
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+            \bottomrule
+        \end{tabular}}              
+\end{table}
+
+\subsection{Performance overview for each Hyperparameter}
+In this section, we present the results of our hyperparameter optimization for the \wlnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_enzymes.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \enzymes dataset.}
+\end{figure}
+\vfill
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_imdb.png}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \imdb dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_mutag.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \mutag dataset.}
+\end{figure}
+\vfill
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_nci1.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \nci dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_proteins.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \proteins dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_reddit.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \reddit dataset.}
+\end{figure}
 
 
-\begin{table}[!htb]
+\subsection{Overview of the Impact of each Hyperparameter for \gnn Models}
+In this section, we present, similarly to the previous section, the results of our hyperparameter optimization for the \gnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_enzymes.png}
+    \end{center}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \enzymes dataset.}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_imdb.png}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \imdb dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_mutag.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \mutag dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_nci1.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \nci dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_proteins.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \proteins dataset.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_reddit.png}
+    \vspace*{-30pt}
+    \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \reddit dataset.}
+\end{figure}
+
+\subsection{Overview of the Number of Configurations}
+\begin{table}[H]
 	\caption{Overview of the number of different configurations tested for each model type and each dataset.}
 	\label{tab:num_runs}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccccccc}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{10}{c}{\textbf{Dataset}}\\\cmidrule{3-12}
             & & \multicolumn{6}{c}{\textbf{Classification}} & \multicolumn{4}{c}{\textbf{Regression}}\\\cmidrule(lr){3-8}\cmidrule(lr){9-12}
-			& & {\enzymes} & {\imdb} & {\mutag} & {\nci} & {\proteins} & {\reddit} & \alchemy & \alchemyten & \zinc & \zincten
+			& & \enzymes & \imdb & \mutag & \nci & \proteins & \reddit & \alchemy & \alchemyten & \zinc & \zincten
 			\\
 			\toprule
 			\multirow[c]{7}{*}{\rotatebox{90}{\wlnn}} 	&
@@ -210,6 +332,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 
 \section{Empirical Testing}
+\subsection{Approximating \wl Coloring: Investigating \gnn Node Representations}
 
 \begin{table}[H]
     \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the maximum number of unique colors that can be appear in the colorings.}

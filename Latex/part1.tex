@@ -375,13 +375,13 @@ Although prior works by \cite{Morris2018} and \cite{Xu2018} have already demonst
     \end{equation*}
     such that $n$ is the maximum number of nodes of any graph in $\cX$, $m$ is the total number of nodes of the set $\cX$, and $k$ is the largest label of any node of a graph in $\cX$ plus $1$.
 
-    We will utilize these constants to construct the collection of functions $\cC := \{ \cA_c \mid c \in \Nb \}$ that is \wldisc. We first describe the construction of an arbitrary $\cA_c \in \cC$ and afterward, prove that the collection $\cC$ is \wldisc.
+    We will utilize these constants to construct the collection of functions $\cC := \{ \cA_c \mid c \in \Nb \}$ that is \wldisc. For the remainder of this proof, we first describe the construction of an arbitrary $\cA_c \in \cC$ and afterward, prove that the collection $\cC$ is \wldisc.
 
     Each $\cA_c$ consists of $n$ message-passing layers. We define the input layer $f^{(0)}(v) \coloneqq v$ as the identity functions such that there is no preprocessing of the node labels. Further, we define every other layer $t$ with $1 \leq t \leq n$ as follows:
     \begin{align*}
         f^{(t)}(v) \coloneqq f^{(t)}_{\text{merge}}(f^{(t-1)}(v), \ \MSopen f^{(t-1)}(u) \mid u \in \cN(v)\MSclose).
     \end{align*}
-    Here $f^{(t)}_{\text{merge}}$ is an injective function that maps its input into the codomain:
+    Here $f^{(t)}_{\text{merge}}$ is an injective function that maps its input into its codomain:
     \begin{equation*}
        \{ i \in \Nb \mid k + (t-1) \cdot m \ \leq \  i \ \leq \ k + t \cdot m \}
     \end{equation*}
@@ -391,8 +391,9 @@ Although prior works by \cite{Morris2018} and \cite{Xu2018} have already demonst
     
     By leveraging the results of \textit{theorem 3} from the work of \cite{Xu2018}, we can infer that each layer of each $\cA_c$ computes a single iteration of the \wl algorithm. This observation makes sense as the update equation for each layer injectively maps each tuple to a previously unused color, similar to how the \textsf{Relabel} function of the \wl algorithm works. Moreover, since the \wl algorithm terminates on any graph $G \in \cX$ after at most $|V(G)| \leq n$ iterations, the coloring computed by the layers of each $\cA_c$ effectively performs $n$ iterations of the \wl algorithm when applied to any graph $G \in \cX$. Due to the convergence behavior of the \wl algorithm, these additional iterations do not increase the expressiveness of the colorings computed by each $\cA_c$, such we can conclude for any graph $G \in \cX$:
     \begin{equation*}
-       \forall c \in \Nb: |\{ v \in V(G) \mid  f^{(n)}(v) = c \}| = |\{ v \in V(G) \mid  \wl(G)(v) = c \}|.
+       \forall c \in \Nb: |\{ v \in V(G) \mid  f^{(n)}(v) = c \}| = |\{ v \in V(G) \mid  \wl(G)(v) = c \}|,
     \end{equation*}
+    which states that the colorings are equal for a bijection $\phi : \Nb \rightarrow \Nb$, such that we can infer that they are equally expressive for distinguishing non-isomorphism.
 
     To prove that the collection $\cC$ is \wldisc, we need to show two properties: 1) Each function in the collection is permutation invariant, and 2) For each pair of graphs in $\cX$ distinguishable by the \wl isomorphism test, there must exist a function in the collection that also distinguishes the pair.
    
@@ -432,12 +433,12 @@ Similar to the proof in the previous subsection, we will use \cref{lem:compositi
             f^{(t)}_{\text{agg}, n}(\MSopen \hat{f}^{(t-1)}(w)[n] \mid w \in \mathcal{N}(v) \MSclose)
         \end{bmatrix}.
     \end{align*}
-    Note that, not all $\cA_i$ will be comprised of $T$ layers. For these cases we define the missing functions as follows:
+    Note that, not all $\cA_i$ will be comprised of $T$ layers, such that for these cases the functions $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$ will not be defined for all $t \in [T]$. In these cases, we define the functions as follows:
     \begin{align*}
         f^{(t)}_{\text{merge}, i}(\hat{f}^{(t-1)}(v), \ Agg) &\coloneqq \hat{f}^{(t-1)}(v), \quad \text{and}\\
         f^{(t)}_{\text{agg}, i}(\MSopen \hat{f}^{(t-1)}(w) \mid w \in \mathcal{N}(v) \MSclose) &\coloneqq 0.
     \end{align*}
-    These functions do not change anything and only forward the result of the actual computation of $\cA_i$ to the last layer. Finally, we construct the \textsf{Readout} function of $\hat{\cA}$ as follows:
+    This definition of $f^{(t)}_{\text{merge}, i}$ and $f^{(t)}_{\text{agg}, i}$ results in the fact that the representation computed in the last layer of $\cA_i$ is forwarded to the last layer $T$ of $\hat{\cA}$. Finally, we construct the \textsf{Readout} function of $\hat{\cA}$ as follows:
     \begin{align*}
         \textsf{Readout}(\MSopen \hat{f}^{(T)}(v) \mid v \in V(G) \MSclose) \coloneqq \mlp^\bullet \circ \begin{bmatrix}
             \textsf{Readout}_1(\MSopen \hat{f}^{(T)}(v)[1] \mid v \in V(G) \MSclose)\\
