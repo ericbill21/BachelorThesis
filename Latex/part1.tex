@@ -161,14 +161,15 @@ To bridge the gap from the theoretical definition to practical instances of the 
         \\
     \end{tabular}
     }
-\end{table}\todo{Rally small technical detail, but i dont thinnk the attention value fits into my defintion of \gnns}\todo{adapt caption!}
+\end{table}\todo{Rally small technical detail, but i dont thinnk the attention value fits into my defintion of \gnns}
 
 Commonly employed \textsf{Readout} functions in this context often involve straightforward pooling techniques like elementwise summation, mean calculation, or maximum extraction. These pooling operations are typically followed by a multilayer perceptron, which performs additional processing on the aggregated information. Although more sophisticated pooling operations exist, such as \textsc{Set2Set} developed by \cite{Vinyals2015}, \cite{Xu2018} showed that given the correct configuration, the elementwise summation pooling function combined with a following multilayer perceptron suffices to create a \gnn that is as expressive as the \wl algorithm in distinguishing non-isomorphism.
 
 \section{Theoretical Connection}\label{sec:theo_connections}
-This section is the main part of our theoretical investigation of the two frameworks \wlnn and \gnn. We will present three intriguing theorems, which will be proven separately afterward. In detail, the first two theorems will establish an equivalence between the two frameworks when the input set of graphs is finite. While the last theorem will take this a step further and demonstrate how powerful the \wl algorithm is by establishing a connection between \wlnn and \gnn for continuous functions.
+This section forms the core of our theoretical investigation, where we explore the equivalence between two frameworks: \wlnn and \gnn. We present two theorems to establish this equivalence, each showing a separate equivalence direction. By combining these theorems, we conclusively establish the equivalence. To maintain clarity and rigor, we will prove each theorem separately afterward in a corresponding subsection.
 
-In the first two theorems, we focus on a finite collection of graphs, which we denote by $\cX$ with $\cX \subset \cG$.
+In particular, the theorem will establish a theoretical connection between the frameworks when applied to a finite collection of graphs, which we denote by $\cX$ with $\cX \subset \cG$.
+
 \begin{theorem}[Finite Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:gnn_in_1wl}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by \gnns, then $\cC$ is also computable by \wlnn.
 \end{theorem}
@@ -176,33 +177,12 @@ In the first two theorems, we focus on a finite collection of graphs, which we d
 \begin{theorem}[Finite Case: ``$\wlnn \subseteq \text{GNN}$'']\label{theorem:1wl_in_gnn}
     Let $\cC$ be a collection of functions from $\cX$ to $\Rb$ computable by \wlnn, then $\cC$ is also computable by \gnns.
 \end{theorem}
-With these two theorems, the equivalence between both frameworks follows. Specifically, every function computed by \wlnn working over any arbitrary, but finite $\cX \subset \cG$ is also computable by a \gnn, and vice versa. As we move towards the empirical evaluation in \cref{part2}, it is evident that if we test a \wlnn model on any of the benchmark datasets, it can achieve theoretically the same level of performance as a \gnn model. Notice that we did not leverage any constraints on the encoding of graphs throughout the first two theorems and their corresponding proves but instead kept it general.
 
-Having established a connection between the two frameworks on a finite subset of graphs, we wanted to further demonstrate the expressive power of the \wl algorithm and in particular of collections of functions that are \wldisc by investigating a connection between the two frameworks for continuous feature spaces and continuous functions. However, since the \textit{graph isomorphism problem} is an inherently discrete problem, the \wl algorithm, as outlined in \cref{sec:definition_wlnn}, is only defined as a discrete and discontinuous function operating on discrete colors, such that extending the definition of the \wl algorithm to a continuous function working over continuous values is not very trivial and, to our knowledge, has not yet been widely investigated. Therefore, we assume in the proof and the following theorem that such a continuous version of the \wl algorithm exists.
-
-We define the set of graphs with continuous labels using the following definition.
-\begin{definition}
-    Let $X$ be a compact subset of $\Rb$ including $0$. We decode graphs with $n$ nodes as a matrix $G \in X^{n \times n}$, where $G_{i,i}$ decodes the label of node $i$ for $i \in [n]$, and $G_{i,j}$ with $i \neq j \in [n]$ decodes an edge from node $i$ to $j$ and a corresponding edge features. Furthermore, we say that there is an edge between node $i$ and $j$ if and only if $G_{i,j} \neq 0$. Additionally, if $G$ encodes an undirected graph, $G$ is a symmetric matrix. For simplicity, we denote $\cX \coloneqq X^{n \times n}$ throughout the next theorem.
-\end{definition}
-
-Then the following theorem can be derived.
-
-\begin{theorem}[Continuous Case: ``$\text{GNN} \subseteq \wlnn$'']\label{theorem:1wl_in_gnn_approximating}
-    Let $\cC$ be a collection of continuous functions from $\cX$ to $\Rb$ computable by \wlnn. If $\cC$ is \wldisc, then there exists a collection of functions $\cC'$ computable by \wlnn that is \gnn-Approximating.
-\end{theorem}
-
-The notion of a collection of functions capable of approximating any \gnn function is defined as follows.
-\begin{definition}[\gapp]
-    Let $\cC$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\cC$ is \gapp if for all permutation-invariant functions $\cA$ computed by a \gnn, and for all $\epsilon \in \Rb$ with $\epsilon > 0$, there exists $h_{\cA,\epsilon} \in \cC$ such that $\| \cA - h_{\cA,\epsilon} \|_\infty \coloneqq \sup_{G \in \cX} |\cA(G) - h_{\cA,\epsilon}(G)| < \epsilon$
-\end{definition}
-
-Since we only wanted to show the expressive power of \wldisc and made the major assumption of the existence of a continuous \wl algorithm, we have included the proof of \cref{theorem:1wl_in_gnn_approximating} in the Appendix in \cref{app:gnn_in_wlnn}.
-
-By putting all theorems into perspective, we can conclude that the ability \wldisc is very powerful, so we can assume that \wlnn is sufficiently expressive for the upcoming empirical part. \todo{Redo, remove gapps and co!}
-
-
-
-
+With these two theorems, the equivalence between both frameworks follows. Specifically, every function computed by \wlnn working over any arbitrary but finite $\cX \subset \cG$ is also computable by a \gnn, and vice versa. Consequently, we can draw the following corollary:
+\begin{corollary}
+    For an arbitrary function $f$ working over $\cX$ to $\Rb$: The function $f$ is computable by a \wlnn model, if and only if, the function $f$ is computable by a \gnn model.
+\end{corollary}
+As we move towards the empirical evaluation in \cref{part2}, it is evident that if we test a \wlnn model on any of the benchmark datasets, it can theoretically achieve the same level of performance as a \gnn model. Notice that we did not leverage any constraints on the encoding of graphs throughout the two theorems and their corresponding proves but instead kept it general.
 
 
 \subsection{Proof of \cref*{theorem:gnn_in_1wl}: ``$\gnn \subseteq \wlnn$''}\label{sec:proof_theorem:1wl_in_gnn}

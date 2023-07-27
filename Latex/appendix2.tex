@@ -12,11 +12,12 @@ We used the following definition of the \textsf{Normalized Shannon-Index}.
     where $n$ is the total number of samples of the dataset, $C$ is the set of all classes, and $n_i$ is the number of samples of the class $i \in C$.
 \end{definition}
 As an example, for the dataset \textsc{Proteins} the variables are set to be the following: $C = \{0, 1\}$ with $n_0 = 663$ and $n_1 = 450$, so that $n = 1113$, yielding a rounded value of $0.973$.
+\clearpage
 
 \subsection{Theoretical Maximum Accuracy Analysis}
 
 \begin{table}[H]
-	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of 1-WL iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. ``\textsc{Oom}'' denotes out of memory error.}
+	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of \wl iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. ``\textsc{Oom}'' denotes out of memory error.}
     \centering
 	\label{tab:max_accuracies_app}
 	\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
@@ -24,7 +25,6 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 			& & {0}  & {1}  & {2}  & {3} & {4}  & {5}
 			\\
 			\toprule
-
 			\multirow{4}{*}{\rotatebox{90}{Bioinformatics}}
             & DD &1.00 & - & - & - & - & - \\
             & ENZYMES &0.81 & 1.00 & - & - & - & - \\
@@ -56,6 +56,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 			\bottomrule
 		\end{tabular}             
 \end{table}
+\clearpage
 
 \subsection{Hyperparameter Configuration and Optimization}
 
@@ -64,65 +65,120 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_wlnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
-			\\
+		\begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{3}{c}{\textbf{Dataset}}\\\cmidrule{3-5}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}}\\
 			\toprule
 			\multirow{6}{*}{}            
-            & Batch Size & 32 & 32 & 32 & 33 & 32 & 32\\
-            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
-            & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
-            & Optimizer & Adam & Adam & Adam & Adam & Adam & Adam \\
-            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
-            \midrule
-			& Number of \wl iterations & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2\}$ \\
-            & Use \wl-Convergence & False & False & False & False & False & False \\
-            \midrule
-            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
-            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm \\ 
-            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ \\
-            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
-            \midrule
-            & Embedding Dimension & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ \\
-            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+            & Batch Size & 32 & 32 & 32\\
+            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$\\
+            & Max Epochs & 200 & 200 & 200\\
+            & Optimizer & Adam & Adam & Adam\\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau\\
+            \cmidrule{3-5}
+			& Number of \wl iterations & $\{\textbf{1}, 2, 3, 4\}$ & $\{\textbf{1}, 2, 3, 4\}$ & $\{\textbf{1}, 2, 3, 4\}$ \\
+            & Use \wl-Convergence & False & False & False\\
+            \cmidrule{3-5}
+            & \mlp Activation Function & ReLU & ReLU & ReLU\\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{2, \textbf{3}, 4, 5\}$ & $\{2, \textbf{3}, 4, 5\}$ & $\{2, \textbf{3}, 4, 5\}$\\
+            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            \cmidrule{3-5}
+            & Embedding Dimension & $\{\text{None}, 16, 32, 64, \textbf{128}\}$ & $\{\text{None}, \textbf{16}, 32, 64, 128\}$ & $\{\text{None}, 16, \textbf{32}, 64, 128\}$\\
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textbf{\textsf{Mean}}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$\\
 			\bottomrule
-		\end{tabular}}              
+		\end{tabular}}
+        \par\medskip
+        \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+        \begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
+            & \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{3}{c}{\textbf{Dataset}}\\\cmidrule{3-5}
+            & & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}\\
+            \toprule
+            \multirow{6}{*}{}            
+            & Batch Size & 33 & 32 & 32\\
+            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
+            & Max Epochs & 200 & 200 & 200 \\
+            & Optimizer & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
+            \cmidrule{3-5}
+            & Number of \wl iterations & $\{1, 2, \textbf{3}, 4\}$ & $\{\textbf{1}, 2, 3, 4\}$ & $\{\textbf{1}, 2, 3, 4\}$ \\
+            & Use \wl-Convergence & False & False & False \\
+            \cmidrule{3-5}
+            & \mlp Activation Function & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{\textbf{2}, 3, 4, 5\}$ & $\{2, \textbf{3}, 4, 5\}$ & $\{2, \textbf{3}, 4, 5\}$ \\
+            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            \cmidrule{3-5}
+            & Embedding Dimension & $\{\text{None}, 16, \textbf{32}, 64, 128\}$ & $\{\text{None}, 16, 32, \textbf{64}, 128\}$ & $\{\text{None}, 16, 32, 64, \textbf{128}\}$ \\
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textbf{\textsf{Max}}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean},\textbf{\textsf{Sum}}\}$\\
+            \bottomrule
+        \end{tabular}}
 \end{table}
+\clearpage
 
 \subsubsection{Overview of Hyperparameters: \gnn on the Classification Datasets}
 \begin{table}[H]
 	\caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
 	\label{tab:sweep_gnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{6}{c}{\textbf{Dataset}}\\\cmidrule{3-8}
-			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}}           & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
+		\begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{3}{c}{\textbf{Dataset}}\\\cmidrule{3-5}
+			& & {\textsc{Enzymes}}         &  {\textsc{Imdb-Binary}}  & {\textsc{Mutag}} \\
+			\toprule
+			\multirow{6}{*}{}            
+            & Batch Size & 32 & 32 & 32 \\
+            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$\\
+            & Max Epochs & 200 & 200 & 200 \\
+            & Optimizer & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
+            \cmidrule{2-5}
+            & GNN Architecture & $\{\textbf{\gat}, \gcn, \gin\}$ & $\{\gat, \textbf{\gcn}, \gin\}$ & $\{\gat, \gcn, \textbf{\gin}\}$ \\
+            & GNN Activation Function & ReLU & ReLU & ReLU \\
+            & GNN Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            & GNN Hidden Dimension & $\{16, 32, \textbf{64}, 128\}$ & $\{16, 32, \textbf{64}, 128\}$ & $\{\textbf{16}, 32, 64, 128\}$ \\
+            & GNN Jumping-Knowledge & cat & cat & cat \\
+            & GNN Number of Layers & $5$ & $5$ & $5$ \\
+            \cmidrule{2-5}
+            & \mlp Activation Function & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{2, \textbf{3}, 4, 5\}$ & $\{2, 3, 4, \textbf{5}\}$ & $\{2, \textbf{3}, 4, 5\}$ \\
+            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            \cmidrule{2-5}
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textbf{\textsf{Mean}}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$\\
+			\bottomrule
+		\end{tabular}}
+        \par\medskip
+        \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
+		\begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{3}{c}{\textbf{Dataset}}\\\cmidrule{3-5}
+			& & {\textsc{NCI1}}       & {\textsc{Proteins}}  & {\textsc{Reddit-Binary}}
 			\\
 			\toprule
 			\multirow{6}{*}{}            
-            & Batch Size & 32 & 32 & 32 & $\{33, 129\}$ & 32 & 32\\
-            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
-            & Max Epochs & 200 & 200 & 200 & 200 & 200 & 200 \\
-            & Optimizer & Adam & Adam & Adam & Adam & Adam & Adam \\
-            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
-            \midrule
-            & GNN Architecture & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ & $\{\gat, \gcn, \gin\}$ \\
-            & GNN Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
-            & GNN Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
-            & GNN Hidden Dimension & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ & $\{16, 32, 64, 128\}$ \\
-            & GNN Jumping-Knowledge & cat & cat & cat & cat & cat & cat \\
-            & GNN Number of Layers & $5$ & $5$ & $5$ & $5$ & $5$ & $5$ \\
-            \midrule
-            & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU & ReLU & ReLU \\
-            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm & BatchNorm \\ 
-            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ \\
-            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
-            \midrule
-            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+            & Batch Size & $\{33, \textbf{129}\}$ & 32 & 32\\
+            & Learning Rate & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ & $X \sim \textit{U}(0.0001, 0.1)$ \\
+            & Max Epochs & 200 & 200 & 200 \\
+            & Optimizer & Adam & Adam & Adam \\
+            & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
+            \cmidrule{2-5}
+            & GNN Architecture & $\{\gat, \gcn, \textbf{\gin}\}$ & $\{\gat, \gcn, \textbf{\gin}\}$ & $\{\gat, \textbf{\gcn}, \gin\}$ \\
+            & GNN Activation Function & ReLU & ReLU & ReLU \\
+            & GNN Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            & GNN Hidden Dimension & $\{16, 32, 64, \textbf{128}\}$ & $\{16, 32, 64, \textbf{128}\}$ & $\{\textbf{16}, 32, 64, 128\}$ \\
+            & GNN Jumping-Knowledge & cat & cat & cat \\
+            & GNN Number of Layers & $5$ & $5$ & $5$ \\
+            \cmidrule{2-5}
+            & \mlp Activation Function & ReLU & ReLU & ReLU \\
+            & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm \\ 
+            & \mlp Number of Layers & $\{2, 3, \textbf{4}, 5\}$ & $\{2, 3, \textbf{4}, 5\}$ & $\{\textbf{2}, 3, 4, 5\}$ \\
+            & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ \\
+            \cmidrule{2-5}
+            & Pooling function & $\{\textbf{\textsf{Max}}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textbf{\textsf{Max}}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textbf{\textsf{Max}}, \textsf{Mean}, \textsf{Sum}\}$\\
 			\bottomrule
-		\end{tabular}}              
+		\end{tabular}}         
 \end{table}
+\clearpage
+
 
 \subsubsection{Overview of Hyperparameters: \wlnn on the Regression Datasets}
 \begin{table}[H]
@@ -141,16 +197,16 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
             & Optimizer & Adam & Adam & Adam & Adam \\
             & Scheduler & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau & ReduceLROnPlateau \\
             \midrule
-			& Number of \wl iterations & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$ & $\{1, 2, 3\}$ & $\{1, 2, 3, 4\}$\\
+			& Number of \wl iterations & $\{\textbf{1}, 2, 3\}$ & $\{\textbf{1}, 2, 3, 4\}$ & $\{1, 2, \textbf{3}\}$ & $\{1, \textbf{2}, 3, 4\}$\\
             & Use \wl-Convergence & False & False & False & False \\
             \midrule
             & \mlp Activation Function & ReLU & ReLU & ReLU & ReLU\\
             & \mlp Normalization & BatchNorm & BatchNorm & BatchNorm & BatchNorm\\ 
-            & \mlp Number of Layers & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$ & $\{2, 3, 4, 5\}$\\
+            & \mlp Number of Layers & $\{2, \textbf{3}, 4, 5\}$ & $\{2, 3, 4, 5, 6, \textbf{7}\}$ & $\{2, \textbf{3}, 4, 5\}$ & $\{2, \textbf{3}, 4, 5\}$\\
             & \mlp Dropout & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$ & $X \sim \textit{U}(0, 0.2)$\\
             \midrule
-            & Embedding Dimension & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$ & $\{\text{None}, 16, 32, 64, 128\}$\\
-            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+            & Embedding Dimension & $\{{16}, \textbf{32}, 64, 128, 256\}$ & $\{16, 32, 64, 128, \textbf{256}\}$ & $\{16, 32, 64, 128, \textbf{256}\}$ & $\{ 16, 32, 64, 128, \textbf{256}\}$\\
+            & Pooling function & $\{\textsf{Max}, {\textsf{Mean}}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textbf{\textsf{Mean}}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$\\
 			\bottomrule
 		\end{tabular}}              
 \end{table}
@@ -158,7 +214,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 \subsubsection{Overview of Hyperparameters: \gnn on the Regression Datasets}
 \begin{table}[H]
     \caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
-    \label{tab:sweep_gnn}
+    \label{tab:sweep_gnn_reg}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
         \begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
             & \multirow{3}{*}{\vspace*{4pt}\textbf{Hyperparameter}}&\multicolumn{4}{c}{\textbf{Dataset}}\\\cmidrule{3-6}
@@ -184,108 +240,114 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
             & \mlp Number of Layers & 4 & 4 & 4 & 4 \\
             & \mlp Dropout & 0.0 &  0.0 &  0.0 &  0.0 \\
             \midrule
-            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textsf{Sum}\}$\\
+            & Pooling function & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$ & $\{\textsf{Max}, \textsf{Mean}, \textbf{\textsf{Sum}}\}$\\
             \bottomrule
         \end{tabular}}              
 \end{table}
 
 \subsection{Performance overview for each Hyperparameter}
-In this section, we present the results of our hyperparameter optimization for the \wlnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum.
+In this section, we present the results of our hyperparameter optimization for the \wlnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum. In the visulizations, we denote with $-1$ for the paraemter that determines the number of iterations of the \wl algorithm, that the  standard version of the algorithm was used. 
 
+\subsubsection{\wlnn Configurations on the \enzymes Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_enzymes.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_enzymes.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \enzymes dataset.}
 \end{figure}
-\vfill
+
+\subsubsection{\wlnn Configurations on the \imdb Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_imdb.png}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_imdb.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \imdb dataset.}
 \end{figure}
+\clearpage
 
+\subsubsection{\wlnn Configurations on the \mutag Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_mutag.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_mutag.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \mutag dataset.}
 \end{figure}
-\vfill
+
+\subsubsection{\wlnn Configurations on the \nci Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_nci1.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_nci1.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \nci dataset.}
 \end{figure}
+\clearpage
 
+\subsubsection{\wlnn Configurations on the \proteins Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_proteins.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_proteins.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \proteins dataset.}
 \end{figure}
 
+\subsubsection{\wlnn Configurations on the \reddit Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_wlnn_reddit.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_reddit.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \wlnn model for the \reddit dataset.}
 \end{figure}
+\clearpage
 
 
 \subsection{Overview of the Impact of each Hyperparameter for \gnn Models}
-In this section, we present, similarly to the previous section, the results of our hyperparameter optimization for the \gnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum.
+In this section, we present the results of our hyperparameter optimization for the \gnn framework on each classification dataset. We will use the same visualization explained and utilized in the previous section, customized to the hyperparameters of the \gnn models.
 
+\subsubsection{\gnn Configurations on the \enzymes Dataset}
 \begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_enzymes.png}
-    \end{center}
-    \vspace*{-30pt}
+    \centering
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_enzymes.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \enzymes dataset.}
 \end{figure}
 
-
+\subsubsection{\gnn Configurations on the \imdb Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_imdb.png}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_imdb.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \imdb dataset.}
 \end{figure}
+\clearpage
 
+\subsubsection{\gnn Configurations on the \mutag Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_mutag.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_mutag.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \mutag dataset.}
 \end{figure}
 
+\subsubsection{\gnn Configurations on the \nci Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_nci1.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_nci1.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \nci dataset.}
 \end{figure}
+\clearpage
 
+\subsubsection{\gnn Configurations on the \proteins Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_proteins.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_proteins.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \proteins dataset.}
 \end{figure}
 
+\subsubsection{\gnn Configurations on the \reddit Dataset}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Figures/hyperparameter_gnn_reddit.png}
-    \vspace*{-30pt}
+    \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_reddit.png}
     \caption{Overview of the effects of each hyperparameter on the accuracy of the corresponding configured \gnn model for the \reddit dataset.}
 \end{figure}
+\clearpage
 
 \subsection{Overview of the Number of Configurations}
 \begin{table}[H]
 	\caption{Overview of the number of different configurations tested for each model type and each dataset.}
 	\label{tab:num_runs}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccccccccc}	\toprule
+		\begin{tabular}{@{}c <{\enspace}@{}lcccccccccc@{}}	\toprule
 			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{10}{c}{\textbf{Dataset}}\\\cmidrule{3-12}
             & & \multicolumn{6}{c}{\textbf{Classification}} & \multicolumn{4}{c}{\textbf{Regression}}\\\cmidrule(lr){3-8}\cmidrule(lr){9-12}
 			& & \enzymes & \imdb & \mutag & \nci & \proteins & \reddit & \alchemy & \alchemyten & \zinc & \zincten
@@ -339,7 +401,7 @@ In this section, we present, similarly to the previous section, the results of o
     \label{tab:unique_colors}
     \centering
     \resizebox{\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
-    \begin{tabular}{@{}c <{\enspace}@{}lrrrrrrrrrrr | r}
+    \begin{tabular}{@{}c <{\enspace}@{}lrrrrrrrrrrr | r@{}}
     \toprule
         & \multirow{3}{*}{\vspace*{4pt}\textbf{Dataset}}&\multicolumn{11}{c}{\textbf{Number of \wl Iterations}}\\\cmidrule{3-14}
         & & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & \# Nodes\\
@@ -360,8 +422,10 @@ In this section, we present, similarly to the previous section, the results of o
         \bottomrule
     \end{tabular}}
 \end{table}
+\clearpage
 
-\begin{figure}[!ht]
+\subsubsection{Approximation Performance on the \enzymes Dataset}
+\begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
         \centering
@@ -372,11 +436,13 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_ENZYMES_1.pdf}
     \end{minipage}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Enzymes} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.49 \pm 0.3$.}
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Enzymes} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.49 \pm 0.3$.}
     \label{fig:gnn_approx_enzymes}
 \end{figure}
+\clearpage
 
-\begin{figure}[!ht]
+\subsubsection{Approximation Performance on the \imdb Dataset}
+\begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
         \centering
@@ -387,12 +453,13 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_IMDB-BINARY_1.pdf}
     \end{minipage}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Imdb-Binary} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.14 \pm 0.15$. \newline
-    Note that \textsc{Imdb binary} does not contain any node features, so we artificially initialize each node feature with a one-hot encoding of its degree.}
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Imdb-Binary} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.14 \pm 0.15$.}
     \label{fig:gnn_approx_imdb}
 \end{figure}
+\clearpage
 
-\begin{figure}[!ht]
+\subsubsection{Approximation Performance on the \mutag Dataset}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45992852703\textwidth}
         \centering
@@ -403,26 +470,13 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_MUTAG_1.pdf}
     \end{subfigure}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Mutag} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for three iteration. The average error for the entire test set is $0.42 \pm 0.29$.}
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Mutag} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.42 \pm 0.29$.}
     \label{fig:gnn_approx_mutag}
 \end{figure}
+\clearpage
 
-\begin{figure}[!ht]
-    \centering
-    \begin{minipage}[b]{0.45992852703\textwidth}
-        \centering
-        \includegraphics[width=\textwidth, left]{Figures/heatmaps_NCI1_0.pdf}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[b]{0.53007147296\textwidth}
-        \includegraphics[width=\textwidth, right]{Figures/heatmaps_NCI1_1.pdf}
-    \end{minipage}
-    \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Nci1} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for three iteration. The average error for the entire test set is $0.50 \pm 0.24$.}
-    \label{fig:gnn_approx_nci_3}
-\end{figure}
-
-\begin{figure}[!ht]
+\subsubsection{Approximation Capability on the \nci Dataset}
+\begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
         \centering
@@ -433,11 +487,32 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_NCI1_1_k_wl_1.pdf}
     \end{minipage}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Nci1} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.42 \pm 0.22$.}
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Nci1} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.42 \pm 0.22$.}
     \label{fig:gnn_approx_nci_1}
 \end{figure}
+\clearpage
 
-\begin{figure}[!ht]
+\subsubsection{Approximation Capability on the \nci Dataset for 3 Iterations of the \wl Algorithm}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[b]{0.45992852703\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, left]{Figures/heatmaps_NCI1_0.pdf}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.53007147296\textwidth}
+        \includegraphics[width=\textwidth, right]{Figures/heatmaps_NCI1_1.pdf}
+    \end{minipage}
+    \hfill
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Nci1} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.50 \pm 0.24$.}
+    \label{fig:gnn_approx_nci_3}
+\end{figure}
+\clearpage
+
+
+
+\subsubsection{Approximation Performance on the \proteins Dataset}
+\begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
         \centering
@@ -448,11 +523,13 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_PROTEINS_1.pdf}
     \end{minipage}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \textsc{Proteins} dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.49 \pm 0.26$.}
+    \caption{Visualizing the performance of the best performing \gnn on the \textsc{Proteins} dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.49 \pm 0.26$.}
     \label{fig:gnn_approx_proteins}
 \end{figure}
+\clearpage
 
-\begin{figure}[!ht]
+\subsubsection{Approximation Performance on the \reddit Dataset}
+\begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
         \centering
@@ -463,6 +540,7 @@ In this section, we present, similarly to the previous section, the results of o
         \includegraphics[width=\textwidth, right]{Figures/heatmaps_REDDIT-BINARY_1.png}
     \end{minipage}
     \hfill
-    \caption{Visualizing the performance of the best performing GNN on the \reddit dataset in approximating node colors computed by the 1-WL algorithm. The ten graphs shown are randomly sampled from the GNN's test set, and the 1-WL algorithm ran only for one iteration. The average error for the entire test set is $0.48 \pm 0.32$.}
+    \caption{Visualizing the performance of the best performing \gnn on the \reddit dataset in approximating node colors computed by the \wl algorithm. The ten graphs shown are randomly sampled from the \gnn's test set. The average error for the entire test set is $0.48 \pm 0.32$.}
     \label{fig:gnn_approx_reddit}
 \end{figure}
+\clearpage

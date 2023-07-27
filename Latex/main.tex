@@ -1,7 +1,7 @@
-\documentclass[11pt, dvipsnames, DIV=12]{scrreprt} %twoside
+\documentclass[11pt, dvipsnames, twoside, DIV=12]{scrreprt} %twoside
 \usepackage{babel}
 
-%\usepackage[showframe]{geometry}
+%\usepackage{geometry} %showframe
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -19,7 +19,8 @@
 \usepackage{siunitx}
 \usepackage[section]{placeins}
 \usepackage{multirow}
-\usepackage{pdflscape}
+\usepackage{pdfpages}
+
 
 
 \usepackage[multiple]{footmisc}
@@ -263,7 +264,7 @@ hyperfootnotes=true
 \setcounter{Maxaffil}{2}
 
 \title{A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm\\
-\vspace{20pt}\small{\normalfont From the faculty of Mathematics, Physics, and Computer Science approved for the purpose of obtaining the academic degree of Bachelor of Sciences.}}
+\vspace{20pt}\small{\normalfont From the Faculty of Mathematics, Physics, and Computer Science approved for the purpose of obtaining the academic degree of Bachelor of Sciences.}}
 \author{\textbf{Eric Tillmann Bill}}
 \affil{\vspace{100pt}}
 
@@ -278,27 +279,31 @@ hyperfootnotes=true
 \begin{document}
 \pagenumbering{Roman}
 
-\begin{tikzpicture}[remember picture, overlay]
-    \node[anchor=north east,inner sep=20pt, shift={(-10pt,0)}] (logo) at (current page.north east)
-               {\includegraphics[scale=0.2]{Figures/rwth_log_en_blau_rgb.png}};
-\end{tikzpicture}
-{\vspace{5pt}\\\fontfamily{phv}\selectfont \textbf{The present work was submitted to the Machine Learning on Graphs Group at the
-Chair of Computer Science 6, RWTH Aachen University\hspace*{\fill}}}
-\vspace{40pt}
-{\let\newpage\relax\maketitle}
+% % Plotting the logo of the institute in the right corner
+% \begin{tikzpicture}[remember picture, overlay]
+%     \node[anchor=north east,inner sep=20pt, shift={(-10pt,0)}] (logo) at (current page.north east)
+%                {\includegraphics[scale=0.2]{Figures/rwth_log_en_blau_rgb.png}};
+% \end{tikzpicture}
+% % Mandatory disclaimer
+% {\vspace{5pt}\\\fontfamily{phv}\selectfont \textbf{The present work was submitted to the Machine Learning on Graphs Group at the
+% Chair of Computer Science 6, RWTH Aachen University\hspace*{\fill}}}
+% % Make title
+% {\let\newpage\relax\maketitle}
 
+\includepdf{main_single_sided.pdf}
+\cleardoubleoddemptypage
 
 \input{abstract.tex}
-\clearpage
+\cleardoubleoddemptypage
+
 \input{acknowledgement.tex}
 
-\cleardoubleoddstandardpage
+\cleardoubleevenstandardpage
 \tableofcontents
 %\listoffigures
 
-\cleardoubleoddstandardpage
+\cleardoublepage
 \pagenumbering{arabic}
-
 \input{intro.tex}
 \input{related_work.tex}
 
@@ -309,7 +314,6 @@ Chair of Computer Science 6, RWTH Aachen University\hspace*{\fill}}}
 \part{Empirical Testing}\label{part2}
 \input{part2.tex}
 
-\cleardoubleoddstandardpage
 \setcitestyle{numbers}
 \settocbibname{Bibliography}
 \bibliography{references}

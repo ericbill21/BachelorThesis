@@ -50,7 +50,7 @@ Having established a formal definition and notation, we will now prove the \wlnn
     \end{equation*}
     with which we can conclude that the composition of multiple functions computable by $\wlnn$, is also $\wlnn$ computable. 
 
-    We define the new encoding function $f^*$ to work as follows on an arbitrary input multiset $M$:
+    We define the encoding function $f^*$ to work as follows on an arbitrary input $M$:
     \begin{equation*}
         f^*(M) := \textsf{concat}(
             \begin{bmatrix}
@@ -72,7 +72,7 @@ Having established a formal definition and notation, we will now prove the \wlnn
             \end{bmatrix})) &,\forall j \in [T-1]\\
         (\mlp^*)_{j+T+1}(v) &:= (\mlp^\bullet)_{j+1}(v) &,\forall j \in [T^\bullet - 1]
     \end{align*}
-    where $T$ is the maximum number of layers of the set of $\mlp_i$'s, and $T^\bullet$ is the number of layers of the given $\mlp^\bullet$. Thereby, we define in the first equation the start of the sequence as the input; with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last equation line, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
+    where $T$ is the maximum number of layers of the set of $\mlp_i$'s, and $T^\bullet$ is the number of layers of the given $\mlp^\bullet$. Thereby, we define in the first equation the start of the sequence as the input; with the second line, we construct the ``simultaneous'' execution of the $\mlp_i$'s, and in the last line of the equations, we add the layers of the given $\mlp^\bullet$ to the end. Further, we define the weight matrix $W_j^*$ as follows: 
     \begin{align*}
         W^*_j &:= \begin{bmatrix}
             W^1_j & 0 & \hdots & 0\\
@@ -81,11 +81,7 @@ Having established a formal definition and notation, we will now prove the \wlnn
             0 & \hdots & 0 & W^n_j
         \end{bmatrix},
     \end{align*}
-    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with ``$0$'' zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$. And finally, we define the overall activation function $\sigma^*_j$ as following:
-
-
- 
-
+    such that we build a new matrix where each individual weight matrix is placed along the diagonal. Here we denote with ``$0$'' zero matrices with the correct dimensions, such that $W_j^*$ is well-defined. Important to note, should for an $\mlp_i$, $W^i_j$ not exist, because it has less than $j$ layers, we use for $W^i_j$ the identity matrix $I_m$ where $m$ is the dimension of the output computed by $\mlp_i$. And finally, we define the overall activation function $\sigma^*_j$ as follows:
     \begin{equation*}
         \sigma^*_j(v) := \begin{bmatrix}
             \sigma_{1,j}(v[1])\\
