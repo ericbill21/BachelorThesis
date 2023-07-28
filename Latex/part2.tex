@@ -162,7 +162,9 @@ In the case of the regression datasets, we adopted a slightly different testing 
 \subsubsection{Hyperparameter Optimization}\label{sec:hyperparam}
 To ensure the trustworthiness of our empirical results and gain valuable insights into the optimal configuration of \wlnn models, we conducted a thorough hyperparameter optimization for each type of model, both \gnn and \wlnn, and performed this optimization individually for each dataset.
 
-In order to ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized for, can be found in the Appendix. In particular, the hyperparameters for \wlnn models that are applied on the classification datasets can be found in \cref{tab:sweep_wlnn}, for \gnn models on the classification datasets in \cref{tab:sweep_gnn}, for \wlnn models on the regression datasets in \cref{tab:sweep_wlnn_reg}, and for \gnn models on the regression datasets in \cref{tab:sweep_gnn_reg}. \todo{new figures erwähnen!}
+In order to ensure the comparability of our results with other works and limit the number of hyperparameters requiring optimization, we followed standard practices when configuring our models. Detailed information on all hyperparameters, including the ones we optimized for, can be found in the Appendix. In particular, the hyperparameters for \wlnn models that are applied on the classification datasets can be found in \cref{tab:sweep_wlnn}, for \gnn models on the classification datasets in \cref{tab:sweep_gnn}, for \wlnn models on the regression datasets in \cref{tab:sweep_wlnn_reg}, and for \gnn models on the regression datasets in \cref{tab:sweep_gnn_reg}. 
+
+We also provide a visualization that tries to illustrate the effect each hyperparameter has on the performance of the resulting model when employed on a specific dataset. These visualizations can be found for the hyperparameter optimization of \wlnn models in Figures \cref{fig:wandb_wlnn_enzymes,fig:wandb_wlnn_imdb,fig:wandb_wlnn_mutag,fig:wandb_wlnn_nci,fig:wandb_wlnn_proteins,fig:wandb_wlnn_reddit} and for \gnn models in \cref{fig:wandb_gnn_enzymes,fig:wandb_gnn_proteins,fig:wandb_gnn_mutag,fig:wandb_gnn_nci,fig:wandb_gnn_proteins,fig:wandb_gnn_reddit} in the Appendix.
 
 Early in our investigations, we made a significant observation regarding the learning performance of \wlnn models. We noticed considerable performance discrepancies when comparing \wlnn models using the standard version of the \wl algorithm with the results achieved by \gnn models. Consequently, we investigated the possibility of parametrizing the \wl algorithm to enhance control over the expressiveness of the colorings it computes. Specifically, we focused on two crucial parameters: 1) the number of iterations and 2) the usage of its convergence behavior as an early termination criterion.
 
@@ -170,7 +172,7 @@ The advantage of this more granular parametrization is that it enables us to app
 
 In contrast, the hyperparameter selection for the \gnn models was relatively less intricate. The key parameters of interest here are the number of message-passing layers and the size of the hidden dimensions used in each layer. The reason for this is that the number of layers directly corresponds to the expressiveness of the \gnn, as demonstrated in the proof, while the size of the hidden dimensions enables easier learning by allowing the model to store more information during graph processing.
 
-\subsubsection{Implementation Details and Result Accessibility}
+\subsubsection{Implementation Details and Result Reproducibility}
 The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{A free and open-source machine learning framework that was originally developed by Meta AI and is now part of the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{An open-source library that extends \textsc{PyTorch} and allows for easy development and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases} as our tool for coordinating and recording the results of the hyperparameter optimization. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our tests on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware.
 
 \section{Empirical Testing}\label{sec:emprical_results}
@@ -242,7 +244,7 @@ The \gineeps model utilizes the \gin architecture for message-passing layers, \t
 			\\	
 			\toprule
 			\multirow{4}{*}{\rotatebox{90}{\gnn}} 
-			& \textsf{\gineeps} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}\tablefootnote[8]{The results of \gineeps on \alchemy and \zinc are adopted from \cite{Mor+2020}.} & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}\tablefootnote[9]{\label{foot:Mor22}The results of \gineeps on \alchemyten is adopted from \cite{Morris2022}.} & - & 0.084 {\scriptsize $\pm  0.004$}\textsuperscript{8}
+			& \textsf{\gineeps} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}\tablefootnote[8]{The results of \gineeps on \alchemy and \zinc are adopted from \cite{Mor+2020}.} & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}\tablefootnote[9]{\label{foot:Mor22}The results of \gineeps on \alchemyten is adopted from \cite{Morris2022}.} & 0.084 {\scriptsize $\pm  0.004$}\textsuperscript{8} & -
 			\\
 			\cmidrule{2-6}
 			& \textsf{GIN:Max} & 0.604 {\scriptsize $\pm 0.004$} -0.578 {\scriptsize $\pm 0.009$} &	0.353 {\scriptsize $\pm 0.003$} -1.228 {\scriptsize $\pm 0.006$} &	0.124 {\scriptsize $\pm 0.004$} &	0.427 {\scriptsize $\pm 0.009$}
@@ -429,7 +431,7 @@ The learning behavior of \wlnn models presents a unique challenge due to the exp
 		\includegraphics[width=\textwidth]{Figures/train_test_diff_legend.pdf}
 		\vspace*{-4ex} 
 	\end{subfigure}
-	\caption{Mean difference of the classification accuracies of the training and testing set for each dataset. In detail, we grouped by different quantiles of the best performing models and the type of the model.}
+	\caption{Mean difference of the classification accuracies of the training and testing set for each dataset. In detail, we grouped by different quantiles of the best-performing models and the type of the model.}
 	\label{fig:performance_diff}
 \end{figure}
 
