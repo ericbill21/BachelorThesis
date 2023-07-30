@@ -81,6 +81,7 @@
 \usepackage{fixmath}
 \usepackage{siunitx}
 
+
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -271,7 +272,7 @@ hyperfootnotes=true
 \author{Supervisor:\\Prof. Dr. rer. nat. Christopher Morris}
 \affil{Machine Learning on Graphs Group\\RWTH Aachen University}
 
-\date{\vspace{30pt}\today}
+\date{\vspace{30pt}August, 2023}
 
 \renewcommand{\thesection}{\arabic{section}}
 \numberwithin{equation}{section}
@@ -291,11 +292,11 @@ hyperfootnotes=true
 % {\let\newpage\relax\maketitle}
 
 \includepdf{main_single_sided.pdf}
-\cleardoubleoddemptypage
 
+\cleardoubleoddemptypage
 \input{abstract.tex}
-\cleardoubleoddemptypage
 
+\cleardoubleoddemptypage
 \input{acknowledgement.tex}
 
 \cleardoubleevenstandardpage
@@ -307,13 +308,16 @@ hyperfootnotes=true
 \input{intro.tex}
 \input{related_work.tex}
 
+\cleardoubleoddemptypage
 \part{Theoretical Equivalence}\label{part1}
-
 \input{part1.tex}
 
+\cleardoubleoddemptypage
 \part{Empirical Testing}\label{part2}
 \input{part2.tex}
 
+
+\cleardoubleoddemptypage
 \setcitestyle{numbers}
 \settocbibname{Bibliography}
 \bibliography{references}
