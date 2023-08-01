@@ -1,7 +1,6 @@
 \chapter{Appendix Part II}
 
-\section{Testing Configuration}
-\subsection{Definition of the Normalized \textsf{Shannon-Index}}\label{sec:definition_shannon_index}
+\section{Definition of the Normalized \textsf{Shannon-Index}}\label{sec:definition_shannon_index}
 We used the following definition of the \textsf{Normalized Shannon-Index}.
 
 \begin{definition}[\textsf{Normalized Shannon-Index}]\label{def:shannon_index}
@@ -14,7 +13,7 @@ We used the following definition of the \textsf{Normalized Shannon-Index}.
 As an example, for the dataset \textsc{Proteins} the variables are set to be the following: $C = \{0, 1\}$ with $n_0 = 663$ and $n_1 = 450$, so that $n = 1113$, yielding a rounded value of $0.973$.
 \clearpage
 
-\subsection{Theoretical Maximum Accuracy Analysis}
+\section{Theoretical Maximum Accuracy Analysis}
 
 \begin{table}[H]
 	\caption{An overview of the maximum theoretical classification accuracy achievable for each dataset based on the number of \wl iterations in percent. A hyphen ``-'' indicates that the maximum accuracy has converged with fewer iterations, implying that further iterations do not improve the accuracy. ``\textsc{Oom}'' denotes out of memory error.}
@@ -58,11 +57,11 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 \end{table}
 \clearpage
 
-\subsection{Hyperparameter Configuration and Optimization}
+\section{Hyperparameter Configuration and Optimization}
 
 \subsubsection{Overview of Hyperparameters: \wlnn on the Classification Datasets}
 \begin{table}[H]
-	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
+	\caption{Hyperparameters for \wlnn models for the classification datasets. Highlighting the best-performing configuration when multiple options exist for a parameter.}
 	\label{tab:sweep_wlnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
@@ -118,7 +117,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 \subsubsection{Overview of Hyperparameters: \gnn on the Classification Datasets}
 \begin{table}[H]
-	\caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
+	\caption{Hyperparameters for \gnn models for the classification datasets. Highlighting the best-performing configuration when multiple options exist for a parameter.}
 	\label{tab:sweep_gnn}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lccc@{}}	\toprule
@@ -182,7 +181,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 \subsubsection{Overview of Hyperparameters: \wlnn on the Regression Datasets}
 \begin{table}[H]
-	\caption{Listing of the hyperparameter with which we configured the \wlnn models for each regression dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
+	\caption{Hyperparameters for \wlnn models for the regression datasets. Highlighting the best-performing configuration when multiple options exist for a parameter.}
 	\label{tab:sweep_wlnn_reg}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
@@ -213,7 +212,7 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 
 \subsubsection{Overview of Hyperparameters: \gnn on the Regression Datasets}
 \begin{table}[H]
-    \caption{Listing of the hyperparameter with which we configured the \gnn models for each classification dataset. In terms of accuracy, the choice of hyperparameters that led to the best-performing configuration is highlighted in boldface if there are numerous options for a hyperparameter.}
+    \caption{Hyperparameters for \gnn models for the regression datasets. Highlighting the best-performing configuration when multiple options exist for a parameter.}
     \label{tab:sweep_gnn_reg}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
         \begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
@@ -246,9 +245,9 @@ As an example, for the dataset \textsc{Proteins} the variables are set to be the
 \end{table}
 
 \subsection{Performance overview for each Hyperparameter}
-In this section, we present the results of our hyperparameter optimization for the \wlnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum. In the visulizations, we denote with $-1$ for the paraemter that determines the number of iterations of the \wl algorithm, that the  standard version of the algorithm was used. 
+In this section, we present the results of our hyperparameter optimization for the \wlnn framework on each classification dataset. We plot a random subset of the tested configurations where each line in the visualization represents a single configuration and is color-coded based on its accuracy relative to the other plotted configurations. Bright yellow lines indicate configurations that performed among the best, while dark purple lines represent configurations with the worst performance. The color coding gradually transitions between these two color endpoints, allowing for a clear visual representation of the performance spectrum. Note that a value of $-1$ for the number of iterations of the \wl algorithm indicates the use of the standard version of the algorithm.
 
-\subsubsection{\wlnn Configurations on the \enzymes Dataset}
+\subsubsection{\wlnn Configurations on the ENZYMES Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_enzymes.png}
@@ -256,7 +255,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_wlnn_enzymes}
 \end{figure}
 
-\subsubsection{\wlnn Configurations on the \imdb Dataset}
+\subsubsection{\wlnn Configurations on the IMDB-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_imdb.png}
@@ -265,7 +264,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{\wlnn Configurations on the \mutag Dataset}
+\subsubsection{\wlnn Configurations on the MUTAG Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_mutag.png}
@@ -273,7 +272,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_wlnn_mutag}
 \end{figure}
 
-\subsubsection{\wlnn Configurations on the \nci Dataset}
+\subsubsection{\wlnn Configurations on the NCI1 Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_nci1.png}
@@ -282,7 +281,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{\wlnn Configurations on the \proteins Dataset}
+\subsubsection{\wlnn Configurations on the PROTEINS Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_proteins.png}
@@ -290,7 +289,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_wlnn_proteins}
 \end{figure}
 
-\subsubsection{\wlnn Configurations on the \reddit Dataset}
+\subsubsection{\wlnn Configurations on the REDDIT-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_wlnn_reddit.png}
@@ -303,7 +302,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \subsection{Overview of the Impact of each Hyperparameter for \gnn Models}
 In this section, we present the results of our hyperparameter optimization for the \gnn framework on each classification dataset. We will use the same visualization explained and utilized in the previous section, customized to the hyperparameters of the \gnn models.
 
-\subsubsection{\gnn Configurations on the \enzymes Dataset}
+\subsubsection{\gnn Configurations on the ENZYMES Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_enzymes.png}
@@ -311,7 +310,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_gnn_enzymes}
 \end{figure}
 
-\subsubsection{\gnn Configurations on the \imdb Dataset}
+\subsubsection{\gnn Configurations on the IMDB-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_imdb.png}
@@ -320,7 +319,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{\gnn Configurations on the \mutag Dataset}
+\subsubsection{\gnn Configurations on the MUTAG Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_mutag.png}
@@ -328,7 +327,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_gnn_mutag}
 \end{figure}
 
-\subsubsection{\gnn Configurations on the \nci Dataset}
+\subsubsection{\gnn Configurations on the NCI1 Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_nci1.png}
@@ -337,7 +336,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{\gnn Configurations on the \proteins Dataset}
+\subsubsection{\gnn Configurations on the PROTEINS Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_proteins.png}
@@ -345,7 +344,7 @@ In this section, we present the results of our hyperparameter optimization for t
     \label{fig:wandb_gnn_proteins}
 \end{figure}
 
-\subsubsection{\gnn Configurations on the \reddit Dataset}
+\subsubsection{\gnn Configurations on the REDDIT-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth, trim={0 75 0 150}, clip]{Figures/hyperparameter_gnn_reddit.png}
@@ -360,7 +359,7 @@ In this section, we present the results of our hyperparameter optimization for t
 	\label{tab:num_runs}
     \resizebox{.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
 		\begin{tabular}{@{}c <{\enspace}@{}lcccccccccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{10}{c}{\textbf{Dataset}}\\\cmidrule{3-12}
+			& \multirow{3}{*}{\vspace*{4pt}\textbf{Model}}&\multicolumn{10}{c}{\textbf{Dataset}}\\\cmidrule{3-12}
             & & \multicolumn{6}{c}{\textbf{Classification}} & \multicolumn{4}{c}{\textbf{Regression}}\\\cmidrule(lr){3-8}\cmidrule(lr){9-12}
 			& & \enzymes & \imdb & \mutag & \nci & \proteins & \reddit & \alchemy & \alchemyten & \zinc & \zincten
 			\\
@@ -405,11 +404,10 @@ In this section, we present the results of our hyperparameter optimization for t
 
 
 
-\section{Empirical Testing}
-\subsection{Approximating \wl Coloring: Investigating \gnn Node Representations}
+\section{Unique Color Count utilized by \wl Algorithm}
 
 \begin{table}[H]
-    \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the maximum number of unique colors that can be appear in the colorings.}
+    \caption{Overview of the number of unique colors in the colorings computed by the \wl algorithm when applied to each dataset. Specifically, we specified the number of iterations of the \wl algorithm. Additionally, the ``\# Nodes'' column showcases the maximum number of unique colors that can appear in the colorings.}
     \label{tab:unique_colors}
     \centering
     \resizebox{\textwidth}{!}{ 	\renewcommand{\arraystretch}{0.9}
@@ -436,7 +434,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{table}
 \clearpage
 
-\subsubsection{Approximation Performance on the \enzymes Dataset}
+\subsubsection{Approximation Performance on the ENZYMES Dataset}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
@@ -453,7 +451,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{Approximation Performance on the \imdb Dataset}
+\subsubsection{Approximation Performance on the IMDB-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
@@ -470,7 +468,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{Approximation Performance on the \mutag Dataset}
+\subsubsection{Approximation Performance on the MUTAG Dataset}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45992852703\textwidth}
@@ -487,7 +485,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{Approximation Capability on the \nci Dataset}
+\subsubsection{Approximation Capability on the NCI1 Dataset}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
@@ -504,7 +502,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{Approximation Capability on the \nci Dataset for 3 Iterations of the \wl Algorithm}
+\subsubsection{Approximation Capability on the NCI1 Dataset for 3 Iterations of the \wl Algorithm}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
@@ -522,8 +520,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \clearpage
 
 
-
-\subsubsection{Approximation Performance on the \proteins Dataset}
+\subsubsection{Approximation Performance on the PROTEINS Dataset}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}
@@ -540,7 +537,7 @@ In this section, we present the results of our hyperparameter optimization for t
 \end{figure}
 \clearpage
 
-\subsubsection{Approximation Performance on the \reddit Dataset}
+\subsubsection{Approximation Performance on the REDDIT-BINARY Dataset}
 \begin{figure}[H]
     \centering
     \begin{minipage}[b]{0.45992852703\textwidth}

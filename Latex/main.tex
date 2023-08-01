@@ -247,9 +247,6 @@ hyperfootnotes=true
 \newcommand{\alchemy}{\textsc{Alchemy}\xspace}
 \newcommand{\alchemyten}{\textsc{Alchemy(10k)}\xspace}
 
-
-
-
 %Parameter for sampling, keep low for fast compile times and increase when submitting the work
 \def\samples{2}
 
@@ -274,8 +271,10 @@ hyperfootnotes=true
 
 \date{\vspace{30pt}August, 2023}
 
-\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesection}{\thechapter.\arabic{section}}
 \numberwithin{equation}{section}
+\counterwithout{footnote}{chapter}
+
 
 \begin{document}
 \pagenumbering{Roman}
@@ -291,7 +290,7 @@ hyperfootnotes=true
 % % Make title
 % {\let\newpage\relax\maketitle}
 
-\includepdf{main_single_sided.pdf}
+\includepdf{main_one_sided.pdf}
 
 \cleardoubleoddemptypage
 \input{abstract.tex}

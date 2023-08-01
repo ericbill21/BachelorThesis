@@ -1,8 +1,7 @@
 \chapter{Appendix Part I}
 
-\section{Preliminaries}
-\subsection{Graph Attention Network}
-The \textsf{Graph Attention Network}(\gat) developed by \cite{Velivckovic2017} is unique and stands out from other \gnn architectures due to its unique attention mechanism. The attention mechanism is inspired by the concept of attention found in the field of natural language processing, specifically in the work \cite{Bahdanau2014}, which allows a model to focus on specific parts of the input data that are more relevant for the given task. In the case of \gat, this attention mechanism is adapted to graphs, enabling the model to learn the importance of each neighboring node during the update step of each node in a message-passing layer.
+\section{Graph Attention Network}
+The \textsf{Graph Attention Network} (\gat) developed by \cite{Velivckovic2017} is a distinctive \gnn architecture that features a unique attention mechanism inspired by natural language processing, specifically from the work \cite{Bahdanau2014}. This attention mechanism allows the model to focus on relevant parts of the input data during message-passing, enabling the \gat to learn the importance of each neighboring node for updating a node's representation.
 
 \begin{definition}\label{def:gat}
 The message-passing layers of the \gat architecture are defined as follows:
