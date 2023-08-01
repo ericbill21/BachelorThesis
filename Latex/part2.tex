@@ -1,3 +1,9 @@
+\cleardoubleoddstandardpage
+
+The empirical part of this thesis is organized into three chapters. Firstly, we cover the methodology used for conducting our experiments. Afterward, in \cref{sec:emprical_results}, we explore the results of the experiments and analyze various properties of both model types in detail. Finally, \cref{sec:discussion} concludes the thesis with a comprehensive discussion, highlighting insights, identifying issues, and suggesting future research directions.
+
+{\let\clearpage\relax
+\chapter{Experimental Setup}\label{sec:testing_configuration}}
 This part aims to compare the empirical performance of the \wlnn framework to the \gnn framework. In particular, we aim to answer the following research questions:
 \begin{description}
 	\item[Q1] Can \wlnn models achieve comparable performance to \gnn models empirically?
@@ -8,12 +14,10 @@ This part aims to compare the empirical performance of the \wlnn framework to th
 	
 	\item[Q4] Is there a substantial difference in the graph representations computed by each model type?
 \end{description}
-To address these questions, this part is structured into three sections. First, we explain the methodology for conducting our experiments, covering model and dataset selection, the testing procedure, and hyperparameter choices. Subsequently, in \cref{sec:emprical_results}, we comprehensively explore the results obtained from the experiments and examine various properties of both model types in detail. Finally, \cref{sec:discussion} concludes this thesis with a discussion that consolidates all insights, answers the research questions, highlights any identified issues, and provides recommendations for future research directions.
+To address these questions, this chapter delves into the configuration and setup of our empirical testing. We begin by presenting our carefully selected datasets, which serve as the foundation for our evaluation. We highlight specific insights and characteristics of these datasets that make them compelling choices for our study. Afterward, we focus on the models we employ for testing and subsequent result comparison. We provide an overview of the selected models, outlining their key features and motivations behind their inclusion in our evaluation. Subsequently, we provide a description of the training pipeline and explain specific hyperparameters for which we will optimize these models.
 
-\section{Testing Configuration}\label{sec:testing_configuration}
-This section delves into the configuration and setup of our empirical testing. We begin by presenting our carefully selected datasets, which serve as the foundation for our evaluation. We highlight specific insights and characteristics of these datasets that make them compelling choices for our study. Afterward, we focus on the models we employ for testing and subsequent result comparison. We provide an overview of the selected models, outlining their key features and motivations behind their inclusion in our evaluation. Subsequently, we provide a description of the training pipeline and explain specific hyperparameters for which we will optimize these models.
 
-\subsection{Datasets}\label{sec:datasets}
+\section{Datasets}\label{sec:datasets}
 We will begin by discussing our dataset selection and providing an individual introduction to each dataset. Subsequently, we will assess the dataset balance and investigate the maximum achievable accuracy of all our models on these datasets.
 
 \subsubsection{Choice of Datasets}
@@ -127,7 +131,7 @@ Upon examining the results, we observe that all datasets exhibit perfect or near
 
 We have conducted the same analyses on additional datasets, as their results might be valuable to the reader. For these, see \cref{tab:max_accuracies_app} in the Appendix.
 
-\subsection{Choice of Models}
+\section{Choice of Models}
 In selecting our models, we aimed to use techniques that are generic and not highly specialized for any of the datasets, such that insights we gain upon analyzing the model's performance can be generalized better. Consequently, we opted for a basic set of models to maintain simplicity and versatility.
 
 \subsubsection{\wlnn Models}
@@ -158,7 +162,7 @@ In summary, each of the \gnn models can be uniquely identified by their \gnn arc
 
 Note that the selection of the \textsf{Readout} function creates similarities between the \gnn and \wlnn models since the encoding functions of the \wlnn model use the same pooling functions, and the in both frameworks, a multilayer perceptron further processes the output of the pooling. These similarities play a crucial role in ensuring that any empirical differences observed between the two frameworks are not attributed to the utilization of more powerful techniques.
 
-\subsection{Experimental Setup}
+\section{Experiments}
 For the empirical testing, we took measures to ensure the reliability of our results in terms of hyperparameter configuration. Additionally, we aimed to ensure the reproducibility of the training pipeline for each model.
 
 \subsubsection{Testing Procedure}
@@ -186,7 +190,8 @@ In contrast, the hyperparameter selection for the \gnn models was relatively les
 \subsubsection{Implementation Details and Result Reproducibility}
 The implementation of our models and training procedures was carried out using \textsc{Python 3.10} along with the open-source library \textsc{PyTorch}\footnote{A free and open-source machine learning framework that was originally developed by Meta AI and is now part of the Linux Foundation umbrella. \href{https://pytorch.org}{https://pytorch.org}} and its extension \textsc{PyTorch Geometric}\footnote{An open-source library that extends \textsc{PyTorch} and allows for easy development and training of graph neural networks. \href{https://pytorch-geometric.readthedocs.io/en/latest}{https://pytorch-geometric.readthedocs.io}}. Moreover, we leveraged \textsc{Weights\&Biases}\footnote{A platform for experiment tracking, hyperparameter tuning, and sharing of results. \href{https://wandb.ai/}{https://wandb.ai/}} as our tool for coordinating and recording the results of the hyperparameter optimization. The code for our experiments is publicly available on \textsc{GitHub} at \url{https://github.com/ericbill21/BachelorThesis}, and the corresponding results can be accessed via \textsc{Weights\&Biases} at \url{https://wandb.ai/eric-bill/BachelorThesisExperiments}. We conducted our experiments on the RWTH High Performance Computing cluster by the RWTH Aachen University as well as on private hardware, a MacBook Air M1 2020. In detail, a total of 6\,754 runs were conducted, with each run testing a specific model configuration on a designated dataset. These runs required a substantial amount of computation time, totaling 2\,114 hours (over 88 days).
 
-\section{Empirical Results}\label{sec:emprical_results}
+\cleardoubleoddstandardpage
+\chapter{Empirical Results}\label{sec:emprical_results}
 In this section, we present the empirical findings of our study. To examine the classification accuracy achieved by the best-performing configuration of each model on each classification dataset, please refer to \cref{tab:results_classification}. For regression datasets, \cref{tab:results_regression} provides an overview of the mean absolute error (MAE) for the best-performing configurations.
 
 \begin{table}[bh]
@@ -243,34 +248,38 @@ In this section, we present the empirical findings of our study. To examine the 
 
 	\caption{Overview of the mean absolute error and the standard deviation (logMAE) on large-scale (multi-target) molecular regression tasks. We highlighted the lowest error for the \wlnn and \gnn models for each dataset.}
 	\label{tab:results_regression}
-	\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
-		\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
-			& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{4}{c}{\textbf{Dataset}}
-			\\
-			\cmidrule{3-6}
-			& & {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
-			\\	
-			\toprule
-			\multirow{4}{*}{\rotatebox{90}{\gnn}} 
-			& \textsf{\gineeps} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}\tablefootnote[8]{The results of \gineeps on \alchemy and \zinc are adopted from \cite{Mor+2020}.} & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}\tablefootnote[9]{\label{foot:Mor22}The results of \gineeps on \alchemyten is adopted from \cite{Morris2022}.} & 0.084 {\scriptsize $\pm  0.004$}\textsuperscript{8} & -
-			\\
-			\cmidrule{2-6}
-			& \textsf{GIN:Max} & 0.604 {\scriptsize $\pm 0.004$} -0.578 {\scriptsize $\pm 0.009$} &	0.353 {\scriptsize $\pm 0.003$} -1.228 {\scriptsize $\pm 0.006$} &	0.124 {\scriptsize $\pm 0.004$} &	0.427 {\scriptsize $\pm 0.009$}
-			\\
-			& \textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & 0.110 {\scriptsize $\pm 0.005$} & 0.339 {\scriptsize $\pm 0.032$}
-			\\
-			& \textsf{GIN:Sum} & \textbf{0.523} {\scriptsize $\pm 0.016$} -0.705 {\scriptsize $\pm 0.035$} & \textbf{0.282} {\scriptsize $\pm 0.002$} -1.890 {\scriptsize $\pm 0.031$} & \textbf{0.104} {\scriptsize $\pm 0.005$} & \textbf{0.298} {\scriptsize $\pm 0.034$}
-			\\
-			\cmidrule{2-6}
-			\multirow{3}{*}{\rotatebox{90}{\scriptsize \wlnn}} 
-			& \textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
-			\\
-			& \textsf{Embedding-Mean} & 0.617 {\scriptsize $\pm 0.003$} -0.564 {\scriptsize $\pm 0.005$} &	0.355 {\scriptsize $\pm 0.004$} -1.269 {\scriptsize $\pm 0.020$} &	\textbf{0.229} {\scriptsize $\pm 0.003$} &	0.484 {\scriptsize $\pm 0.009$}
-			\\
-			& \textsf{Embedding-Sum} & \textbf{0.600} {\scriptsize $\pm 0.004$} -0.625 {\scriptsize $\pm 0.032$} & \textbf{0.305} {\scriptsize $\pm 0.001$} -1.740 {\scriptsize $\pm 0.042$} &	0.326 {\scriptsize $\pm 0.014$} &	\textbf{0.465} {\scriptsize $\pm 0.009$}
-			\\
-			\bottomrule
-	\end{tabular}}
+	\begin{minipage}{\textwidth}
+		\resizebox{0.975\textwidth}{!}{ 	\renewcommand{\arraystretch}{1.05}
+			\begin{tabular}{@{}c <{\enspace}@{}lcccc@{}}	\toprule
+				& \multirow{3}{*}{\vspace*{4pt}\textbf{Method}}&\multicolumn{4}{c}{\textbf{Dataset}}
+				\\
+				\cmidrule{3-6}
+				& & {\textsc{Alchemy}} & {\textsc{Alchemy (10k)}} & {\textsc{Zinc}} & {\textsc{Zinc (10k)}} 
+				\\	
+				\toprule
+				\multirow{4}{*}{\rotatebox{90}{\gnn}} 
+				& \textsf{\gineeps} & 0.103 {\scriptsize $\pm  0.001$} -2.956 {\scriptsize $\pm  0.029$}\footnotemark[8] & 0.180 {\scriptsize $\pm  0.006$} -1.958  {\scriptsize $\pm  0.047$}\footnotemark[9] & 0.084 {\scriptsize $\pm  0.004$}\textsuperscript{8} & -
+				\\
+				\cmidrule{2-6}
+				& \textsf{GIN:Max} & 0.604 {\scriptsize $\pm 0.004$} -0.578 {\scriptsize $\pm 0.009$} &	0.353 {\scriptsize $\pm 0.003$} -1.228 {\scriptsize $\pm 0.006$} &	0.124 {\scriptsize $\pm 0.004$} &	0.427 {\scriptsize $\pm 0.009$}
+				\\
+				& \textsf{GIN:Mean} & 0.643 {\scriptsize $\pm 0.014$} -0.505 {\scriptsize $\pm 0.021$} & 0.314 {\scriptsize $\pm 0.004$} -1.469 {\scriptsize $\pm 0.044$} & 0.110 {\scriptsize $\pm 0.005$} & 0.339 {\scriptsize $\pm 0.032$}
+				\\
+				& \textsf{GIN:Sum} & \textbf{0.523} {\scriptsize $\pm 0.016$} -0.705 {\scriptsize $\pm 0.035$} & \textbf{0.282} {\scriptsize $\pm 0.002$} -1.890 {\scriptsize $\pm 0.031$} & \textbf{0.104} {\scriptsize $\pm 0.005$} & \textbf{0.298} {\scriptsize $\pm 0.034$}
+				\\
+				\cmidrule{2-6}
+				\multirow{3}{*}{\rotatebox{90}{\scriptsize \wlnn}} 
+				& \textsf{Embedding-Max} & 0.648 {\scriptsize $\pm 0.003$} -0.511 {\scriptsize $\pm 0.009$} &	0.409 {\scriptsize $\pm 0.003$} -1.023 {\scriptsize $\pm 0.009$} &	0.382 {\scriptsize $\pm 0.005$} &	0.659 {\scriptsize $\pm 0.007$}
+				\\
+				& \textsf{Embedding-Mean} & 0.617 {\scriptsize $\pm 0.003$} -0.564 {\scriptsize $\pm 0.005$} &	0.355 {\scriptsize $\pm 0.004$} -1.269 {\scriptsize $\pm 0.020$} &	\textbf{0.229} {\scriptsize $\pm 0.003$} &	0.484 {\scriptsize $\pm 0.009$}
+				\\
+				& \textsf{Embedding-Sum} & \textbf{0.600} {\scriptsize $\pm 0.004$} -0.625 {\scriptsize $\pm 0.032$} & \textbf{0.305} {\scriptsize $\pm 0.001$} -1.740 {\scriptsize $\pm 0.042$} &	0.326 {\scriptsize $\pm 0.014$} &	\textbf{0.465} {\scriptsize $\pm 0.009$}
+				\\
+				\bottomrule
+		\end{tabular}}
+		\footnotetext[8]{The results of \gineeps on \alchemy and \zinc are adopted from \cite{Mor+2020}.}
+		\footnotetext[9]{The results of \gineeps on \alchemyten is adopted from \cite{Morris2022}.}
+	\end{minipage}
 \end{table}
 
 Due to the usage of existing training pipelines for experiments on the regression datasets, we include the results of the \gineeps model proposed by \cite{Mor+2020} in \cref{tab:results_regression}. The \gineeps model utilizes the \gin architecture for message-passing layers, \textsf{Mean} as its pooling function, and a two-layer \mlp for the final processing of its input graph. This design closely resembles our \textsf{GIN:Mean} model, with the crucial distinction being that \gineeps incorporates edge features in its computations.
@@ -283,7 +292,7 @@ Moreover, our results align with the empirical findings of other \gnn models in 
 In the subsequent subsection, we will further analyze these results. Specifically, we will investigate the tradeoff between generality and expressiveness in \wlnn models, the differences in their learning behaviors, the ability of \gnn models to approximate \wlnn models, the learned pooled graph representations of each model type, the impact of \gnn models performance by preprocessing the data, and finally the effect of large datasets on the performance of \wlnn models.
 
 \FloatBarrier
-\subsection{Fixed \wl Iterations: Tradeoff between Expressiveness and Generality}\label{sec:tradeoff_expressiveness}
+\section{Fixed \wl Iterations: Tradeoff between Expressiveness and Generality}\label{sec:tradeoff_expressiveness}
 As discussed in Section \ref{sec:hyperparam}, we explored constraining the expressiveness of the \wl algorithm by fixing the number of iterations it is applied to each graph in a \wlnn model. The intention behind this was to ensure that the resulting colorings of graphs computed using a fixed \wl algorithm would fall within a similar color range, thereby limiting the total number of colors and the overall distance between each used color. 
 
 From a theoretical perspective, fixing the number of \wl iterations in a \wlnn model only limits its expressiveness. For instance, let $k \in \Nb$ now be fixed. If the standard \wl algorithm converges on an input graph $G$ after $k' < k$ iterations, the coloring computed after $k$ iterations is as expressive as the one obtained from the standard \wl algorithm since the coloring converges after $k'$ iterations. On the contrary, if the standard \wl algorithm converges after $k' > k$ iterations on an input graph $G$, the coloring obtained after $k$ iterations is less expressive and contains less information than the coloring derived from the standard \wl algorithm.
@@ -390,7 +399,7 @@ Interpreting the results of the \textsc{Zinc} dataset is more complex. While the
 
 In conclusion, reducing the number of \wl iterations leads to improved generability and overall better performance of the models, with the clear exception of \nci. However, as our results indicate, most \wlnn models achieve optimal performance when employing only a single iteration of the \wl algorithm, which is essentially equivalent to encoding the node degree. This observation demonstrates that \wlnn models do not require the full expressiveness of the \wl algorithm to achieve comparable performance to \gnn models, which raises the question of whether \gnn models, despite their theoretical ability to be highly expressive, also tend to rely primarily on node degree information for computation. To explore this question fully, we will first investigate the difference in the learning behavior, in which we will give reasons as to why \wlnn models achieve their best performance with a small number of \wl iterations.
 
-\subsection{Difference in Learning Behavior between \gnn and \wlnn Models}
+\section{Difference in Learning Behavior between \gnn and \wlnn Models}
 This section investigates the differences in learning behavior between \wlnn and \gnn models. In particular, we will investigate the ability to generalize by assessing the degree of overfit for each type of model.
 
 \cref{fig:performance_diff} represents the difference in performance between the training and testing performance for both \wlnn and \gnn models across all classification datasets. Different quantiles from the best-performing models were considered, ranging from the top \perc{1} to the top \perc{100}. Each bar in the graph represents the mean difference between training accuracy and test accuracy for the respective quantile of runs. \wlnn models are depicted in blue, while \gnn models are represented in orange. In comparison, shorter or negative bars indicate better generalization where the performance on the training set aligns more closely with the testing set. The black line in each bar represents the standard error.
@@ -525,7 +534,7 @@ To investigate the impact of the number of \wl iterations on overfitting, we plo
 In conclusion, our analysis reveals that \wlnn models exhibit optimal generalization when limited to one iteration of the \wl algorithm. Increasing the number of iterations leads to a significant overfitting behavior. This insight indicates that the expressiveness of the \wl algorithm surpasses the requirements for effective learning. In comparison, \gnn models excel in learning and representing graph structures in a more generalized manner. The observation that a single iteration of the \wl algorithm leads to the best generalization also aligns with the results from the previous section, where the models achieving the highest accuracy on the test set also utilized only a single iteration of the \wl algorithm (except for the \nci dataset). This observation raises an intriguing question: Do \gnns also attempt to compute a similarly expressive representation of all graphs, akin to a single iteration of the \wl algorithm? We will explore this question in the following section.
 
 \FloatBarrier
-\subsection{Approximating \wl Coloring: Investigating \gnn Node Representations}
+\section{Approximating \wl Coloring: Investigating \gnn Node Representations}
 This section will explore the node features computed by a \gnn. Specifically, we will analyze the ability of \gnns to approximate the coloring computed by a single iteration of the \wl algorithm.
 
 \begin{figure}[!tbh]
@@ -647,7 +656,7 @@ It is also worth noting that \nci is the only dataset that demonstrates improved
 In conclusion, considering the similar accuracy performance of \gnn and \wlnn models and the relatively robust approximation capabilities of \gnns compared to the \wl coloring after a single iteration, we argue that \gnns learn to efficiently encode the essential information in a graph for solving the task by striking the right balance between incorporating structural and label information. Further, given that both frameworks achieve comparable performance on all datasets in terms of accuracy, combined with the fact that most models utilize only a single iteration of the \wl algorithm or an approximation of the coloring, the question arises as to whether this difference remains when pooling this information using the same pooling function. We will investigate this question in the following section.
 
 \FloatBarrier
-\subsection{Comparing Pooled Graph Representations: \gnn vs. \wlnn Models}
+\section{Comparing Pooled Graph Representations: \gnn vs. \wlnn Models}
 After the previous section, we observed that \gnns do not perfectly approximate the coloring calculated by the \wl algorithm. However, we hypothesized that \gnns might employ a more efficient encoding containing only essential information. To investigate further, we will examine the graph representations derived after pooling the node representations analyzed in the previous section. We aim to establish if these graph representations hold the same amount of information and share similarities. If they do, this will strengthen our hypothesis that the \gnn models learn a more efficient encoding, and it suggests that the full expressiveness of the \wl algorithm may not be necessary for these tasks.
 
 To achieve this, we selected the best-performing \gnn and \wlnn models in terms of classification accuracy for each dataset and replaced the final multilayer perceptron with various algorithms. Specifically, we used two different configurations of \textsf{Support Vector Machines (SVM)}: one with a linear kernel (\textsf{SVM Linear}) and another with a radial basis function (\textsf{SVM RBF}). Additionally, we employed the \textsf{$k$-Nearest-Neighbor ($k$-NN)} classifier for different values of $k$. Each algorithm was trained exclusively on the fixed output of the pooling function. To ensure fair comparisons, we froze the weights of the \gnn models and the Look-Up Table of the \wlnn models during this process to ensure no optimization of underlying parameters before pooling. This approach guarantees more comparable results across algorithms. Moreover, we maintained the same training, validation, and test split used for training and evaluating the \mlp. For a comprehensive evaluation, we summarized the accuracies and standard deviations achieved by each method, comparing them to the \mlp's performance in \cref{tab:pool_analysis}. Furthermore, in the case of the \textsf{$k$-NN} algorithm, we provided the achieved accuracy for the optimal $k$ value, including the $k$ value in the parentheses. This analysis will allow us to make statements about the linear separability of the graph representations as well as how well these cluster with respect to their class labels.
@@ -832,7 +841,7 @@ The real exception, however, lies in the behavior of the \textsf{$k$-NN} when ap
 In conclusion, our findings indicate that the pooled graph representations computed by both \wlnn and \gnn models are highly linearly separable in their high-dimensional space while also forming meaningful clusters with respect to their class labels. Notably, the \gnn models demonstrated superior clustering performance, providing further support for our hypothesis that the message-passing layers of a \gnn encode essential information without overly emphasizing expressiveness. This suggests that the \gnn models strike a balance between efficient encoding and required expressiveness depending on their application.
 
 \FloatBarrier
-\subsection{Combining the \wl algorithm with \gnns}\label{sec:wl_with_gnn}
+\section{Combining the \wl algorithm with \gnns}\label{sec:wl_with_gnn}
 As already outlined at the beginning of this section, is that in comparison to all configurations we tested for \wlnn and \gnn models, the best accuracy achieved on all classification datasets is by a \wlnn model, with the clear exception for the \imdb and \reddit dataset. What makes this observation so interesting is that both datasets are the only ones lacking node features, such that we initialize the features of the dataset with an encoding of their node degree for \gnn models tested on these datasets.
 
 This difference raises the question of whether \gnn models generally perform better when their input graphs undergo preprocessing. Specifically, we aim to explore if \gnn models achieve improved performance when their graphs are preprocessed using the \wl algorithm for a single iteration. We will refer to such \gnn models as \wl:\gnn.
@@ -864,7 +873,7 @@ We conducted the same hyperparameter optimization routines as for the normal \gn
 Upon analyzing the best accuracies achieved by each \wl:\gnn model in comparison to the other model types, we observed that its performance is not significantly better than any of the \gnn or \wlnn models. While it does show minor improvements compared to the \gnn models, such as in the \enzymes and \proteins datasets, these improvements are not significant. This leads us to the conclusion that the expressiveness of the \wl algorithm is not needed and does not enhance the performance of \gnn models in general. Therefore, by initializing its node features, there is no need to artificially incorporate the expressiveness of the \wl algorithm into \gnn representations.
 
 \FloatBarrier
-\subsection{Impact of the Size of Datasets on the Performance of \wlnn}\label{sec:size_impact}
+\section{Impact of the Size of Datasets on the Performance of \wlnn}\label{sec:size_impact}
 After learning about the expressiveness of the \wl algorithm in terms of the number of unique colors its uses in \cref{fig:wl_unique_colors}, compared with the fact that this number is increasingly larger for larger datasets as outlined in \cref{tab:unique_colors} in the Appendix, the question arises: Do \wlnn models scale as effectively as \gnn models in terms of performance as the dataset size increases? To explore this hypothesis, we sought to investigate significantly larger datasets and selected the well-known regression datasets \alchemy and \zinc. Additionally, we utilized a fixed split, significantly smaller than the original dataset, for both \alchemy and \zinc. Consequently, we tested \wlnn models on both the entire dataset and the smaller split to examine potential differences in performance. An overview of the results is provided in \cref{tab:results_regression} at the beginning of this section.
 
 Similar to the classification datasets, we conducted a hyperparameter optimization for both \wlnn and \gnn models. The primary question of interest here was whether we would observe performance differences between the various splits for each dataset and if there would be discrepancies between the two types of models.
@@ -883,17 +892,18 @@ Another aspect to consider is that, unlike all other results, the \alchemy and \
 
 In conclusion, the impact of the size of a dataset on the performance of \wlnn models must be investigated further. In detail, future research needs to investigate datasets not only of large size but also datasets that consist of large graphs, such that the number of unique colors is already relatively high even after a single iteration of the \wl algorithm. A good example of such a dataset is the \reddit dataset, where the number of unique colors after a single iteration of the \wl algorithm is 566 due to the high number of nodes on average per graph. For this dataset, a performance gap between \wlnn and \gnn models can be observed, with the best \gnn model achieving up to an \perc{8} higher accuracy than the best \wlnn model. However, it is also essential to acknowledge that the reasons for this performance gap are not solely attributable to the dataset's size, as other factors are at play, as discussed in the preceding subsections.
 
-\section{Discusssion}\label{sec:discussion}
-This concluding section will discuss and summarize the key findings and conclusions from our empirical investigation by addressing our initial research questions. Moreover, we examine the use case of the \wlnn framework as a valuable research tool and outline potential areas for future research. Finally, we conclude the thesis with some final remarks.
+\cleardoubleoddstandardpage
+\chapter{Discusssion}\label{sec:discussion}
+This concluding chapter discusses and summarizes the key findings and conclusions from our empirical investigation by addressing our initial research questions. Moreover, it examines the use case of the \wlnn framework beyond the scope of this work and outlines potential areas for future research. Finally, the thesis concludes with some final remarks.
 
-\subsection{Insights into the Representations learned by \gnns}
+\section{Insights into the Representations learned by \gnns}
 This section concludes our empirical investigation and summarizes our findings by answering our initial research questions.
 
 \paragraph{Q1} Can \wlnn models achieve comparable performance to \gnn models empirically?
 
 \vspace{-15pt}
 
-\paragraph{A1} Yes, the results on the classification datasets indicate that \wlnn models achieved comparable performance and even outperformed \gnn models on 4 out of 6 datasets. However, regression datasets showed a performance discrepancy between \gnn and \wlnn models, suggesting that \wlnn models might be more suitable for classification tasks than regression tasks due to the discrete nature of the \wl algorithm.
+\paragraph{A1} Yes, the results on the classification datasets indicate that \wlnn models achieved comparable performance and even outperformed \gnn models on 4 out of 6 datasets. However, the experiments on the regression datasets show a performance discrepancy between \gnn and \wlnn models, suggesting that \wlnn models might be more suitable for classification tasks than regression tasks due to the discrete nature of the \wl algorithm.
 
 \paragraph{Q2} Are there observable differences in the learning behavior between \wlnn and \gnn models?
 
@@ -914,30 +924,23 @@ This section concludes our empirical investigation and summarizes our findings b
 
 \paragraph{A4} The graph representations derived from pooling the node representations of \wlnn and \gnn models share many similarities. Both graph representations demonstrate good linear separability and clustering in their high-dimensional space, indicating that the full expressiveness of the \wl algorithm is not always necessary, as \gnns achieve similar results with more efficient encoding. Moreover, \gnn models even perform better on most datasets regarding linear separability and clustering, indicating that the information encoded in their node representations is more efficiently captured, even though it may not be as expressive as the \wl coloring.
 
-\subsection{The Use of the \wlnn Framework beyond the Scope of this Work}
-This work has demonstrated numerous similarities between the \wlnn and \gnn frameworks. In particular, we established the theoretical equivalence in terms of computability and observed many similarities we investigated in detail in the previous section. As a result, the \wlnn framework proves to be a valuable tool for studying \gnn models and datasets. Moreover, it offers certain advantages over \gnns.
+\section{The \wlnn Framework beyond the Scope of this Work}
+Throughout this work, we have extensively explored the similarities between the \wlnn and \gnn frameworks, establishing their theoretical equivalence in terms of computability and uncovering various shared characteristics. As a result, the \wlnn framework emerges as a valuable tool for investigating \gnn models and datasets and even offers certain advantages over \gnns.
 
-Such an advantage is the ease of deployment. Setting up a \wlnn model requires only selecting an appropriate encoding function and configuring the size of its multilayer perceptron. 
+One significant advantage lies in the ease of deployment. Configuring a \wlnn model involves only selecting a suitable encoding function and setting the size of its multilayer perceptron. Additionally, the colors computed by the \wl algorithm remain fixed and only need to be calculated once during model initialization. Consequently, the training process of a \wlnn model mainly revolves around optimizing the multilayer perceptron, making it notably faster than training \gnn models. For instance, our experiments demonstrated that training \gin:\textsf{Sum} on the \zinc dataset took nearly 13 hours, while our best \wlnn model completed training in under 3 hours.
 
-Additionally, since the colors computed by the \wl algorithm do not change and therefore only need to be computed once, during the initialization of the model. The training phase of a \wlnn model mainly involves optimizing the multilayer perceptron. As a result, training \wlnn models can be significantly faster than \gnn models. For instance, in our experiments, training \gin:\textsf{Sum} on the \zinc dataset required almost 13 hours, whereas our best \wlnn model completed training in less than 3 hours.
+However, despite these advantages, it is crucial to acknowledge that \wlnn models are restricted in their real-world applicability. The requirement to initialize the \wl algorithm with unique colors for all substructures the model will encounter before training makes the \wlnn framework more suitable for research purposes and tasks with a known set of input graphs. In contrast, \gnns exhibit greater versatility, proving effective on any graph and thus better suited for real-world applications.
 
-However, despite these advantages, \wlnn models have limitations that restrict their real-world applicability. The need to initialize the \wl algorithm with unique colors for all substructures before training makes the \wlnn framework more suitable for research purposes and tasks with a known set of input graphs. In contrast, \gnns exhibit greater versatility, being effective on any graph and thus better suited for real-world applications.
+In conclusion, \wlnn models offer valuable insights into \gnn behavior and performance evaluation for datasets. Their advantages make them well-suited for research and understanding the theoretical underpinnings of \gnns. 
 
-In conclusion, \wlnn models provide valuable insights into \gnn behavior and performance evaluation. However, due to their limitations, they are limited to lab settings and not recommended for real-world use.
-
-\subsection{Recommendations for Future Research}
-
+\section{Recommendations for Future Research}
 This section highlights potential areas for further investigation that emerged during our study, offering valuable opportunities for future research.
 
-A primary consideration is the time constraints that impacted the extent of experimentation in this study, specifically in Sections 2 and 3.
-
-The impact of the \wl algorithm preprocessing on \gnn models, as discussed in \cref{sec:wl_with_gnn}, warrants further investigation. While initial results did not show significant improvements, they at least demonstrated comparable performance to \gnns. Investigating the reasons behind this phenomenon and conducting additional hyperparameter optimization runs for \wl:\gnn models will shed light on the potential advantages and limitations of incorporating \wl preprocessing into \gnn models.
+The impact of the \wl algorithm as a tool for preprocessing data for \gnn models, as discussed and investigated in \cref{sec:wl_with_gnn}, needs further research. While initial results did not show significant improvements, they at least demonstrated comparable performance to \gnns. Investigating the reasons behind this phenomenon and conducting additional hyperparameter optimization runs for \wl:\gnn models will shed light on the potential advantages and limitations of incorporating \wl as a tool for preprocessing data of \gnn models.
 
 Similarly, the discrepancies in performance observed on the regression datasets, as discussed in \cref{sec:size_impact}, raise questions about whether this discrepancy is inherent to the nature of the regression task or influenced by the dataset size. To address this, further experiments on smaller-scale regression datasets and larger-scale classification datasets, such as \textsc{MalNet} curated by \cite{Freitas2022}, would provide valuable insights into the scalability and generalizability of both \wlnn and \gnn models.
 
-Additionally, extending the study to investigate more specialized models within the \wlnn framework would be an intriguing research direction. The empirical similarities observed between \wlnn and \gnn models open up possibilities for exploring highly specialized \wlnn models and their unique characteristics. This research direction could focus on understanding the specific functionalities and advantages of these specialized models, using \wlnn models as a versatile tool for investigating different aspects of \gnn behavior.
+\section{Conclusion}
+In conclusion, this thesis has introduced the novel \wlnn framework. We have proved the theoretical equivalence to \gnns in terms of computability and demonstrated how well it is suitable for investigating \gnns. Leveraging this framework as a tool for understanding \gnns, we learned that \gnn models are more efficient in generalizing and encoding an efficient coloring of their nodes, such that they encode just as much structural information as required for solving the respective tasks.
 
-In summary, while this study has provided valuable insights into the behavior and capabilities of \wlnn and \gnn models, there are still numerous unexplored avenues for future research. Conducting more extensive experiments, exploring the potential of \wl algorithm preprocessing, and investigating specialized \wlnn models will contribute to a deeper understanding of these frameworks and their applications.
-
-\subsection{Conclusion}
-In conclusion, our empirical investigation has demonstrated the theoretical equivalence and many empirical similarities between \wlnn and \gnn models. \wlnn models offer valuable insights into understanding \gnn behavior and capabilities and serve as a powerful tool for investigating \gnn models and datasets. However, their limitations restrict their applicability to real-world scenarios, making \gnn models more suitable for practical applications. As the field of graph representation learning continues to evolve, future research in the areas we highlighted can pave the way for exciting discoveries and advancements in this domain.
+As the field of graph representation learning continues to evolve, future research in the areas we highlighted can pave the way for exciting discoveries and advancements in this domain.

@@ -1,12 +1,15 @@
+\cleardoubleoddstandardpage
+
 This part of the thesis focuses on the equivalence between \wlnn and \gnn. We will begin by providing a preliminary section that formalizes all the concepts used in the proof and introduces a general notation. Afterward, we will dedicate a separate section to present and prove three theorems. These theorems combined conclude the equivalence.
 
-\section{Preliminaries}\label{sec:pre_lim}
+{\let\clearpage\relax
+\chapter{Preliminaries}\label{sec:pre_lim}}
 This section will introduce and formalizes all concepts used throughout the proof and the rest of the thesis. We start with general notations, introduce a general definition of graphs and multilayer perceptrons, and familiarize the reader with the Weisfeiler-Leman algorithm. We will introduce each framework independently, first the \wlnn and then \gnn. In the end, we will briefly introduce important properties of collections of functions computed by both methods.
 
-\subsection{General Notation}
+\section{General Notation}
 Let $\Nb$ denote the set of natural numbers such that $\Nb := \{0, 1,2, \ldots \}$. By $[n]$, we denote the set $\{0, \ldots, n\} \subset \mathbb{N}$ for each $n \in \mathbb{N}$. Further, with $\MSopen \ldots \MSclose$, we denote a multiset formally defined as a 2-tuple $(X, m)$, where $X$ is a set of all unique elements and $m: X \rightarrow \mathbb{N}_{\geq 1}$ a mapping that maps each element in $X$ to the number of its occurrences in the multiset.
 
-\subsection{Graphs}
+\section{Graphs}
 We will briefly introduce a formal definition for graphs and coloring on graphs. Starting with the definition of a graph.
 
 \begin{definition}[Graph]
@@ -33,7 +36,7 @@ We use $S_n$ to denote the symmetric group over the elements $[n]$ for any $n \i
     Let $f: \mathcal{G} \rightarrow \mathcal{Y}$ be an arbitrary function, then $f$ is \textit{permuation-equivariant} if and only if for all $G \in \mathcal{G}$, where $n_G \coloneqq |V(G)|$ and for every $\pi \in S_{n_G}$: $f(G) = \pi^{-1} \cdot f(\pi \cdot G)$.
 \end{definition}
 
-\subsection{Multilayer Perceptrons}
+\section{Multilayer Perceptrons}
 We will now provide a formal definition of multilayer perceptrons. These functions are also known as feedforward neural networks in the literature. However, for the remainder of this thesis, we will refer to them as multilayer perceptrons.
 
 \begin{definition}[Multilayer Perceptron]\label{def:mlp}
@@ -46,7 +49,7 @@ We will now provide a formal definition of multilayer perceptrons. These functio
     Following this definition, when applying a $\mlp$ on an input $v \in \Rb^n$ it is defined as $\mlp(v) \coloneqq (\mlp)_T(v)$.
 \end{definition}
 
-\subsection{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
+\section{Weisfeiler and Leman Algorithm}\label{sec:1-WL Definition}
 The Weisfeiler-Leman algorithm consists of two main parts: the coloring algorithm and the graph isomorphism test. We will introduce each part individually and present some implications afterward.
 
 \subsubsection{The Weisfeiler-Leman Graph Coloring Algorithm}
@@ -108,7 +111,7 @@ Similarly, we define the notion \wldisc for collections of permutation invariant
     Let $\cX \subseteq \cG$. Further, let $\cC$ be a collection of permutation invariant functions from $\cX$ to $\Rb$. We say $\cC$ is \wldisc if for all graphs $G_1, G_2 \in \cX$ for which the \wl isomorphism test concludes non-isomorphic ($G_1 \not\wliso G_2$), there exists a function $h_{G_1, G_2} \in \cC$ such that $h_{G_1, G_2}(G_1) \neq h_{G_1, G_2}(G_2)$.
 \end{definition}
 
-\subsection{\wlnn}\label{sec:definition_wlnn}
+\section{\wlnn}\label{sec:definition_wlnn}
 As the \cref{sec:related_work_wl} shows, the $\wl$ algorithm is quite powerful in identifying a graph's substructures and distinguishing non-isomorphic graph pairs. With the \wlnn framework, we define functions that utilize this structural information to derive application-specific insights.
 
 \begin{definition}[\wlnn]
@@ -128,7 +131,7 @@ As the \cref{sec:related_work_wl} shows, the $\wl$ algorithm is quite powerful i
 
 It is worth noting that this definition can be easily adjusted to accommodate node- or edge-level tasks by applying the encoding function $f_\text{enc}$ and the multilayer perceptron $\mlp$ elementwise to the colors of the multiset. However, for the purposes of this thesis, we will not delve into these variations, as our main focus will be on graph-level tasks such as graph classification or regression, which possess greater theoretical interest and are more prevalent in most datasets. Furthermore, all the theoretical findings presented in this thesis can be straightforwardly adapted to \wlnn models designed for node- or edge-level tasks.
 
-\subsection{Graph Neural Networks (Message-Passing)}\label{sec:GNN Defintion}
+\section{Graph Neural Networks (Message-Passing)}\label{sec:GNN Defintion}
 A \textsf{Graph Neural Network} (\gnn) is a composition of multiple layers, where each layer computes a new feature for each node and edge. Each \gnn layer thus technically obtains a new graph structurally identical to the previous one but with new feature information. After an input graph has been passed through all layers, a final readout function is applied that pools all graph features and derives a task-related output. With this, it is possible to apply a \gnn to every graph, regardless of its size, as the ``computation'' will only take place on the nodes and edges of the graph.
 
 Note that in the following, we will restrict the definition only to consider node features; however, one can easily extend it to include edge features as well.
@@ -178,7 +181,8 @@ To bridge the gap from the theoretical definition to practical instances of the 
 
 Commonly employed \textsf{Readout} functions in this context often involve straightforward pooling techniques like elementwise summation, mean calculation, or maximum extraction. These pooling operations are typically followed by a multilayer perceptron, which performs additional processing on the aggregated information. Although more sophisticated pooling operations exist, such as \textsc{Set2Set} developed by \cite{Vinyals2015}, \cite{Xu2018} showed that given the correct configuration, the elementwise summation pooling function combined with a following multilayer perceptron suffices to create a \gnn that is as expressive as the \wl algorithm in distinguishing non-isomorphism.
 
-\section{Theoretical Connection}\label{sec:theo_connections}
+\cleardoubleoddstandardpage
+\chapter{Theoretical Connection}\label{sec:theo_connections}
 This section forms the core of our theoretical investigation, where we explore the equivalence between two frameworks: \wlnn and \gnn. We present two theorems to establish this equivalence, each showing a separate equivalence direction. By combining these theorems, we conclusively establish the equivalence. To maintain clarity and rigor, we will prove each theorem separately afterward in a corresponding subsection.
 
 In particular, the theorem will establish a theoretical connection between the frameworks when applied to a finite collection of graphs, which we denote by $\cX$ with $\cX \subset \cG$.
@@ -198,7 +202,7 @@ With these two theorems, the equivalence between both frameworks follows. Specif
 As we move towards the empirical evaluation in \cref{part2}, it is evident that if we test a \wlnn model on any of the benchmark datasets, it can theoretically achieve the same level of performance as a \gnn model. Notice that we did not leverage any constraints on the encoding of graphs throughout the two theorems and their corresponding proofs.
 
 
-\subsection{Proof of \cref*{theorem:gnn_in_1wl}: ``$\gnn \subseteq \wlnn$''}\label{sec:proof_theorem:1wl_in_gnn}
+\section{Proof of \cref*{theorem:gnn_in_1wl}: ``$\gnn \subseteq \wlnn$''}\label{sec:proof_theorem:1wl_in_gnn}
 We will prove \cref{theorem:1wl_in_gnn} by first introducing a set of lemmas, which will be leveraged in the proof of the theorem at the end of this section. The \cref{lem:encoding-indicator-func1,lem:encoding-indicator-func2}, and the proof of \cref{theorem:gnn_in_1wl} extend the results by \cite{Chen2019}.
 
 To begin, we prove an essential insight that for any pair of graphs indistinguishable by the \wl isomorphism test, the output of any \wlnn model applied to both graphs is identical.
@@ -370,7 +374,7 @@ We can now leverage the above lemmas to prove the \cref{theorem:gnn_in_1wl}, whi
     Important, we can only do this since $\cX$ is finite, making the overall sum finite and the cardinality of $\cX/\!{\wliso}(G^*)$ well-defined for all graphs.
 \end{proof}
 
-\subsection{Proof of \cref*{theorem:1wl_in_gnn}: ``$\wlnn \subseteq \gnn$''}
+\section{Proof of \cref*{theorem:1wl_in_gnn}: ``$\wlnn \subseteq \gnn$''}
 In this section, we will prove the converse direction. Similar to the previous subsection, we will begin by introducing a set of lemmas that will play a crucial role in proving \cref{theorem:1wl_in_gnn}.
 
 We start by showing the existence of a collection of functions computable by \gnns that is \wldisc. For the proof, we will devise message-passing layers for a \gnn that effectively compute a single iteration of the \wl algorithm per layer. Afterward, we show that with a proper choice of the \textsf{Readout} function, we construct a collection of \gnn functions that is \wldisc. 

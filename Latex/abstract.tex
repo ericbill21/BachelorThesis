@@ -1,2 +1,9 @@
 \chapter*{Abstract}
-Lorem Ipsum :D
+
+Graphs are omnipresent data structures that model complex relationships in diverse fields, ranging from social networks and biological systems to recommendation engines and knowledge graphs. The inherent flexibility of graph data presents a challenge for machine learning, as it lacks the constraints found in other data formats like images and text. In recent years, \textsc{Graph Neural Networks} (\gnns) have emerged as a promising approach for analyzing graphs, showing exceptional empirical performance in various tasks. However, while their theoretical expressiveness has been studied thoroughly, a comprehensive understanding of the representations they learn remains limited.
+
+This thesis addresses the need to gain deeper insights into the representations learned by \gnns. To this end, we introduce a novel framework named \wlnn, which combines the Weisfeiler-Leman algorithm (\wl) with a feedforward neural network. The \wlnn framework serves as a powerful tool to study \gnns by enabling a comparison of their learned representations.
+
+Empirical experiments conducted on various datasets reveal intriguing findings. Firstly, \wlnn models achieve comparable performance to \gnn models and even outperform them on certain datasets. Secondly, \wlnn models tend to exhibit more pronounced overfitting, attributed to the expressive nature of the \wl algorithm. Both \wlnn and \gnn models primarily rely on the information computed by a single iteration of the \wl algorithm, suggesting a trade-off between expressiveness and efficiency. Additionally, graph representations inferred by \gnn models demonstrate better linear separability and clustering compared to \wlnn models.
+
+In conclusion, this thesis contributes to the understanding of \gnn representations and highlights the potential of the \wlnn framework as an analysis tool. The empirical insights gained from our experiments shed light on the inner workings of \gnn models, paving the way for further advancements in graph representation learning research.
