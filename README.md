@@ -1,5 +1,5 @@
 # Bachelor's Thesis
-Welcome to the GitHub repository for my bachelor thesis titled *A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm*.
+Welcome to the GitHub repository for my bachelor's thesis titled *A Theoretical and Empirical Investigation into the Equivalence of Graph Neural Networks and the Weisfeiler-Leman Algorithm*.
 
 Here, you will find all the code used to conduct experiments, as well as the LaTeX code for creating the written version of the thesis. Please note that we employed Weights&Biases to record our experimental results. To access these results, kindly refer to [wandb.ai/eric-bill/BachelorThesisExperiments](https://wandb.ai/eric-bill/BachelorThesisExperiments).
 
